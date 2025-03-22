@@ -1,0 +1,163 @@
+<!-- Header -->
+<header>
+    <div class='container'>
+        <div class="row">
+            <div class="col">
+                <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
+                    <div class="container-fluid">
+                        <!-- Logo -->
+                        <a class="navbar-brand" routerLink="/home">
+                            <img src="logo/copipego.png" alt="Logo" width="150" height="75" class="rounded">
+                        </a>
+
+                        <!-- Toggler para móviles -->
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <!-- Contentent  -->
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <!-- Left menu -->
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="categories">
+                                <!-- Categories dropdown -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Categories
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <a *ngFor="let category of categories" class="dropdown-item">
+                                            {{ category.name }}
+                                        </a>
+                                    </div>
+                                </li>
+
+                                <!-- Search -->
+                                <li class="nav-item ms-3">
+                                    <form>
+                                        <div class="input-group">
+                                            <button type="submit" class="btn btn-outline-light">
+                                                <i class="ti-search"></i>
+                                            </button>
+                                            <input type="search" id="search" class="form-control" name="title" placeholder="Search..." required>
+                                        </div>
+                                    </form>
+                                </li>
+                            </ul>
+
+                            <!-- Right Menu -->
+                            <ul class="navbar-nav ms-auto align-items-center">
+                                <!-- Learning -->
+                                <li class="nav-item">
+                                    <a class="nav-link" style="color:white;">
+                                        Learning
+                                    </a>
+                                </li>
+
+                                <!-- Cart -->
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
+                                            <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
+                                        </i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"style="min-width: 350px;">
+                                        <!-- Cart Content-->
+                                        <div class="d-flex flex-column gap-2">
+                                            <!-- Items -->
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">Name of the product</h6>
+                                                    <small class="text-muted">Quantity: 1</small>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span>$10.00</span>
+                                                        <button class="btn btn-link text-danger p-0">
+                                                            <i class="ti-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Items -->
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-0">Name of the product</h6>
+                                                    <small class="text-muted">Quantity: 1</small>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <span>$10.00</span>
+                                                        <button class="btn btn-link text-danger p-0">
+                                                            <i class="ti-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Subtotal -->
+                                            <div class="pt-3 border-top">
+                                                <div class="d-flex justify-content-between fw-bold">
+                                                    <span>Total:</span>
+                                                    <span>$20.00</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Buttons -->
+                                            <div class="d-grid gap-2 mt-2">
+                                                <button class="btn btn-primary">Cart</button>
+                                                <button class="btn btn-outline-secondary">Keep shooping</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                <!-- User -->
+                                <li class="nav-item dropdown ms-2">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="" class="avatar_nav rounded-circle" alt="User" width="40" height="40">
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <!-- User info -->
+                                        <li class="p-2">
+                                            <div class="d-flex align-items-center">
+                                                <img src="" class="avatar_nav2 rounded-circle me-2" width="40" height="40">
+                                                <div>
+                                                    <div class="fw-bold">name - surname</div>
+                                                    <div class="text-muted small">email&#64;.com</div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        
+                                        <!-- Menu options -->
+                                        <li><a class="dropdown-item">Settings</a></li>
+                                        <li><a class="dropdown-item">Profile</a></li>
+                                        <li><a class="dropdown-item">Create course</a></li>
+                                        <li><a class="dropdown-item">ABM-category</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item">Log out</a></li>
+                                    </ul>
+                                </li>
+
+                                <!-- Access buttons -->
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-dark" routerLink="/login" >Log in</a>
+                                </li>
+                                <li class="nav-item ms-2">
+                                    <a class="btn btn-outline-light" routerLink="/signup" >Sign up</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- for the routes -->
+<router-outlet></router-outlet>
+
+<footer style="text-align: center;">
+    <hr> Platform course developed by Miguel Águila &copy; 
+    <hr>
+</footer>
