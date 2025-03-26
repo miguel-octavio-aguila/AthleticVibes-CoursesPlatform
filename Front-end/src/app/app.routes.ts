@@ -16,5 +16,9 @@ export const routes: Routes = [
     {
         path: 'signup',
         component: SignupComponent
+    },
+    {
+        path: 'logout/:sure',
+        component: LoginComponent
     }
 ];

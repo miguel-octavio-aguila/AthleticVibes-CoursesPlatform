@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { User } from '../../models/User';
 import { UserService } from '../../services/user.service';
 import { DOCUMENT } from '@angular/common';
@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private _userSevice: UserService,
     private _router: Router,
+    private _route: ActivatedRoute,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.page_title = 'Identify';
@@ -33,6 +34,7 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.logout();
   }
 
   // refresh
@@ -73,5 +75,24 @@ export class LoginComponent implements OnInit {
         console.log(<any>error);
       }
     );
+  }
+
+  // logout
+  logout() {
+    this._route.params.subscribe(params => {
+      // sure, with + to convert to number
+      let logout = +params['sure'];
+      if (logout == 1) {
+        localStorage.removeItem('identity');
+        localStorage.removeItem('token');
+        localStorage.removeItem('cart');
+        this.identity = null;
+        this.token = null;
+        // redirect
+        this._router.navigate(['/home']).then(() => {
+          this.refresh();
+        });
+      }
+    });
   }
 }
