@@ -19,7 +19,10 @@ export class AppComponent {
   public identity:any;
   public token:any;
   public url:any;
+
   public categories: any = [];
+
+  public audio = new Audio('sonidos/carton.mp3');
 
   constructor(
     private categoryService: CategoryService,
@@ -36,8 +39,13 @@ export class AppComponent {
   loadUser() {
     this.identity = this.userService.getIdentity();
     this.token = this.userService.getToken();
-    // console.log(this.identity.name);
-    // console.log(this.token);
+    if (Object.keys(this.identity).length === 0 || typeof this.identity === undefined) {
+      this.identity = false;
+    }
+  }
+
+  play_audio() {
+    this.audio.play();
   }
 
   getCategories() {

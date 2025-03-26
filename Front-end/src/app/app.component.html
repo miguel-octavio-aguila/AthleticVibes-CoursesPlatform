@@ -7,7 +7,7 @@
                     <div class="container-fluid">
                         <!-- Logo -->
                         <a class="navbar-brand" routerLink="/home">
-                            <img src="logo/copipego.png" alt="Logo" width="150" height="75" class="rounded">
+                            <img src="logo/copipego.png" alt="Logo" width="150" height="75" class="rounded" (click)="play_audio()">
                         </a>
 
                         <!-- Toggler para móviles -->
@@ -47,14 +47,14 @@
                             <!-- Right Menu -->
                             <ul class="navbar-nav ms-auto align-items-center">
                                 <!-- Learning -->
-                                <li class="nav-item">
+                                <li class="nav-item" *ngIf="identity.sub">
                                     <a class="nav-link" style="color:white;">
                                         Learning
                                     </a>
                                 </li>
 
                                 <!-- Cart -->
-                                <li class="nav-item dropdown">
+                                <li class="nav-item dropdown" *ngIf="identity.sub">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
                                             <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
@@ -111,38 +111,57 @@
                                 </li>
 
                                 <!-- User -->
-                                <li class="nav-item dropdown ms-2">
-                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="" class="avatar_nav rounded-circle" alt="User" width="40" height="40">
+                                <li class="nav-item dropdown ms-2" *ngIf="identity.sub">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img *ngIf="!identity.image == null" src="" class="avatar_nav rounded-circle" alt="" width="40" height="40">
+                                        <p>{{ identity.name }}</p>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                         <!-- User info -->
                                         <li class="p-2">
                                             <div class="d-flex align-items-center">
-                                                <img src="" class="avatar_nav2 rounded-circle me-2" width="40" height="40">
+                                                <img *ngIf="!identity.image == null" src="" class="avatar_nav2 rounded-circle me-2" width="40" height="40">
                                                 <div>
-                                                    <div class="fw-bold">name - surname</div>
-                                                    <div class="text-muted small">email&#64;.com</div>
+                                                    <div class="fw-bold">
+                                                        <a href="#" class="letra-avatar">
+                                                            {{ identity.name + ' ' + identity.surname }}
+                                                        </a>
+                                                    </div>
+                                                    <div class="text-muted small letra-avatar2">
+                                                        {{ identity.email}}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
                                         
                                         <!-- Menu options -->
-                                        <li><a class="dropdown-item">Settings</a></li>
-                                        <li><a class="dropdown-item">Profile</a></li>
-                                        <li><a class="dropdown-item">Create course</a></li>
-                                        <li><a class="dropdown-item">ABM-category</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item">Log out</a></li>
+                                        <li class="single-product-cart">
+                                            <a class="dropdown-item">Settings</a>
+                                        </li>
+                                        <li class="single-product-cart">
+                                            <a class="dropdown-item">Profile</a>
+                                        </li>
+                                        <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                            <a class="dropdown-item">Create course</a>
+                                        </li>
+                                        <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                            <a class="dropdown-item">ADD-category</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item">Log out</a>
+                                        </li>
                                     </ul>
                                 </li>
 
                                 <!-- Access buttons -->
-                                <li class="nav-item ms-2">
+                                <li class="nav-item ms-2" *ngIf="!identity || identity.sub == null">
                                     <a class="btn btn-dark" routerLink="/login" >Log in</a>
                                 </li>
-                                <li class="nav-item ms-2">
+                                <li class="nav-item ms-2" *ngIf="!identity || identity.sub == null">
                                     <a class="btn btn-outline-light" routerLink="/signup" >Sign up</a>
                                 </li>
                             </ul>
