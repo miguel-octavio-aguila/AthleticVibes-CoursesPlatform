@@ -3,6 +3,7 @@ import { HomeComponent } from './components/home/home.component';
 import { RouterModule } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
+import { UserEditComponent } from './components/user-edit/user-edit.component';
 
 export const routes: Routes = [
     {
@@ -20,5 +21,9 @@ export const routes: Routes = [
     {
         path: 'logout/:sure',
         component: LoginComponent
+    },
+    {
+        path: 'settings',
+        component: UserEditComponent
     }
 ];

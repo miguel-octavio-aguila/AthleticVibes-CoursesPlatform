@@ -61,4 +61,15 @@ export class UserService {
         // Make the POST request to the API
         return this.http.post(this.apiUrl + 'register', params, { headers: headers });
     }
+
+    update(token:any, user:any): Observable<any> {
+        // Convert the user object to a JSON string
+        let json = JSON.stringify(user);
+        // Convert the JSON string to a string that can read
+        let params = 'json=' + json;
+        // Set the headers
+        let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
+        // Make the PUT request to the API
+        return this.http.put(this.apiUrl + 'update', params, { headers: headers });
+    }
 }
