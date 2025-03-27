@@ -30,7 +30,7 @@ export class LoginComponent implements OnInit {
   ) {
     this.page_title = 'Identify';
     // id, name, surname, role, email, password, description, image
-    this.user = new User(1,'','','ROLE_USER','','','','');
+    this.user = new User(0,'','','ROLE_USER','','','','');
   }
 
   ngOnInit(): void {

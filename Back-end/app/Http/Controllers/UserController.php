@@ -82,8 +82,14 @@ class UserController extends Controller
 
             // validate data
             $validate = Validator::make($params_array, [
-                'name' => 'required|alpha', // alpha is for letters only
-                'surname' => 'required|alpha', 
+                'name' => [
+                    'required',
+                    'regex:/^[\p{L}\s\-]+$/u'
+                ],
+                'surname' => [
+                    'required',
+                    'regex:/^[\p{L}\s\-]+$/u'
+                ],
                 'email' => 'required|email|unique:users',
                 'password' => 'required'
             ]);
