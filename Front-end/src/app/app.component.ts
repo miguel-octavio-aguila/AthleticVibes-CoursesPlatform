@@ -19,6 +19,7 @@ export class AppComponent {
   public identity:any;
   public token:any;
   public url:any;
+  public url_front:any;
 
   public categories: any = [];
 
@@ -29,6 +30,7 @@ export class AppComponent {
     public userService: UserService
   ) {
     this.url = GLOBAL.url;
+    this.url_front = GLOBAL.url_front;
     this.loadUser();
   }
 
