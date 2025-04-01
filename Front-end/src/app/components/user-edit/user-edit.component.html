@@ -1,1 +1,77 @@
-<p>user-edit works!</p>
+<div class="all col-md-4 mt-3" style="margin: 0 auto;">
+    <h1 style="text-align: center; font-size: 2.5em; color: 444;">
+        {{ page_title}}
+    </h1>
+    <p *ngIf="status != 'success'" style="text-align: center; box-shadow: 5px 5px 5px gray;">
+        Modify user profile settings.
+    </p>
+    <hr>
+    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success'">
+        <p style="text-align: center;">
+            <strong>Profile updated successfully!</strong>
+        </p>
+    </div>
+    <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
+        <p style="text-align: center;">
+            <strong>Error!</strong> Data not saved. 
+        </p>
+    </div>
+    <!-- Settings form -->
+    <form class="col-12 col-md-12 col-lg-12" #settingsForm="ngForm" (ngSubmit)="onSubmit(settingsForm)">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
+            <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                Name is required and must contain only letters.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="surname">Surname</label>
+            <input type="text" name="surname" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
+            <small *ngIf="!surname.valid && surname.touched" class="invalid-feedback d-block">
+                Last name is required and must contain only letters.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+            <small *ngIf="!email.valid && email.touched" class="invalid-feedback d-block">
+                Email is required and must be a valid email address.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="description" class="form-control" #description="ngModel" [froalaEditor]="froala_options" [froalaModel]="user.description" [(ngModel)]="user.description" required></textarea>
+            <small *ngIf="!description.valid && description.touched" class="invalid-feedback d-block">
+                Description is required.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="image">Avatar</label>
+            <!-- show the image -->
+            <div *ngIf="identity && identity.image">
+                <img src="{{ url + 'user/avatar/' + identity.image }}" class="avatar_nav">
+            </div>
+
+            <!-- Dropzone para subir imágenes -->
+            <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
+                <ngx-dropzone-label>
+                    <strong>Drop your image here or click to select</strong>
+                    <em>Image size must be less than 600 MB</em>
+                </ngx-dropzone-label>
+                <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+                    <ngx-dropzone-label>
+                        {{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)
+                    </ngx-dropzone-label>
+                </ngx-dropzone-preview>
+            </ngx-dropzone>
+
+            <button type="button" class="btn btn-success mt-2" [disabled]="files.length === 0 || uploading" (click)="uploadImage()">
+                <span *ngIf="!uploading">Upload image</span>
+                <span *ngIf="uploading">Uploading...</span>
+            </button>
+        </div>
+        <hr>
+        <input type="submit" name="" value="Save" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="settingsForm.invalid">
+    </form>
+</div>

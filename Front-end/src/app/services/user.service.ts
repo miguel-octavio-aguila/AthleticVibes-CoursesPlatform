@@ -41,7 +41,7 @@ export class UserService {
         return this.identity;
     }
 
-    getToken(): Observable<any> {
+    getToken(): string {
         let token = localStorage.getItem('token');
         if (token && token != 'undefined') {
             this.token = token;
