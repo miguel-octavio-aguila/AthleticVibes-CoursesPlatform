@@ -68,7 +68,6 @@
               "buildTarget": "Front-end:build:production"
             },
             "development": {
-              "proxyConfig": "src/proxy.conf.json",
               "buildTarget": "Front-end:build:development"
             }
           },

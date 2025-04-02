@@ -89,10 +89,10 @@ export class UserEditComponent {
       this.uploading = true;
       
       this.fileUploadService.uploadFile(this.files[0]).subscribe({
-        next: (response) => {
-          if (response.user) {
-            this.user.image = response.user.image;
-            this.identity.image = this.user.image;
+        next: (response: any) => {
+          if (response.image) {
+            this.user.image = response.image;
+            this.identity.image = response.image;
             localStorage.setItem('identity', JSON.stringify(this.identity));
             this.status = 'success';
           } else {
@@ -119,7 +119,10 @@ export class UserEditComponent {
           this.identity = this.user;
           localStorage.setItem('identity', JSON.stringify(this.user));
           // Redirect to the user profile page
-          this.router.navigate(['/settings']);
+          this.router.navigate(['/settings']).then(() => {
+            // Reload the page to reflect the changes
+            //window.location.reload();
+          });
         }
       },
       error: (error) => {

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\File;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Exception;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Response;
 
 
 class UserController extends Controller

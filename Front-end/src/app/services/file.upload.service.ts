@@ -17,7 +17,7 @@ export class FileUploadService {
   uploadFile(file: File): Observable<any> {
     // Create a FormData object to hold the file data
     const formData = new FormData();
-    formData.append('file', file, file.name);
+    formData.append('file0', file, file.name);
     
     // Obtain the token from the UserService
     const token = this.userService.getToken();
@@ -28,6 +28,6 @@ export class FileUploadService {
     });
     
     // Make the POST request to upload the file
-    return this.http.post(GLOBAL.url + 'user/avatar/', formData, { headers });
+    return this.http.post(GLOBAL.url + 'upload', formData, { headers });
   }
 }
