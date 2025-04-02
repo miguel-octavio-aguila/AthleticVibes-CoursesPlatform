@@ -1,7 +1,0 @@
-{
-    "/api": {
-      "target": "http://backend-rest.com",
-      "secure": false,
-      "changeOrigin": true
-    }
-  }
