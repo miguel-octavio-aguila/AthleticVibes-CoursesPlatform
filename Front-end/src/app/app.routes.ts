@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { UserEditComponent } from './components/user-edit/user-edit.component';
+import { CourseNewComponent } from './components/course-new/course-new.component';
 
 export const routes: Routes = [
     {
@@ -25,5 +26,9 @@ export const routes: Routes = [
     {
         path: 'settings',
         component: UserEditComponent
-    }
+    },
+    {
+        path: 'create-course',
+        component: CourseNewComponent
+    },
 ];
