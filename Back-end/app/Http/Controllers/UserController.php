@@ -157,7 +157,7 @@ class UserController extends Controller
             ]);
 
             // remove the fields that we do not want to update
-            unset($params_array['sub']);
+            unset($params_array['id']);
             unset($params_array['role']);
             unset($params_array['password']);
             unset($params_array['created_at']);
