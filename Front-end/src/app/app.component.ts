@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CategoryService } from './services/category.service';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { GLOBAL } from './services/global';
   styleUrl: './app.component.css',
   providers: [CategoryService]
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Front-end';
 
   public identity:any;
@@ -36,6 +36,7 @@ export class AppComponent {
 
   ngOnInit(): void {
     this.getCategories();
+    this.identity = this.userService.getIdentity();
   }
 
   loadUser() {

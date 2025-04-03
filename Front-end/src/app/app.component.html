@@ -47,14 +47,14 @@
                             <!-- Right Menu -->
                             <ul class="navbar-nav ms-auto align-items-center">
                                 <!-- Learning -->
-                                <li class="nav-item" *ngIf="identity.sub">
+                                <li class="nav-item" *ngIf="identity && identity.sub">
                                     <a class="nav-link" style="color:white;">
                                         Learning
                                     </a>
                                 </li>
 
                                 <!-- Cart -->
-                                <li class="nav-item dropdown" *ngIf="identity.sub">
+                                <li class="nav-item dropdown" *ngIf="identity && identity.sub">
                                     <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
                                             <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
@@ -111,24 +111,30 @@
                                 </li>
 
                                 <!-- User -->
-                                <li class="nav-item dropdown ms-2" *ngIf="identity.sub">
+                                <li class="nav-item dropdown" *ngIf="identity && identity.sub">
                                     <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img *ngIf="!identity.image == null" src="" class="avatar_nav rounded-circle" alt="" width="40" height="40">
-                                        <p>{{ identity.name }}</p>
+                                        <div *ngIf="identity && identity.image" class="avatar_nav">
+                                            <img src="{{ url + 'user/avatar/' + identity.image }}">
+                                        </div>
+                                        <span class="my-auto">{{ identity.name }}</span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                         <!-- User info -->
                                         <li class="p-2">
-                                            <div class="d-flex align-items-center">
-                                                <img *ngIf="!identity.image == null" src="" class="avatar_nav2 rounded-circle me-2" width="40" height="40">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div *ngIf="identity && identity.image" class="avatar_nav2">
+                                                    <img src="{{ url + 'user/avatar/' + identity.image }}">
+                                                </div>
                                                 <div>
                                                     <div class="fw-bold">
-                                                        <a href="#" class="letra-avatar">
+                                                        <a href="#" class="letra_avatar">
                                                             {{ identity.name + ' ' + identity.surname }}
                                                         </a>
                                                     </div>
-                                                    <div class="text-muted small letra-avatar2">
-                                                        {{ identity.email}}
+                                                    <div class="text-muted small">
+                                                        <a href="#" class="letra_avatar2">
+                                                            {{ identity.email}}
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>

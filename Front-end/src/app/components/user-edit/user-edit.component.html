@@ -50,10 +50,10 @@
             <label for="image">Avatar</label>
             <!-- show the image -->
             <div *ngIf="identity && identity.image">
-                <img src="{{ url + 'user/avatar/' + identity.image }}" class="avatar_nav">
+                <img src="{{ url + 'user/avatar/' + identity.image }}" class="avatar_settings">
             </div>
 
-            <!-- Dropzone para subir imágenes -->
+            <!-- Dropzone -->
             <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
                 <ngx-dropzone-label>
                     <strong>Drop your image here or click to select</strong>
@@ -66,12 +66,9 @@
                 </ngx-dropzone-preview>
             </ngx-dropzone>
 
-            <button type="button" class="btn btn-success mt-2" [disabled]="files.length === 0 || uploading" (click)="uploadImage()">
-                <span *ngIf="!uploading">Upload image</span>
-                <span *ngIf="uploading">Uploading...</span>
-            </button>
+            <span *ngIf="!uploading">Upload image</span>
+            <span *ngIf="uploading">Uploading...</span>
         </div>
         <hr>
-        <input type="submit" name="" value="Save" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="settingsForm.invalid">
-    </form>
+        <input type="submit" name="" value="Save Changes" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="settingsForm.invalid || uploading">    </form>
 </div>

@@ -84,58 +84,84 @@ export class UserEditComponent {
     this.files.splice(this.files.indexOf(event), 1);
   }
 
-  uploadImage() {
-    if (this.files.length > 0) {
-      this.uploading = true;
-      
+  // creaate a promise with no value 
+  uploadImage(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if files are selected
       this.fileUploadService.uploadFile(this.files[0]).subscribe({
         next: (response: any) => {
+          // Check if the response contains an image
           if (response.image) {
+            // Update the user object with the new image
             this.user.image = response.image;
             this.identity.image = response.image;
+            // Save the new image in local storage
             localStorage.setItem('identity', JSON.stringify(this.identity));
-            this.status = 'success';
+            // To indicate that the image is uploaded and the uploading is finished
+            this.uploading = false;
+            // Indicate success of the promise
+            resolve();
           } else {
             this.status = 'error';
+            this.uploading = false;
+            reject('Error uploading image');
           }
-          this.uploading = false;
         },
         error: (error) => {
           console.log(error);
           this.status = 'error';
           this.uploading = false;
+          reject(error);
         }
       });
-    }
-  }
-
-  onSubmit(form:any) {
-    this.userService.update(this.token, this.user).subscribe({
-      next: (response) => {
-        if (!response.user) {
-          this.status = 'error';
-        } else {
-          this.status = 'success';
-          this.identity = this.user;
-          localStorage.setItem('identity', JSON.stringify(this.user));
-          // Redirect to the user profile page
-          this.router.navigate(['/settings']).then(() => {
-            // Reload the page to reflect the changes
-            //window.location.reload();
-          });
-        }
-      },
-      error: (error) => {
-        this.status = 'error';
-        console.log(error);
-      }
     });
   }
 
-  avatarUpload(data: any) {
-    // let _data is a variable that holds the data returned from the server
-    let _data = JSON.parse(data.response);
-    // add the image to the user object
-    this.user.image = _data.image;
+  // onSubmit method to handle form submission
+  // form is the form object that is passed from the template
+  // async is used to indicate that this method is asynchronous and will return a promise, so we can use await inside it
+  async onSubmit(form: any) {
+    // try catch is used to handle errors that may occur during the execution of the code inside the try block
+    try {
+      // First, check if the user has selected any files to upload
+      if (this.files.length > 0) {
+        this.uploading = true;
+        // Call the uploadImage method to upload the image
+        // and await for it to finish before proceeding
+        await this.uploadImage();
+      }
+      
+      // Save the user data
+      this.userService.update(this.token, this.user).subscribe({
+        next: (response) => {
+          if (!response.user) {
+            this.status = 'error';
+          } else {
+            this.status = 'success';
+            this.identity = this.user;
+            localStorage.setItem('identity', JSON.stringify(this.user));
+            
+            // Make a timeout to scroll to the top of the page after 100ms
+            setTimeout(() => {
+              // Scroll to the top of the page in a smooth way
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // Alternative using ViewChild:
+              // this.topElement.nativeElement.scrollIntoView({ behavior: 'smooth' });
+              // wait to reload the page
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            }, 100);
+          }
+        },
+        error: (error) => {
+          this.status = 'error';
+          console.log(error);
+        }
+      });
+    } catch (error) {
+      this.status = 'error';
+      console.log(error);
+    }
   }
 }
