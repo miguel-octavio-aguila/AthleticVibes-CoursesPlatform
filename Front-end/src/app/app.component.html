@@ -111,7 +111,7 @@
                                 </li>
 
                                 <!-- User -->
-                                <li class="nav-item dropdown" *ngIf="identity && identity.sub">
+                                <li class="nav-item dropdown" *ngIf="identity && identity.sub || identity.id">
                                     <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <div *ngIf="identity && identity.image" class="avatar_nav">
                                             <img src="{{ url + 'user/avatar/' + identity.image }}">
@@ -164,10 +164,10 @@
                                 </li>
 
                                 <!-- Access buttons -->
-                                <li class="nav-item ms-2" *ngIf="!identity || identity.sub == null">
+                                <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
                                     <a class="btn btn-dark" routerLink="/login" >Log in</a>
                                 </li>
-                                <li class="nav-item ms-2" *ngIf="!identity || identity.sub == null">
+                                <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
                                     <a class="btn btn-outline-light" routerLink="/signup" >Sign up</a>
                                 </li>
                             </ul>
