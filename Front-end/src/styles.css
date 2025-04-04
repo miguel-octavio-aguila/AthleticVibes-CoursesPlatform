@@ -46,3 +46,8 @@
     font-size: small;
 }
 
+/* Courses */
+.course_image_settings {
+    width: 80px;
+    margin-bottom: 10px;
+}

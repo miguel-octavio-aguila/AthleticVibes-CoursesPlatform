@@ -1,1 +1,100 @@
-<p>course-new works!</p>
+<div class="all col-md-4 mt-3" style="margin: 0 auto;">
+    <h1 style="text-align: center; font-size: 2.5em; color: 444;">
+        {{ title }}
+    </h1>
+    <p *ngIf="status != 'success'" style="text-align: center; box-shadow: 5px 5px 5px gray;">
+        Create a new course to start teaching.
+    </p>
+    <p *ngIf="edit" style="text-align: center; box-shadow: 5px 5px 5px gray;">
+        Modify yout course {{course.name}}.
+    </p>
+    <hr>
+    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success'">
+        <p style="text-align: center;">
+            <strong>Course created successfully!</strong>
+        </p>
+    </div>
+    <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
+        <p style="text-align: center;">
+            <strong>Error!</strong> Course not created. 
+        </p>
+    </div>
+    <!-- Course create form -->
+    <form class="col-12 col-md-12 col-lg-12" #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)">
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">
+            <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                Name is required and must contain only letters.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="category_id">Categories</label>
+            <select name="category_id" class="form-control" #category_id="ngModel" [(ngModel)]="course.category_id">
+                <option *ngFor="let category of categories" value="{{ category.id }}">
+                    {{ category.name }}
+                </option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="detail">Description</label>
+            <textarea type="text" name="detail" class="form-control" #detail="ngModel" [(ngModel)]="course.detail" required></textarea>
+            <small *ngIf="!detail.valid && detail.touched" class="invalid-feedback d-block">
+                Description is required.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="image">Image of the course</label>
+            <!-- show the image -->
+            <div *ngIf="edit && course.image">
+                <img src="{{ url + 'courses/image/' + course.image }}" class="course_image_settings">
+            </div>
+
+            <!-- Dropzone -->
+            <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
+                <ngx-dropzone-label>
+                    <strong>Drop your image here or click to select</strong>
+                    <em>Image size must be less than 600 MB</em>
+                </ngx-dropzone-label>
+                <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+                    <ngx-dropzone-label>
+                        {{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)
+                    </ngx-dropzone-label>
+                </ngx-dropzone-preview>
+            </ngx-dropzone>
+
+            <span *ngIf="!uploading">Upload image</span>
+            <span *ngIf="uploading">Uploading...</span>
+        </div>
+        <div class="form-group">
+            <label for="url">URL of the video</label>
+            <input type="text" name="url" #url="ngModel" [(ngModel)]="course.url" class="form-control" required>
+            <small *ngIf="!url.valid && url.touched" class="invalid-feedback d-block">
+                Invalid URL.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="accordion">Sections of the course</label>
+            <input type="number" name="accordion" min="1" max="50" #accordion="ngModel" [(ngModel)]="course.accordion" class="form-control" required>
+            <small *ngIf="!accordion.valid && accordion.touched" class="invalid-feedback d-block">
+                Number of sections must be between 1 and 50.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="current_price">Current price (USD)</label>
+            <input type="number" name="current_price" #current_price="ngModel" [(ngModel)]="course.current_price" class="form-control" required>
+            <small *ngIf="!current_price.valid && current_price.touched" class="invalid-feedback d-block">
+                Price is required.
+            </small>
+        </div>
+        <div class="form-group">
+            <label for="previous_price">Previous price (USD)</label>
+            <input type="number" name="previous_price" #previous_price="ngModel" [(ngModel)]="course.previous_price" class="form-control" required>
+            <small *ngIf="!previous_price.valid && previous_price.touched" class="invalid-feedback d-block">
+                Price is required.
+            </small>
+        </div>
+        <hr>
+        <input type="submit" name="" value="Save Changes" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="courseForm.invalid || uploading">
+    </form>
+</div>

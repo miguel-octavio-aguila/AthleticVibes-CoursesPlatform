@@ -28,12 +28,12 @@ Route::get('/api/user/avatar/{filename}', [UserController::class, 'getImage']);
 Route::get('/api/user/detail/{id}', [UserController::class, 'detail']);
 
 // Course routes
-Route::resource('/api/courses', CourseController::class);
 Route::get('/api/courses/getCourse/{id}', [CourseController::class, 'getCourse']);
 Route::post('/api/courses/upload', [CourseController::class, 'upload']);
 Route::get('/api/courses/search/{search}', [CourseController::class, 'search']);
 Route::get('/api/courses/getCoursesByCategory/{id}', [CourseController::class, 'getCoursesByCategory']);
 Route::get('/api/courses/image/{filename}', [CourseController::class, 'getImage']);
+Route::resource('/api/courses', CourseController::class);
 
 // Video routes
 Route::get('/api/videos/getVideos', [VideoController::class, 'getVideos']);

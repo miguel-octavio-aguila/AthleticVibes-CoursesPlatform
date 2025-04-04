@@ -140,7 +140,6 @@ export class UserEditComponent {
             this.status = 'success';
             this.identity = this.user;
             localStorage.setItem('identity', JSON.stringify(this.user));
-            
             // Make a timeout to scroll to the top of the page after 100ms
             setTimeout(() => {
               // Scroll to the top of the page in a smooth way

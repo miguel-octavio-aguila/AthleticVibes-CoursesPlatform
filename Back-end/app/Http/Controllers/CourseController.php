@@ -66,17 +66,23 @@ class CourseController extends Controller implements HasMiddleware
         if (!empty($params_array)) {
             // validate the data
             $validate = Validator::make($params_array, [
-                'name' => 'required|unique:courses',
+                'name' => [
+                    'required',
+                    'regex:/^[\p{L}\p{N}\s\-]+$/u',
+                    'unique:courses,name'
+                ],
                 'category_id' => 'required',
+                'image' => 'required',
                 'detail' => 'required',
                 'url' => 'required',
                 'accordion' => 'required',
                 'current_price' => 'required',
                 'previous_price' => 'required'
             ]);
-
+            
             // if the validation fails
             if ($validate->fails()) {
+                return $params_array;
                 return response()->json($validate->errors(), 400);
             }
 
@@ -84,6 +90,7 @@ class CourseController extends Controller implements HasMiddleware
             $course = new Course();
             $course->name = $params_array['name'];
             $course->category_id = $params_array['category_id'];
+            $course->image = $params_array['image'];
             $course->detail = $params_array['detail'];
             $course->url = $params_array['url'];
             $course->accordion = $params_array['accordion'];
@@ -369,14 +376,14 @@ class CourseController extends Controller implements HasMiddleware
         if (!empty($courses) && is_object($courses)) {
             $data = [
                 'code' => 200,
-               'status' =>'success',
+                'status' =>'success',
                 'courses' => $courses
             ];
         } else {
             $data = [
                 'code' => 400,
-               'status' => 'error',
-              'message' => 'Courses does not exist'
+                'status' => 'error',
+                'message' => 'Courses does not exist'
             ];
         }
 

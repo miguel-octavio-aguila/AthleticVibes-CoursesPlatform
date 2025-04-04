@@ -28,6 +28,13 @@ export class CourseService {
 
   // create method
   create(token: string, course: any): Observable<any> {
+    // clean htmlentities
+    if (course.detail) {
+      course.detail = GLOBAL.htmlEntities(course.detail);
+    }
+    if (course.url) {
+      course.url = GLOBAL.htmlEntities(course.url);
+    }
     let json = JSON.stringify(course);
     let params = 'json=' + json;
     let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')

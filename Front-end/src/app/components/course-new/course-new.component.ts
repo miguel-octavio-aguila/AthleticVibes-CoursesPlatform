@@ -5,13 +5,17 @@ import { UserService } from '../../services/user.service';
 import { GLOBAL } from '../../services/global';
 import { FileUploadService } from '../../services/file.upload.service';
 import { CategoryService } from '../../services/category.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { NgxDropzoneModule } from 'ngx-dropzone';
+
 
 // this is a global variable for iziToast
 declare var iziToast: any;
 
 @Component({
   selector: 'app-course-new',
-  imports: [],
+  imports: [CommonModule, FormsModule, NgxDropzoneModule],
   templateUrl: './course-new.component.html',
   styleUrl: './course-new.component.css',
   providers: [UserService, CourseService, CategoryService]
@@ -24,7 +28,8 @@ export class CourseNewComponent {
   public course_: Course;
   public status: any;
   public edit: boolean;
-  public url: string;
+  public url_back: any;
+  public url: any;
   public categories: any;
   public resetVar = true;
   public uploading = false;
@@ -39,15 +44,15 @@ export class CourseNewComponent {
     private fileUploadService: FileUploadService
   ){
     this.title = 'Create a course';
-    this.url = GLOBAL.url;
+    this.url_back = GLOBAL.url;
     this.course = this._courseService.getCourse();
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
     this.edit = false;
     this.course_ = new Course(
-      this.course.sub,
+      this.course.id,
       this.course.name,
-      this.course.category,
+      this.course.category_id,
       this.course.detail,
       this.course.image,
       this.course.url,
@@ -58,7 +63,7 @@ export class CourseNewComponent {
   }
 
   ngOnInit(): void {
-    this._categoryService.getCategories();
+    this.getCategories();
   }
   
   onSelect(event: any) {
@@ -115,11 +120,11 @@ export class CourseNewComponent {
         // and await for it to finish before proceeding
         await this.uploadCourse();
       }
-      
+      this.course_.category_id = Number(this.course_.category_id);
       // Save the user data
       this._courseService.create(this.token, this.course_).subscribe({
         next: (response) => {
-          if (!response.course_) {
+          if (!response.course) {
             this.status = 'error';
             // iziToast
             iziToast.show({
@@ -143,7 +148,6 @@ export class CourseNewComponent {
             });
             this.course = this.course_;
             localStorage.setItem('Course', JSON.stringify(this.course_));
-            
             // Make a timeout to scroll to the top of the page after 100ms
             setTimeout(() => {
               // Scroll to the top of the page in a smooth way
@@ -171,9 +175,8 @@ export class CourseNewComponent {
   getCategories() {
     this._categoryService.getCategories().subscribe({
       next: (response) => {
-        if (response.categories == 'success') {
+        if (response.status == 'success') {
           this.categories = response.categories;
-          console.log(this.categories);
         }
       },
       error: (error) => {
