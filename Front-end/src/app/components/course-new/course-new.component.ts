@@ -146,8 +146,8 @@ export class CourseNewComponent {
               position: 'topRight',
               message: 'The course has been created successfully.'
             });
-            this.course = this.course_;
-            localStorage.setItem('Course', JSON.stringify(this.course_));
+            this.course = response.course;
+            localStorage.setItem('Course', JSON.stringify(this.course));
             // Make a timeout to scroll to the top of the page after 100ms
             setTimeout(() => {
               // Scroll to the top of the page in a smooth way
