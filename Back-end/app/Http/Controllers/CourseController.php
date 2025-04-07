@@ -39,8 +39,8 @@ class CourseController extends Controller implements HasMiddleware
         $courses = Course::all();
         return response()->json([
             'code' => 200,
-            'message' => 'Success',
-            'data' => $courses
+            'status' => 'success',
+            'courses' => $courses
         ]);
     }
 

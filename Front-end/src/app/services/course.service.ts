@@ -41,4 +41,10 @@ export class CourseService {
                                     .set('Authorization', token);
     return this.http.post(this.url + 'courses', params, { headers: headers });
   }
+
+  // get courses for the home
+  getCourses(): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+    return this.http.get(this.url + 'courses', { headers: headers });
+  }
 }
