@@ -1,1 +1,63 @@
-<p>category-list works!</p>
+<div style="background-color: #bbbcb7;">
+    <div class="container">
+        <div class="row">
+            <div class="col mt-3">
+                <h1>
+                    {{ title }}
+                </h1>
+                <hr>
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    <div class="col" *ngFor="let category of categories; let indice=index">
+                        <article class="card card_1">
+                            <div class="card-body">
+                                <div class="card-title text-center">
+                                    <h3 class="fs-5">
+                                        {{ category.name }}
+                                    </h3>
+                                </div>
+                                <!-- Buttons if you are the admin -->
+                                <div class="video-buttons mt-3">
+                                    <span *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                        <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                            <i class="ti-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + category.id">
+                                            <i class= "ti-trash"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </article>
+                        <!-- Delete Modal -->
+                        <div class="modal fade" [id]="'delete' + category.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">
+                                            Are you sure you want to delete this category?
+                                        </h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        You are going to delete the category: {{ category.name }}.
+                                        <br>
+                                        This action cannot be undone.
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
+                                            Close
+                                        </button>
+                                        <button type="button" class="btn btn-admin-action" style="color: black;">
+                                            <i class= "ti-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="btn btn-warning">Create category</a>
+            </div>
+        </div>
+    </div>
+</div>

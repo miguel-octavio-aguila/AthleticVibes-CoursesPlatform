@@ -6,6 +6,7 @@ import { SignupComponent } from './components/signup/signup.component';
 import { UserEditComponent } from './components/user-edit/user-edit.component';
 import { CourseNewComponent } from './components/course-new/course-new.component';
 import { CourseEditComponent } from './components/course-edit/course-edit.component';
+import { CategoryListComponent } from './components/category-list/category-list.component';
 
 export const routes: Routes = [
     {
@@ -35,5 +36,9 @@ export const routes: Routes = [
     {
         path: 'course-edit/:id',
         component: CourseEditComponent
+    },
+    {
+        path: 'categories',
+        component: CategoryListComponent
     },
 ];
