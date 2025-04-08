@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\JwtAuth;
 use App\Models\Sale;
+use App\Models\Video;
+use App\Models\Comment;
+use App\Models\Responxe;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -248,7 +251,39 @@ class CourseController extends Controller implements HasMiddleware
      */
     public function destroy(string $id)
     {
+        $sales = Sale::where('course_id', $id)->get();
+        $videos = Video::where('course_id', $id)->get();
         $course = Course::where('id', $id)->first();
+
+        // delete sales
+        if ($sales && count($sales) >= 1) {
+            foreach ($sales as $sale) {
+                $sale->delete();
+            }
+        }
+
+        // delete videos
+        if ($videos && count($videos) >= 1) {
+            foreach ($videos as $video) {
+                $comments = Comment::where('video_id', $video->id)->get();
+                // delete comments
+                if ($comments && count($comments) >= 1) {
+                    foreach ($comments as $comment) {
+                        // delete responses
+                        $responses = Responxe::where('comment_id', $comment->id)->get();
+                        if ($responses && count($responses) >= 1) {
+                            foreach ($responses as $response) {
+                                $response->delete();
+                            }
+                        }
+                        // delete comment
+                        $comment->delete();
+                    }
+                }
+                // delete video
+                $video->delete();
+            }
+        }
 
         // check if the course exists
         if (!empty($course) && is_object($course)) {

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'app-home',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
   providers: [CourseService, UserService]
@@ -17,6 +18,7 @@ export class HomeComponent {
   public courses: any;
   public identity: any;
   public status: any;
+  public token: any;
 
   constructor(
     private _courseService: CourseService,
@@ -24,6 +26,7 @@ export class HomeComponent {
   ){
     this.title = 'Home';
     this.identity = this._userService.getIdentity();
+    this.token = this._userService.getToken();
   }
 
   ngOnInit(){
@@ -64,5 +67,20 @@ export class HomeComponent {
       thumbnail_url = 'https://img.youtube.com/vi/' + video + '/mqdefault.jpg';
     }
     return thumbnail_url;
+  }
+
+  // delete course
+  deleteCourse(id: any){
+    this._courseService.delete(this.token, id).subscribe(
+      response => {
+        this.getCourses();
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 }

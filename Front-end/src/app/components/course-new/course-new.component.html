@@ -2,16 +2,21 @@
     <h1 style="text-align: center; font-size: 2.5em; color: 444;">
         {{ title }}
     </h1>
-    <p *ngIf="status != 'success'" style="text-align: center; box-shadow: 5px 5px 5px gray;">
+    <p *ngIf="status != 'success' && !edit" style="text-align: center; box-shadow: 5px 5px 5px gray;">
         Create a new course to start teaching.
     </p>
     <p *ngIf="edit" style="text-align: center; box-shadow: 5px 5px 5px gray;">
         Modify yout course {{course.name}}.
     </p>
     <hr>
-    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success'">
+    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success' && !edit">
         <p style="text-align: center;">
             <strong>Course created successfully!</strong>
+        </p>
+    </div>
+    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success' && edit">
+        <p style="text-align: center;">
+            <strong>Course updated successfully!</strong>
         </p>
     </div>
     <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
@@ -46,8 +51,8 @@
         <div class="form-group">
             <label for="image">Image of the course</label>
             <!-- show the image -->
-            <div *ngIf="edit && course.image">
-                <img src="{{ url + 'courses/image/' + course.image }}" class="course_image_settings">
+            <div *ngIf="edit && course.image != null">
+                <img [src]="url_back + 'courses/image/' + course.image" class="course_image_settings">
             </div>
 
             <!-- Dropzone -->

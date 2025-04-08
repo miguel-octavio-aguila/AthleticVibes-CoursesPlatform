@@ -1,26 +1,25 @@
-import { Component, OnInit } from '@angular/core';
-import { Course } from '../../models/Course';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
-import { GLOBAL } from '../../services/global';
-import { FileUploadService } from '../../services/file.upload.service';
 import { CategoryService } from '../../services/category.service';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
+import { GLOBAL } from '../../services/global';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+import { Course } from '../../models/Course';
+import { FileUploadService } from '../../services/file.upload.service';
 
-
-// this is a global variable for iziToast
 declare var iziToast: any;
 
 @Component({
-  selector: 'app-course-new',
-  imports: [CommonModule, FormsModule, NgxDropzoneModule],
-  templateUrl: './course-new.component.html',
-  styleUrl: './course-new.component.css',
-  providers: [UserService, CourseService, CategoryService]
+  selector: 'app-course-edit',
+  imports: [CommonModule, FormsModule, RouterModule, NgxDropzoneModule],
+  templateUrl: '../course-new/course-new.component.html',
+  styleUrl: './course-edit.component.css',
+  providers: [CourseService, UserService, CategoryService]
 })
-export class CourseNewComponent {
+export class CourseEditComponent {
   public title: string;
   public identity: any;
   public token: any;
@@ -41,14 +40,16 @@ export class CourseNewComponent {
     private _courseService: CourseService,
     private _userService: UserService,
     private _categoryService: CategoryService,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private _route: ActivatedRoute,
+    private _router: Router
   ){
-    this.title = 'Create a course';
+    this.title = 'Edit the course';
     this.url_back = GLOBAL.url;
     this.course = this._courseService.getCourse();
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
-    this.edit = false;
+    this.edit = true;
     this.course_ = new Course(
       this.course.id,
       this.course.name,
@@ -64,6 +65,7 @@ export class CourseNewComponent {
 
   ngOnInit(): void {
     this.getCategories();
+    this.getCourse();
   }
   
   onSelect(event: any) {
@@ -122,7 +124,7 @@ export class CourseNewComponent {
       }
       this.course.category_id = Number(this.course.category_id);
       // Save the user data
-      this._courseService.create(this.token, this.course).subscribe({
+      this._courseService.update(this.token, this.course, this.course.id).subscribe({
         next: (response) => {
           if (!response.course) {
             this.status = 'error';
@@ -133,7 +135,7 @@ export class CourseNewComponent {
               color: '#FFF',
               class: 'text-danger',
               position: 'topRight',
-              message: 'The course has not been created.'
+              message: 'The course has not been updated.'
             });
           } else {
             this.status = 'success';
@@ -144,7 +146,7 @@ export class CourseNewComponent {
               color: '#FFF',
               class: 'text-success',
               position: 'topRight',
-              message: 'The course has been created successfully.'
+              message: 'The course has been updated successfully.'
             });
             this.course = response.course;
             localStorage.setItem('Course', JSON.stringify(this.course));
@@ -182,6 +184,34 @@ export class CourseNewComponent {
       error: (error) => {
         console.log(error);
       }
+    });
+  }
+
+  getCourse() {
+    this._route.params.subscribe({
+      next: (params) => {
+        var id = +params['id'];
+        this._courseService.getCourseInfo(id, this.token).subscribe({
+          next: (response) => {
+            if (response.status == 'success') {
+              this.course = response.course;
+              this.course_.id = this.course.id;
+              this.course_.name = this.course.name; 
+            } else {
+              this._router.navigate(['/home']);
+            }
+          },
+          error: (error) => {
+            console.log(error);
+            this._router.navigate(['/home'])
+          }
+        });
+        },
+      error: (error) => {
+        console.log(error);
+        this.status = 'error';
+        this._router.navigate(['/home'])
+      } 
     });
   }
 }

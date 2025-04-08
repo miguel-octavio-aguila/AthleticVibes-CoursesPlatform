@@ -31,7 +31,7 @@
                                         <a class="btn btn-admin-action me-2" id="my-edit-button">
                                             <i class="ti-plus"></i>
                                         </a>
-                                        <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                        <a class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">
                                             <i class="ti-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + course.id">
@@ -101,7 +101,7 @@
                                         <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
                                             Close
                                         </button>
-                                        <button type="button" class="btn btn-admin-action" style="color: black;">
+                                        <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteCourse(course.id)">
                                             <i class= "ti-trash"></i>
                                         </button>
                                     </div>
