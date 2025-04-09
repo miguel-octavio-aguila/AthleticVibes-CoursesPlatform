@@ -1,188 +1,197 @@
-<!-- Header -->
-<header style="background-color: rgba(125,105,106,255);">
-    <div class='container'>
-        <div class="row">
-            <div class="col">
-                <nav class="navbar navbar-expand-lg navbar-dark">
-                    <div class="container-fluid">
-                        <!-- Logo -->
-                        <a class="navbar-brand" routerLink="/home">
-                            <img src="images/header_logo.jpg" alt="Logo" width="100" height="80" class="rounded" (click)="play_audio()">
-                        </a>
+<section>
+    <!-- Header -->
+    <header style="background-color: rgba(125,105,106,255);">
+        <div class='container'>
+            <div class="row">
+                <div class="col">
+                    <nav class="navbar navbar-expand-lg navbar-dark">
+                        <div class="container-fluid">
+                            <!-- Logo -->
+                            <a class="navbar-brand" routerLink="/home">
+                                <img src="images/header_logo.jpg" alt="Logo" width="100" height="80" class="rounded">
+                            </a>
 
-                        <!-- Toggler para móviles -->
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+                            <!-- Toggler para móviles -->
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
 
-                        <!-- Contentent  -->
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <!-- Left menu -->
-                            <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="categories">
-                                <!-- Categories dropdown -->
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Categories
-                                    </a>
-                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                        <a *ngFor="let category of categories" class="dropdown-item">
-                                            {{ category.name }}
+                            <!-- Contentent  -->
+                            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                                <!-- Left menu -->
+                                <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="categories">
+                                    <!-- Categories dropdown -->
+                                    <div class="menu">
+                                        <div class="category_item">
+                                            <a href="#" class="category_link">
+                                                <span>Categories</span>
+                                                <svg viewBox="0 0 360 360" xml:space="preserve">
+                                                    <g>
+                                                        <path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                                    </g>
+                                                </svg>
+                                            </a>
+                                            <div class="category_menu">
+                                                <div class="category_drop_item" *ngFor="let category of categories">
+                                                    <a href="#" class="category_drop_link">{{ category.name }}</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Search -->
+                                    <li class="nav-item ms-3">
+                                        <form>
+                                            <div class="input-group">
+                                                <button type="submit" class="btn btn-outline-light">
+                                                    <i class="ti-search"></i>
+                                                </button>
+                                                <input type="search" id="search" class="form-control" name="title" placeholder="Search..." required>
+                                            </div>
+                                        </form>
+                                    </li>
+                                </ul>
+
+                                <!-- Right Menu -->
+                                <ul class="navbar-nav ms-auto align-items-center">
+                                    <!-- Learning -->
+                                    <li class="nav-item" *ngIf="identity && identity.sub">
+                                        <a class="nav-link" style="color:white;">
+                                            Learning
                                         </a>
-                                    </div>
-                                </li>
+                                    </li>
 
-                                <!-- Search -->
-                                <li class="nav-item ms-3">
-                                    <form>
-                                        <div class="input-group">
-                                            <button type="submit" class="btn btn-outline-light">
-                                                <i class="ti-search"></i>
-                                            </button>
-                                            <input type="search" id="search" class="form-control" name="title" placeholder="Search..." required>
+                                    <!-- Cart -->
+                                    <li class="nav-item dropdown" *ngIf="identity && identity.sub">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
+                                                <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
+                                            </i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"style="min-width: 350px;">
+                                            <!-- Cart Content-->
+                                            <div class="d-flex flex-column gap-2">
+                                                <!-- Items -->
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-0">Name of the product</h6>
+                                                        <small class="text-muted">Quantity: 1</small>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span>$10.00</span>
+                                                            <button class="btn btn-link text-danger p-0">
+                                                                <i class="ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Items -->
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-0">Name of the product</h6>
+                                                        <small class="text-muted">Quantity: 1</small>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span>$10.00</span>
+                                                            <button class="btn btn-link text-danger p-0">
+                                                                <i class="ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Subtotal -->
+                                                <div class="pt-3 border-top">
+                                                    <div class="d-flex justify-content-between fw-bold">
+                                                        <span>Total:</span>
+                                                        <span>$20.00</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Buttons -->
+                                                <div class="d-grid gap-2 mt-2">
+                                                    <button class="btn btn-primary">Cart</button>
+                                                    <button class="btn btn-outline-secondary">Keep shooping</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </form>
-                                </li>
-                            </ul>
+                                    </li>
 
-                            <!-- Right Menu -->
-                            <ul class="navbar-nav ms-auto align-items-center">
-                                <!-- Learning -->
-                                <li class="nav-item" *ngIf="identity && identity.sub">
-                                    <a class="nav-link" style="color:white;">
-                                        Learning
-                                    </a>
-                                </li>
-
-                                <!-- Cart -->
-                                <li class="nav-item dropdown" *ngIf="identity && identity.sub">
-                                    <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
-                                            <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
-                                        </i>
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"style="min-width: 350px;">
-                                        <!-- Cart Content-->
-                                        <div class="d-flex flex-column gap-2">
-                                            <!-- Items -->
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0">Name of the product</h6>
-                                                    <small class="text-muted">Quantity: 1</small>
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <span>$10.00</span>
-                                                        <button class="btn btn-link text-danger p-0">
-                                                            <i class="ti-trash"></i>
-                                                        </button>
+                                    <!-- User -->
+                                    <li class="nav-item dropdown" *ngIf="identity && identity.sub || identity.id">
+                                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <div *ngIf="identity && identity.image" class="avatar_nav">
+                                                <img src="{{ url + 'user/avatar/' + identity.image }}">
+                                            </div>
+                                            <span class="my-auto">{{ identity.name }}</span>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                            <!-- User info -->
+                                            <li class="p-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div *ngIf="identity && identity.image" class="avatar_nav2">
+                                                        <img src="{{ url + 'user/avatar/' + identity.image }}">
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">
+                                                            <a href="#" class="letra_avatar">
+                                                                {{ identity.name + ' ' + identity.surname }}
+                                                            </a>
+                                                        </div>
+                                                        <div class="text-muted small">
+                                                            <a href="#" class="letra_avatar2">
+                                                                {{ identity.email}}
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <!-- Items -->
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-0">Name of the product</h6>
-                                                    <small class="text-muted">Quantity: 1</small>
-                                                    <div class="d-flex justify-content-between align-items-center">
-                                                        <span>$10.00</span>
-                                                        <button class="btn btn-link text-danger p-0">
-                                                            <i class="ti-trash"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
                                             
-                                            <!-- Subtotal -->
-                                            <div class="pt-3 border-top">
-                                                <div class="d-flex justify-content-between fw-bold">
-                                                    <span>Total:</span>
-                                                    <span>$20.00</span>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Buttons -->
-                                            <div class="d-grid gap-2 mt-2">
-                                                <button class="btn btn-primary">Cart</button>
-                                                <button class="btn btn-outline-secondary">Keep shooping</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
+                                            <!-- Menu options -->
+                                            <li class="single-product-cart">
+                                                <a class="dropdown-item" routerLink="/settings">Settings</a>
+                                            </li>
+                                            <li class="single-product-cart">
+                                                <a class="dropdown-item">Profile</a>
+                                            </li>
+                                            <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                                <a class="dropdown-item" routerLink="/create-course">Create course</a>
+                                            </li>
+                                            <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                                <a class="dropdown-item" routerLink="/categories">Categories</a>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" routerLink="/logout/1">Log out</a>
+                                            </li>
+                                        </ul>
+                                    </li>
 
-                                <!-- User -->
-                                <li class="nav-item dropdown" *ngIf="identity && identity.sub || identity.id">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <div *ngIf="identity && identity.image" class="avatar_nav">
-                                            <img src="{{ url + 'user/avatar/' + identity.image }}">
-                                        </div>
-                                        <span class="my-auto">{{ identity.name }}</span>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                        <!-- User info -->
-                                        <li class="p-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div *ngIf="identity && identity.image" class="avatar_nav2">
-                                                    <img src="{{ url + 'user/avatar/' + identity.image }}">
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">
-                                                        <a href="#" class="letra_avatar">
-                                                            {{ identity.name + ' ' + identity.surname }}
-                                                        </a>
-                                                    </div>
-                                                    <div class="text-muted small">
-                                                        <a href="#" class="letra_avatar2">
-                                                            {{ identity.email}}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        
-                                        <!-- Menu options -->
-                                        <li class="single-product-cart">
-                                            <a class="dropdown-item" routerLink="/settings">Settings</a>
-                                        </li>
-                                        <li class="single-product-cart">
-                                            <a class="dropdown-item">Profile</a>
-                                        </li>
-                                        <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                            <a class="dropdown-item" routerLink="/create-course">Create course</a>
-                                        </li>
-                                        <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                            <a class="dropdown-item" routerLink="/categories">Categories</a>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" routerLink="/logout/1">Log out</a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <!-- Access buttons -->
-                                <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
-                                    <a class="btn btn-dark" routerLink="/login" >Log in</a>
-                                </li>
-                                <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
-                                    <a class="btn btn-outline-light" routerLink="/signup" >Sign up</a>
-                                </li>
-                            </ul>
+                                    <!-- Access buttons -->
+                                    <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
+                                        <a class="btn btn-start" routerLink="/login" >Log in</a>
+                                    </li>
+                                    <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
+                                        <a class="btn btn-start" routerLink="/signup" >Sign up</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                </nav>
+                    </nav>
+                </div>
             </div>
         </div>
-    </div>
-</header>
-
-<!-- for the routes -->
-<router-outlet></router-outlet>
-
-<footer style="text-align: center; background-color: #bbbcb7; width: 100%; padding: 30px 0;">
-    <hr>Platform course developed by Miguel Águila &copy; 
-    <hr>
-</footer>
+    </header>
+    <main>
+        <!-- for the routes -->
+        <router-outlet></router-outlet>
+    </main>
+    <footer style="text-align: center; background-color:#bcb4bc; width: 100%; padding: 30px 0;">
+        <hr>Platform course developed by Miguel Águila &copy; 
+        <hr>
+    </footer>
+</section>

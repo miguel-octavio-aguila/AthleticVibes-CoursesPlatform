@@ -10,6 +10,10 @@ import { CategoryListComponent } from './components/category-list/category-list.
 
 export const routes: Routes = [
     {
+        path: '',
+        component: HomeComponent
+    },
+    {
         path: 'home',
         component: HomeComponent
     },

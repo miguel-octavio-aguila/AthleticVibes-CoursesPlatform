@@ -1,7 +1,7 @@
 /* Card */
 .card_1 {
     box-sizing: border-box;
-    background: #bcb4bc;
+    background: #bbbcb7;
     border: 1px solid white;
     box-shadow: 12px 17px 51px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(6px);
