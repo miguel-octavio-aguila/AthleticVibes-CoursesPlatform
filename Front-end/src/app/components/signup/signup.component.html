@@ -1,52 +1,54 @@
-<div class="col-md-4 mt-3" style="margin: 0 auto;">
-    <h1 style="text-align: center; font-size: 2.5em; color: 444;">
-        {{ page_title}}
-    </h1>
-    <p *ngIf="status != 'success'" style="text-align: center; box-shadow: 5px 5px 5px gray;">
-        Register to access the application.
-    </p>
-    <hr>
-    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success'">
-        <p style="text-align: center;">
-            <strong>Registration successful!</strong>&nbsp;<a routerLink="/login">Log in now.</a>
-        </p>
+<div class="general">
+    <div class="form-box">
+        <div class="form-value">
+            <div class="alert alert-success" *ngIf="status == 'success'">
+                <p style="text-align: center;">
+                    <strong>Registration successful!</strong>&nbsp;<a routerLink="/login">Log in now.</a>
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error'">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Email already exists.
+                </p>
+            </div>
+            <!-- Sign up form -->
+            <form class="col-12 col-md-12 col-lg-12" #signupForm="ngForm" (ngSubmit)="onSubmit(signupForm)">
+                <h1>
+                    {{ page_title}}
+                </h1>
+                <p *ngIf="status != 'success'">
+                    Register to access the application.
+                </p>
+                <div class="form-group">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
+                    <label for="name">First name</label>
+                    <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                        Name is required and must contain only letters.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="surname" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
+                    <label for="surname">Last name</label>
+                    <small *ngIf="!surname.valid && surname.touched" class="invalid-feedback d-block">
+                        Last name is required and must contain only letters.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                    <label for="email">Email</label>
+                    <small *ngIf="!email.valid && email.touched" class="invalid-feedback d-block">
+                        Email is required and must be a valid email address.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" name="password" #password="ngModel" [(ngModel)]="user.password" required>
+                    <label for="password">Password</label>
+                    <small *ngIf="!password.valid && password.touched" class="invalid-feedback d-block">
+                        Password is required.
+                    </small>
+                </div>
+                <input type="submit" name="" value="Sign up" class="btn btn-button" [disabled]="signupForm.invalid">
+            </form>
+        </div>
     </div>
-    <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
-        <p style="text-align: center;">
-            <strong>Error!</strong> Email already exists.
-        </p>
-    </div>
-    <!-- Sign up form -->
-    <form class="col-12 col-md-12 col-lg-12" #signupForm="ngForm" (ngSubmit)="onSubmit(signupForm)">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" name="name" placeholder="First Name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
-            <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
-                Name is required and must contain only letters.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="surname">Surname</label>
-            <input type="text" name="surname" placeholder="Last Name" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
-            <small *ngIf="!surname.valid && surname.touched" class="invalid-feedback d-block">
-                Last name is required and must contain only letters.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
-            <small *ngIf="!email.valid && email.touched" class="invalid-feedback d-block">
-                Email is required and must be a valid email address.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" name="password" #password="ngModel" [(ngModel)]="user.password" required>
-            <small *ngIf="!password.valid && password.touched" class="invalid-feedback d-block">
-                Password is required.
-            </small>
-        </div>
-        <hr>
-        <input type="submit" name="" value="Sign up" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="signupForm.invalid">
-    </form>
 </div>

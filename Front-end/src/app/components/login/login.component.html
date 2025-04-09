@@ -19,7 +19,6 @@
                 <p *ngIf="status != 'success'">
                     Identify yourself to access the application.
                 </p>
-                <hr>
                 <div class="form-group">
                     <input type="email" class="form-control" id="email" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
                     <label for="email">Email</label>
@@ -34,9 +33,7 @@
                         Password is required.
                     </small>
                 </div>
-                <hr>
                 <input type="submit" name="" value="Login" class="btn btn-button" [disabled]="loginForm.invalid">
-                <hr>
                 <div class="register">
                     <p>
                         Don't have an account? <a [routerLink]="['/signup']">Register</a>
