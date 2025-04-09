@@ -6,10 +6,11 @@ import { DOCUMENT } from '@angular/common';
 import { Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
   providers: [UserService]
@@ -28,7 +29,7 @@ export class LoginComponent implements OnInit {
     private _route: ActivatedRoute,
     @Inject(DOCUMENT) private document: Document
   ) {
-    this.page_title = 'Identify';
+    this.page_title = 'Login';
     // id, name, surname, role, email, password, description, image
     this.user = new User(0,'','','ROLE_USER','','','','');
   }
