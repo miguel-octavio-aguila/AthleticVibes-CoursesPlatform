@@ -21,9 +21,9 @@
                                 <!-- Left menu -->
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="categories">
                                     <!-- Categories dropdown -->
-                                    <div class="menu">
+                                    <li class="nav-item menu">
                                         <div class="category_item">
-                                            <a href="#" class="category_link">
+                                            <a href="#" class="nav-link category_link">
                                                 <span>Categories</span>
                                                 <svg viewBox="0 0 360 360" xml:space="preserve">
                                                     <g>
@@ -37,7 +37,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </li>
 
                                     <!-- Search -->
                                     <li class="nav-item ms-3">
@@ -119,58 +119,67 @@
                                     </li>
 
                                     <!-- User -->
-                                    <li class="nav-item dropdown" *ngIf="identity && identity.sub || identity.id">
-                                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <div *ngIf="identity && identity.image" class="avatar_nav">
-                                                <img src="{{ url + 'user/avatar/' + identity.image }}">
-                                            </div>
-                                            <span class="my-auto">{{ identity.name }}</span>
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                            <!-- User info -->
-                                            <li class="p-2">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <div *ngIf="identity && identity.image" class="avatar_nav2">
-                                                        <img src="{{ url + 'user/avatar/' + identity.image }}">
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-bold">
-                                                            <a href="#" class="letra_avatar">
-                                                                {{ identity.name + ' ' + identity.surname }}
-                                                            </a>
+                                    <li class="nav-item menu" *ngIf="identity && identity.sub || identity.id">
+                                        <div class="category_item">
+                                            <a class="nav-link category_link align-items-center" href="#">
+                                                <div *ngIf="identity && identity.image" class="avatar_nav">
+                                                    <img src="{{ url + 'user/avatar/' + identity.image }}">
+                                                </div>
+                                                <span class="my-auto">{{ identity.name }}</span>
+                                                <svg viewBox="0 0 360 360" xml:space="preserve">
+                                                    <g>
+                                                        <path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                                    </g>
+                                                </svg>
+                                            </a>
+                                            <div class="category_menu">
+                                                <!-- User info -->
+                                                <div class="category_drop_item">
+                                                    <div class="category_drop_link d-flex align-items-center justify-content-center gap-2" style="padding: 0">
+                                                        <div *ngIf="identity && identity.image" class="avatar_nav2">
+                                                            <img src="{{ url + 'user/avatar/' + identity.image }}">
                                                         </div>
-                                                        <div class="text-muted small">
-                                                            <a href="#" class="letra_avatar2">
-                                                                {{ identity.email}}
-                                                            </a>
+                                                        <div>
+                                                            <div class="fw-bold d-flex flex-column align-items-center">
+                                                                <a href="#" class="letra_avatar">
+                                                                    {{ identity.name }}
+                                                                </a>
+                                                                <a href="#" class="letra_avatar">
+                                                                    {{ identity.surname }}
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            
-                                            <!-- Menu options -->
-                                            <li class="single-product-cart">
-                                                <a class="dropdown-item" routerLink="/settings">Settings</a>
-                                            </li>
-                                            <li class="single-product-cart">
-                                                <a class="dropdown-item">Profile</a>
-                                            </li>
-                                            <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                <a class="dropdown-item" routerLink="/create-course">Create course</a>
-                                            </li>
-                                            <li class="single-product-cart" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                <a class="dropdown-item" routerLink="/categories">Categories</a>
-                                            </li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" routerLink="/logout/1">Log out</a>
-                                            </li>
-                                        </ul>
-                                    </li>
 
+                                                <div>
+                                                    <hr class="dropdown-divider">
+                                                </div>
+                                                
+                                                <!-- Menu options -->
+                                                <div class="category_drop_item">
+                                                    <a class="category_drop_link" routerLink="/settings">Settings</a>
+                                                </div>
+                                                <div class="category_drop_item">
+                                                    <a class="category_drop_link">Profile</a>
+                                                </div>
+                                                <div class="category_drop_item" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                                    <a class="category_drop_link" routerLink="/create-course">Create course</a>
+                                                </div>
+                                                <div class="category_drop_item" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                                    <a class="category_drop_link" routerLink="/categories">Categories</a>
+                                                </div>
+
+                                                <div>
+                                                    <hr class="dropdown-divider">
+                                                </div>
+
+                                                <div class="category_drop_item">
+                                                    <a class="category_drop_link" routerLink="/logout/1">Log out</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
                                     <!-- Access buttons -->
                                     <li class="nav-item ms-2" *ngIf="!identity || !identity.sub">
                                         <a class="btn btn-start" routerLink="/login" >Log in</a>

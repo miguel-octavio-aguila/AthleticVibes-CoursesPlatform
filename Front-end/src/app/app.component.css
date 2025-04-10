@@ -48,7 +48,7 @@ section {
     scale: 1;
 }
 
-/* Categories */
+/* Categories and User dropdown */
 .menu {
     font-size: 15px;
     line-height: 1.6;
@@ -74,7 +74,7 @@ section {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 12px 36px;
+    padding: 12px 60px;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
