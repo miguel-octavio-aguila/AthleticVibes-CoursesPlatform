@@ -1,3 +1,21 @@
+/* Welcome */
+.home_welcome {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 0px;
+}
+
+.home_welcome img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* Card */
 .card_1 {
     box-sizing: border-box;

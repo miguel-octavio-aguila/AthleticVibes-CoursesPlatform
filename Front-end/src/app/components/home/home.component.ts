@@ -4,6 +4,7 @@ import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { GLOBAL } from '../../services/global';
 
 @Component({
   standalone: true,
@@ -19,14 +20,16 @@ export class HomeComponent {
   public identity: any;
   public status: any;
   public token: any;
+  public url: any;
 
   constructor(
     private _courseService: CourseService,
-    private _userService: UserService
+    private _userService: UserService,
   ){
     this.title = 'Home';
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
+    this.url = GLOBAL.url;
   }
 
   ngOnInit(){

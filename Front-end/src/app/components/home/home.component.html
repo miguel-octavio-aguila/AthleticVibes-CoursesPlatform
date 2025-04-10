@@ -2,9 +2,12 @@
     <div class="container">
         <div class="row">
             <div class="col mt-3">
-                <h1 *ngIf="identity && identity.sub">
-                    {{ title }}
-                </h1>
+                <div class="d-flex align-items-center justify-content-center gap-3" *ngIf="identity && identity.sub">
+                    <div class="home_welcome">
+                        <img src="{{ url + 'user/avatar/' + identity.image }}">
+                    </div>
+                    <span class="my-auto fw-bold" style="font-size: x-large;">Hello again, {{ identity.name + ' ' + identity.surname + '!'}}</span>
+                </div>
                 <hr>
                 <div class="row row-cols-1 row-cols-md-3 g-4">
                     <div class="col" *ngFor="let course of courses; let indice=index">
