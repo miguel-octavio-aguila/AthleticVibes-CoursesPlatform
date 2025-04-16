@@ -1,75 +1,104 @@
-<div class="all col-md-4 mt-3" style="margin: 0 auto;">
-    <h1 style="text-align: center; font-size: 2.5em; color: 444;">
+<div class="max-w-md mx-auto relative overflow-hidden z-10 bg-custom-gray p-8 mt-5 rounded-lg shadow-md before:w-24 before:h-24 before:absolute before:bg-white before:rounded-full before:-z-10 before:blur-2xl before:top-16 before:-left-11 after:w-32 after:h-32 after:absolute after:bg-custom-gray-2 after:rounded-full after:-z-10 after:blur-xl after:top-24 after:-right-12">
+    <h1 class="text-2xl font-bold text-custom-brown mb-6">
         {{ page_title }}
     </h1>
-    <p *ngIf="status != 'success'" style="text-align: center; box-shadow: 5px 5px 5px gray;">
+    <p *ngIf="status != 'success'" class="mb-3">
         Modify user profile settings.
     </p>
-    <hr>
-    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success'">
+    
+    <div class="alert alert-success" *ngIf="status == 'success'">
         <p style="text-align: center;">
             <strong>Profile updated successfully!</strong>
         </p>
     </div>
-    <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
+    <div class="alert alert-danger" *ngIf="status == 'error'">
         <p style="text-align: center;">
             <strong>Error!</strong> Data not saved. 
         </p>
     </div>
     <!-- Settings form -->
-    <form class="col-12 col-md-12 col-lg-12" #settingsForm="ngForm" (ngSubmit)="onSubmit(settingsForm)">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
+    <form class="" #settingsForm="ngForm" (ngSubmit)="onSubmit(settingsForm)">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-custom-brown" for="name">First name</label>
+            <input type="text" name="name" #name="ngModel" class="mt-1 p-2 w-full bg-custom-gray-2 border border-transparent rounded-md text-custom-brown bold" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
             <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
-                Name is required and must contain only letters.
+                First name is required and must contain only letters.
             </small>
         </div>
-        <div class="form-group">
-            <label for="surname">Surname</label>
-            <input type="text" name="surname" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-custom-brown" for="surname">Last name</label>
+            <input type="text" name="surname" #surname="ngModel" class="mt-1 p-2 w-full bg-custom-gray-2 border border-transparent rounded-md text-custom-brown" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
             <small *ngIf="!surname.valid && surname.touched" class="invalid-feedback d-block">
                 Last name is required and must contain only letters.
             </small>
         </div>
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-custom-brown" for="email">Email</label>
+            <input type="email" class="mt-1 p-2 w-full bg-custom-gray-2 border border-transparent rounded-md text-custom-brown" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
             <small *ngIf="!email.valid && email.touched" class="invalid-feedback d-block">
                 Email is required and must be a valid email address.
             </small>
         </div>
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea name="description" class="form-control" #description="ngModel" [froalaEditor]="froala_options" [froalaModel]="user.description" [(ngModel)]="user.description" required></textarea>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-custom-brown" for="description">Description</label>
+            <textarea name="description" class="mt-1 p-2 w-full bg-custom-gray-2 border border-transparent rounded-md text-custom-brown" rows="3" #description="ngModel" [froalaEditor]="froala_options" [froalaModel]="user.description" [(ngModel)]="user.description" required></textarea>
             <small *ngIf="!description.valid && description.touched" class="invalid-feedback d-block">
                 Description is required.
             </small>
         </div>
-        <div class="form-group">
-            <label for="image">Avatar</label>
-            <!-- show the image -->
-            <div *ngIf="identity && identity.image">
-                <img src="{{ url + 'user/avatar/' + identity.image }}" class="avatar_settings">
+        <div class="mb-4">
+            <div class="flex flex-col items-center justify-center text-center">
+                <label class="block text-sm font-medium text-custom-brown" for="image">Avatar</label>
+                <!-- show the image -->
+                <div *ngIf="identity && identity.image" class="mb-2">
+                    <img src="{{ url + 'user/avatar/' + identity.image }}" class="w-16 h-16 rounded-full object-cover">
+                </div>
+            </div>
+            <!-- Dropzone -->
+            <div class="h-64 w-full flex flex-col">
+                <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)"
+                class="flex-1 w-full border-2 border-dashed border-custom-brown rounded-lg flex items-center justify-center bg-custom-gray-2">
+                    <ngx-dropzone-label class="flex flex-col items-center justify-center p-4 cursor-pointer">
+                        <svg class="h-24 w-24 text-custom-brown" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                        <p class="text-center text-custom-brown mt-2">Browse File to upload!</p>
+                    </ngx-dropzone-label>
+                    <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)" class="bg-custom-brown rounded-md p-2 max-w-xs flex items-center">
+                        <ngx-dropzone-label class="flex items-center justify-between w-full">
+                            <svg class="h-6 w-6 fill-custom-brown mr-2" fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                            </svg>
+                            <span class="flex-1 text-sm truncate">{{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)</span>
+                        </ngx-dropzone-label>
+                    </ngx-dropzone-preview>
+                </ngx-dropzone>
+
+                <!-- File status footer -->
+                <div class="mt-2 bg-custom-gray-2 w-full h-10 p-2 rounded-lg flex items-center justify-between text-custom-brown">
+                    <svg class="h-6 w-6 fill-custom-brown bg-gray-200 bg-opacity-40 rounded-full p-0.5 shadow-md" fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                        <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                    </svg>
+                    <p class="flex-1 text-center text-sm">
+                        <span *ngIf="files?.length === 0">Not selected file</span>
+                        <span *ngIf="files?.length === 1">{{ files[0].name }}</span>
+                        <span *ngIf="files && files.length > 1">{{ files.length }} files selected</span>
+                    </p>
+                    <svg class="h-6 w-6 text-custom-brown cursor-pointer hover:text-custom-brown transition-colors" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" (click)="onRemoveAll()">
+                        <path d="M5.16565 10.1534C5.07629 8.99181 5.99473 8 7.15975 8H16.8402C18.0053 8 18.9237 8.9918 18.8344 10.1534L18.142 19.1534C18.0619 20.1954 17.193 21 16.1479 21H7.85206C6.80699 21 5.93811 20.1954 5.85795 19.1534L5.16565 10.1534Z" stroke="currentColor" stroke-width="2"></path>
+                        <path d="M19.5 5H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        <path d="M10 3C10 2.44772 10.4477 2 11 2H13C13.5523 2 14 2.44772 14 3V5H10V3Z" stroke="currentColor" stroke-width="2"></path>
+                    </svg>
+                </div>
             </div>
 
-            <!-- Dropzone -->
-            <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
-                <ngx-dropzone-label>
-                    <strong>Drop your image here or click to select</strong>
-                    <em>Image size must be less than 600 MB</em>
-                </ngx-dropzone-label>
-                <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
-                    <ngx-dropzone-label>
-                        {{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)
-                    </ngx-dropzone-label>
-                </ngx-dropzone-preview>
-            </ngx-dropzone>
-
-            <span *ngIf="!uploading">Upload image</span>
-            <span *ngIf="uploading">Uploading...</span>
+            <div class="flex items-center mt-2">
+                <span *ngIf="!uploading" class="text-custom-brown text-sm">Upload image</span>
+                <span *ngIf="uploading" class="text-custom-brown text-sm">Uploading...</span>
+            </div>
         </div>
-        <hr>
-        <input type="submit" name="" value="Save Changes" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="settingsForm.invalid || uploading">
+        <input type="submit" name="" value="Save Changes" class="bg-gradient-to-r from-custom-gray-2 via-white to-custom-gray-2 text-custom-brown px-4 py-2 font-bold rounded-md hover:opacity-80" [disabled]="settingsForm.invalid || uploading">
     </form>
 </div>

@@ -84,6 +84,17 @@ export class UserEditComponent {
     this.files.splice(this.files.indexOf(event), 1);
   }
 
+  onRemoveAll(): void {
+    // Limpiar el array de archivos
+    this.files = [];
+    
+    // Si necesitas realizar alguna acción adicional, como limpiar el modelo
+    if (this.user && this.user.image) {
+      // Opcional: Borrar la referencia a la imagen en el modelo
+      // this.user.image = null;
+    }
+  }
+
   // creaate a promise with no value 
   uploadImage(): Promise<void> {
     return new Promise((resolve, reject) => {
