@@ -1,105 +1,142 @@
-<div class="all col-md-4 mt-3" style="margin: 0 auto;">
-    <h1 style="text-align: center; font-size: 2.5em; color: 444;">
-        {{ title }}
-    </h1>
-    <p *ngIf="status != 'success' && !edit" style="text-align: center; box-shadow: 5px 5px 5px gray;">
-        Create a new course to start teaching.
-    </p>
-    <p *ngIf="edit" style="text-align: center; box-shadow: 5px 5px 5px gray;">
-        Modify yout course {{course.name}}.
-    </p>
-    <hr>
-    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success' && !edit">
-        <p style="text-align: center;">
-            <strong>Course created successfully!</strong>
-        </p>
-    </div>
-    <div class="alert alert-success col-md-12 mt-3" *ngIf="status == 'success' && edit">
-        <p style="text-align: center;">
-            <strong>Course updated successfully!</strong>
-        </p>
-    </div>
-    <div class="alert alert-danger col-md-12 mt-3" *ngIf="status == 'error'">
-        <p style="text-align: center;">
-            <strong>Error!</strong> Course not created. 
-        </p>
-    </div>
-    <!-- Course create form -->
-    <form class="col-12 col-md-12 col-lg-12" #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)">
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">
-            <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
-                Name is required and must contain only letters.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="category_id">Categories</label>
-            <select name="category_id" class="form-control" #category_id="ngModel" [(ngModel)]="course.category_id">
-                <option *ngFor="let category of categories" value="{{ category.id }}">
-                    {{ category.name }}
-                </option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="detail">Description</label>
-            <textarea type="text" name="detail" class="form-control" #detail="ngModel" [(ngModel)]="course.detail" required></textarea>
-            <small *ngIf="!detail.valid && detail.touched" class="invalid-feedback d-block">
-                Description is required.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="image">Image of the course</label>
-            <!-- show the image -->
-            <div *ngIf="edit && course.image != null">
-                <img [src]="url_back + 'courses/image/' + course.image" class="course_image_settings">
+<div class="general">
+    <div class="form-box">
+        <div class="form value">
+            <div class="alert alert-success" *ngIf="status == 'success' && !edit">
+                <p style="text-align: center;">
+                    <strong>Course created successfully!</strong>
+                </p>
             </div>
+            <div class="alert alert-success" *ngIf="status == 'success' && edit">
+                <p style="text-align: center;">
+                    <strong>Course updated successfully!</strong>
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && !edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Course not created. 
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Course not updated. 
+                </p>
+            </div>
+            <!-- Course create form -->
+            <form #courseForm="ngForm" (ngSubmit)="onSubmit(courseForm)">
+                <h1 >
+                    {{ title }}
+                </h1>
+                <p *ngIf="status != 'success' && !edit">
+                    Create a new course to start teaching.
+                </p>
+                <p *ngIf="edit">
+                    Modify yout course {{course.name}}.
+                </p>
+                <div class="form-group">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">
+                    <label for="name">Name</label>
+                    <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                        Name is required and must contain only letters.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <select name="category_id" class="form-control" #category_id="ngModel" [(ngModel)]="course.category_id">
+                        <option *ngFor="let category of categories" value="{{ category.id }}">
+                            {{ category.name }}
+                        </option>
+                    </select>
+                    <label for="category_id">Categories</label>
+                </div>
+                <div class="form-group">
+                    <textarea type="text" name="detail" class="form-control" #detail="ngModel" [(ngModel)]="course.detail" required></textarea>
+                    <label for="detail">Description</label>
+                    <small *ngIf="!detail.valid && detail.touched" class="invalid-feedback d-block">
+                        Description is required.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <div *ngIf="edit && course.image != null" class="course-container">
+                        <p class="course-label" for="image">Image of the course</p>
+                        <!-- show the image -->
+                        <div class="course-image-container">
+                            <img [src]="url_back + 'courses/image/' + course.image" class="course-image">
+                        </div>
+                    </div>
+        
+                    <!-- Dropzone -->
+                    <div class="dropzone-container">
+                        <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
+                            <ngx-dropzone-label>
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                <p>Browse File to upload!</p>
+                            </ngx-dropzone-label>
+                            <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+                                <ngx-dropzone-label>
+                                    <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                        <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                                    </svg>
+                                    <span>{{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)</span>
+                                </ngx-dropzone-label>
+                            </ngx-dropzone-preview>
+                        </ngx-dropzone>
 
-            <!-- Dropzone -->
-            <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
-                <ngx-dropzone-label>
-                    <strong>Drop your image here or click to select</strong>
-                    <em>Image size must be less than 600 MB</em>
-                </ngx-dropzone-label>
-                <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
-                    <ngx-dropzone-label>
-                        {{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)
-                    </ngx-dropzone-label>
-                </ngx-dropzone-preview>
-            </ngx-dropzone>
+                        <!-- File status footer -->
+                        <div class="file-status-footer">
+                            <svg class="file-icon" fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                            </svg>
+                            <p>
+                                <span *ngIf="files?.length === 0">Not selected file</span>
+                                <span *ngIf="files?.length === 1">{{ files[0].name }}</span>
+                                <span *ngIf="files && files.length > 1">{{ files.length }} files selected</span>
+                            </p>
+                            <svg class="delete-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" (click)="onRemoveAll()">
+                                <path d="M5.16565 10.1534C5.07629 8.99181 5.99473 8 7.15975 8H16.8402C18.0053 8 18.9237 8.9918 18.8344 10.1534L18.142 19.1534C18.0619 20.1954 17.193 21 16.1479 21H7.85206C6.80699 21 5.93811 20.1954 5.85795 19.1534L5.16565 10.1534Z" stroke="currentColor" stroke-width="2"></path>
+                                <path d="M19.5 5H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                <path d="M10 3C10 2.44772 10.4477 2 11 2H13C13.5523 2 14 2.44772 14 3V5H10V3Z" stroke="currentColor" stroke-width="2"></path>
+                            </svg>
+                        </div>
 
-            <span *ngIf="!uploading">Upload image</span>
-            <span *ngIf="uploading">Uploading...</span>
+                        <div class="upload-status">
+                            <span *ngIf="!uploading">Upload image</span>
+                            <span *ngIf="uploading">Uploading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="url" #url="ngModel" [(ngModel)]="course.url" class="form-control" required>
+                    <label for="url">URL of the video</label>
+                    <small *ngIf="!url.valid && url.touched" class="invalid-feedback d-block">
+                        Invalid URL.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="accordion" min="1" max="50" #accordion="ngModel" [(ngModel)]="course.accordion" class="form-control" required>
+                    <label for="accordion">Sections of the course</label>
+                    <small *ngIf="!accordion.valid && accordion.touched" class="invalid-feedback d-block">
+                        Number of sections must be between 1 and 50.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="current_price" #current_price="ngModel" [(ngModel)]="course.current_price" class="form-control" required>
+                    <label for="current_price">Current price (USD)</label>
+                    <small *ngIf="!current_price.valid && current_price.touched" class="invalid-feedback d-block">
+                        Price is required.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="number" name="previous_price" #previous_price="ngModel" [(ngModel)]="course.previous_price" class="form-control" required>
+                    <label for="previous_price">Previous price (USD)</label>
+                    <small *ngIf="!previous_price.valid && previous_price.touched" class="invalid-feedback d-block">
+                        Price is required.
+                    </small>
+                </div>
+                <input type="submit" name="" value="Save Changes" class="btn btn-button" [disabled]="courseForm.invalid || uploading">
+            </form>
         </div>
-        <div class="form-group">
-            <label for="url">URL of the video</label>
-            <input type="text" name="url" #url="ngModel" [(ngModel)]="course.url" class="form-control" required>
-            <small *ngIf="!url.valid && url.touched" class="invalid-feedback d-block">
-                Invalid URL.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="accordion">Sections of the course</label>
-            <input type="number" name="accordion" min="1" max="50" #accordion="ngModel" [(ngModel)]="course.accordion" class="form-control" required>
-            <small *ngIf="!accordion.valid && accordion.touched" class="invalid-feedback d-block">
-                Number of sections must be between 1 and 50.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="current_price">Current price (USD)</label>
-            <input type="number" name="current_price" #current_price="ngModel" [(ngModel)]="course.current_price" class="form-control" required>
-            <small *ngIf="!current_price.valid && current_price.touched" class="invalid-feedback d-block">
-                Price is required.
-            </small>
-        </div>
-        <div class="form-group">
-            <label for="previous_price">Previous price (USD)</label>
-            <input type="number" name="previous_price" #previous_price="ngModel" [(ngModel)]="course.previous_price" class="form-control" required>
-            <small *ngIf="!previous_price.valid && previous_price.touched" class="invalid-feedback d-block">
-                Price is required.
-            </small>
-        </div>
-        <hr>
-        <input type="submit" name="" value="Save Changes" class="btn btn-success" style="cursor: pointer; margin: auto; display: block;" [disabled]="courseForm.invalid || uploading">
-    </form>
+    </div>
 </div>

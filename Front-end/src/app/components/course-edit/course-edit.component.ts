@@ -16,7 +16,7 @@ declare var iziToast: any;
   selector: 'app-course-edit',
   imports: [CommonModule, FormsModule, RouterModule, NgxDropzoneModule],
   templateUrl: '../course-new/course-new.component.html',
-  styleUrl: './course-edit.component.css',
+  styleUrl: '../course-new/course-new.component.css',
   providers: [CourseService, UserService, CategoryService]
 })
 export class CourseEditComponent {
@@ -74,6 +74,17 @@ export class CourseEditComponent {
   
   onRemove(event: any) {
     this.files.splice(this.files.indexOf(event), 1);
+  }
+
+  onRemoveAll(): void {
+    // Limpiar el array de archivos
+    this.files = [];
+    
+    // Si necesitas realizar alguna acción adicional, como limpiar el modelo
+    if (this.course && this.course.image) {
+      // Opcional: Borrar la referencia a la imagen en el modelo
+      // this.user.image = null;
+    }
   }
 
   // creaate a promise with no value 

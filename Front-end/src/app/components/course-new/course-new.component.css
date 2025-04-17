@@ -1,0 +1,313 @@
+/* All  */
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.general{
+    padding-top: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-position: center;
+    background-size: cover;
+    background-color: #bcb4bc;
+}
+
+/* Form */
+.form-box{
+    position: relative;
+    width: 400px;
+    min-height: 650px;
+    height: auto;
+    background-color: #bbbcb7;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h1{
+    font-size: 2em;
+    color: #3c342c;
+    text-align: center;
+    padding: 10px;
+}
+
+p {
+    text-align: center; 
+}
+
+.course-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Etiqueta para el avatar */
+.course-label {
+    display: block;
+    font-size: 1em; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #3c342c; /* text-custom-brown */
+    position: absolute;
+    transform: translateY(-130%);
+}
+
+/* Contenedor de la imagen del avatar */
+.course-image-container {
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+/* Imagen del avatar */
+.course-image {
+    width: 4rem; /* w-16 */
+    object-fit: cover; /* object-cover */
+}
+
+.form-group{
+    position: relative;
+    margin: 30px 0px;
+    width: 310px;
+    border-bottom: 2px solid #3c342c;
+}
+
+.form-group label{
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: #3c342c;
+    font-size: 1em;
+    pointer-events: none;
+    transition: 0.5s;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    padding: 0 35px 0 5px;
+    color: #3c342c;
+}
+
+.form-group textarea {
+    height: 70px;
+    padding-top: 15px;
+}
+
+.form-group select {
+    height: 50px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 20px;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%233c342c' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 5px center;
+}
+
+.form-group input:focus ~ label,
+.form-group input:valid ~ label,
+.form-group textarea:focus ~ label,
+.form-group textarea:valid ~ label,
+.form-group select:focus ~ label,
+.form-group select ~ label{
+top: -5px;
+}
+
+.form-group input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    padding:0 35px 0 5px;
+    color: #3c342c;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.form-control:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #3c342c;
+}
+
+.form-group ion-icon{
+    position: absolute;
+    right: 8px;
+    color: #3c342c;
+    font-size: 1.2em;
+    top: 20px;
+}
+
+.btn-button{
+    width: 100%;
+    height: 40px;
+    border-radius: 40px;
+    background: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* dropzone */
+.dropzone-container {
+    height: 16rem; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+ngx-dropzone {
+    flex: 1;
+    width: 100%;
+    border: 2px dashed #3c342c;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    overflow: hidden !important;
+}
+
+ngx-dropzone-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    cursor: pointer;
+}
+
+ngx-dropzone-label svg {
+    height: 6rem;
+    width: 6rem;
+    color: #3c342c;
+}
+
+ngx-dropzone-label p {
+    text-align: center;
+    color: #3c342c;
+    margin-top: 0.5rem;
+}
+
+ngx-dropzone-preview {
+    background-color: transparent;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    max-width: 20rem;
+    display: flex;
+    align-items: center;
+}
+
+ngx-dropzone-preview ngx-dropzone-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+ngx-dropzone-preview ngx-dropzone-label svg {
+    height: 1.5rem; /* h-6 */
+    width: 1.5rem; /* w-6 */
+    fill: #3c342c;
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+ngx-dropzone-preview ngx-dropzone-label span {
+    flex: 1;
+    font-size: 0.875rem; /* text-sm */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* truncate */
+}
+
+.file-status-footer {
+    margin-top: 0.5rem; /* mt-2 */
+    background-color: transparent;
+    width: 100%; /* w-full */
+    height: 2.5rem; /* h-10 */
+    padding: 0.5rem; /* p-2 */
+    border-radius: 0.5rem; /* rounded-lg */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #3c342c; /* text-custom-brown */
+}
+
+.file-status-footer svg.file-icon {
+    height: 1.5rem; /* h-6 */
+    width: 1.5rem; /* w-6 */
+    fill: #3c342c; /* fill-custom-brown */
+    background-color: transparent;
+    border-radius: 9999px; /* rounded-full */
+    padding: 0.125rem; /* p-0.5 */
+}
+
+.file-status-footer p {
+    flex: 1;
+    text-align: center;
+    font-size: 0.875rem; /* text-sm */
+}
+
+.file-status-footer svg.delete-icon {
+    height: 1.5rem; /* h-6 */
+    width: 1.5rem; /* w-6 */
+    color: #3c342c; /* text-custom-brown */
+    cursor: pointer;
+}
+
+.file-status-footer svg.delete-icon:hover {
+    color: #3c342c; /* hover:text-custom-brown - esto parece redundante pero mantengo la estructura */
+    transition: colors 0.3s ease; /* transition-colors */
+}
+
+.upload-status {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem; /* mt-2 */
+}
+
+.upload-status span {
+    color: #3c342c; /* text-custom-brown */
+    font-size: 0.875rem; /* text-sm */
+}
+
+/* alerts */
+.alert {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
