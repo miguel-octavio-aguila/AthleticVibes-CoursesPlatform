@@ -30,13 +30,13 @@
                     Create a new course to start teaching.
                 </p>
                 <p *ngIf="edit">
-                    Modify yout course {{course.name}}.
+                    Modify your course {{course.name}}.
                 </p>
                 <div class="form-group">
                     <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">
-                    <label for="name">Name</label>
+                    <label for="name">Course name</label>
                     <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
-                        Name is required and must contain only letters.
+                        Course name is required and must contain only letters.
                     </small>
                 </div>
                 <div class="form-group">
@@ -135,7 +135,8 @@
                         Price is required.
                     </small>
                 </div>
-                <input type="submit" name="" value="Save Changes" class="btn btn-button" [disabled]="courseForm.invalid || uploading">
+                <input *ngIf="status != 'success' && !edit" type="submit" name="" value="Save" class="btn btn-button" [disabled]="courseForm.invalid || uploading">
+                <input *ngIf="edit" type="submit" name="" value="Save Changes" class="btn btn-button" [disabled]="courseForm.invalid || uploading">
             </form>
         </div>
     </div>

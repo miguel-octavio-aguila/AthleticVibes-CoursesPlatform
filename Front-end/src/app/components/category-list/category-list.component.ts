@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { CategoryService } from '../../services/category.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-category-list',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './category-list.component.html',
   styleUrl: './category-list.component.css',
   providers: [UserService, CategoryService]

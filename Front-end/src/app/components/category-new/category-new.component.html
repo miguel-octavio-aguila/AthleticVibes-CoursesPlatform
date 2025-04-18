@@ -1,0 +1,47 @@
+<div class="general">
+    <div class="form-box">
+        <div class="form value">
+            <div class="alert alert-success" *ngIf="status == 'success' && !edit">
+                <p style="text-align: center;">
+                    <strong>Category created successfully!</strong>
+                </p>
+            </div>
+            <div class="alert alert-success" *ngIf="status == 'success' && edit">
+                <p style="text-align: center;">
+                    <strong>Category updated successfully!</strong>
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && !edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Category not created. 
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Category not updated. 
+                </p>
+            </div>
+            <!-- Category create form -->
+            <form #categoryForm="ngForm" (ngSubmit)="onSubmit(categoryForm)">
+                <h1 >
+                    {{ title }}
+                </h1>
+                <p *ngIf="status != 'success' && !edit">
+                    Create a new category.
+                </p>
+                <p *ngIf="edit">
+                    Modify your category {{category.name}}.
+                </p>
+                <div class="form-group">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="category.name" required pattern="[a-zA-Z0-9 ]+">
+                    <label for="name">Category name</label>
+                    <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                        Category name is required and must contain only letters.
+                    </small>
+                </div>
+                <input *ngIf="status != 'success' && !edit" type="submit" name="" value="Save" class="btn btn-button" [disabled]="categoryForm.invalid">
+                <input *ngIf="edit" type="submit" name="" value="Save Changes" class="btn btn-button" [disabled]="categoryForm.invalid">            
+            </form>
+        </div>
+    </div>
+</div>

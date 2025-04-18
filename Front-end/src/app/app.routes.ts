@@ -7,6 +7,7 @@ import { UserEditComponent } from './components/user-edit/user-edit.component';
 import { CourseNewComponent } from './components/course-new/course-new.component';
 import { CourseEditComponent } from './components/course-edit/course-edit.component';
 import { CategoryListComponent } from './components/category-list/category-list.component';
+import { CategoryNewComponent } from './components/category-new/category-new.component';
 
 export const routes: Routes = [
     {
@@ -44,5 +45,9 @@ export const routes: Routes = [
     {
         path: 'categories',
         component: CategoryListComponent
+    },
+    {
+        path: 'create-category',
+        component: CategoryNewComponent
     },
 ];

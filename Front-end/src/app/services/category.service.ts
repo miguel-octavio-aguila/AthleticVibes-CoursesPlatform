@@ -24,4 +24,13 @@ export class CategoryService {
     let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
     return this.http.get(this.apiUrl + 'categories', { headers: headers });
   }
+
+  // create category
+  createCategory(token: any, category: Category): Observable<any> {
+    let json = JSON.stringify(category);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Authorization', token);
+    return this.http.post(this.apiUrl + 'categories', params, { headers: headers });
+  }
 }
