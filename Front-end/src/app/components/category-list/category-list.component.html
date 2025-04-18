@@ -18,7 +18,7 @@
                                 <!-- Buttons if you are the admin -->
                                 <div class="video-buttons mt-3">
                                     <span *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                        <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                        <a class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/category-edit', category.id]">
                                             <i class="ti-pencil"></i>
                                         </a>
                                         <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + category.id">
@@ -47,7 +47,7 @@
                                         <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
                                             Close
                                         </button>
-                                        <button type="button" class="btn btn-admin-action" style="color: black;">
+                                        <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteCategory(category.id)">
                                             <i class= "ti-trash"></i>
                                         </button>
                                     </div>

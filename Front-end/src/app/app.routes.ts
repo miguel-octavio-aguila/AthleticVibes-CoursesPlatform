@@ -8,6 +8,7 @@ import { CourseNewComponent } from './components/course-new/course-new.component
 import { CourseEditComponent } from './components/course-edit/course-edit.component';
 import { CategoryListComponent } from './components/category-list/category-list.component';
 import { CategoryNewComponent } from './components/category-new/category-new.component';
+import { CategoryEditComponent } from './components/category-edit/category-edit.component';
 
 export const routes: Routes = [
     {
@@ -49,5 +50,9 @@ export const routes: Routes = [
     {
         path: 'create-category',
         component: CategoryNewComponent
+    },
+    {
+        path: 'category-edit/:id',
+        component: CategoryEditComponent
     },
 ];

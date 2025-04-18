@@ -30,7 +30,7 @@
                     Create a new course to start teaching.
                 </p>
                 <p *ngIf="edit">
-                    Modify your course {{course.name}}.
+                    Modify your course: {{course.name}}.
                 </p>
                 <div class="form-group">
                     <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">

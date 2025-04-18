@@ -20,6 +20,7 @@ export class CategoryListComponent {
   public token: any;
 
   constructor(
+    private _router: Router,
     private userService: UserService,
     private categoryService: CategoryService 
   ) {
@@ -38,6 +39,23 @@ export class CategoryListComponent {
         if (res.status == 'success') {
           this.categories = res.categories
           console.log(this.categories);
+        }
+      },
+      err => console.error(err)
+    );
+  }
+
+  deleteCategory(id: any) {
+    this.categoryService.deleteCategory(this.token, id).subscribe(
+      res => {
+        if (res.status == 'success') {
+          this.status = 'success';
+          this.getCategories();
+          setTimeout(() => {
+            this._router.navigate(['/categories']).then(() => {
+              window.location.reload();
+            });
+          }, 1000);
         }
       },
       err => console.error(err)

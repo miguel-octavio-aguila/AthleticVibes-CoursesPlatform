@@ -41,7 +41,7 @@ class CategoryController extends Controller implements HasMiddleware
             $data = [
                 'status' => 'error',
                 'code' => 404,
-               'message' => 'Categories not found',
+                'message' => 'Categories not found',
             ];
         }
 
@@ -97,9 +97,9 @@ class CategoryController extends Controller implements HasMiddleware
         } else {
             // return an error
             $data = [
-               'status' => 'error',
+                'status' => 'error',
                 'code' => 400,
-               'message' => 'Invalid data',
+                'message' => 'Invalid data',
             ];
         }
 
@@ -119,16 +119,16 @@ class CategoryController extends Controller implements HasMiddleware
         if (is_object($category)) {
             // return the category
             $data = [
-               'status' =>'success',
+                'status' =>'success',
                 'code' => 200,
                 'category' => $category,
             ];
         } else {
             // return an error
             $data = [
-               'status' => 'error',
+                'status' => 'error',
                 'code' => 404,
-              'message' => 'Category not found',
+                'message' => 'Category not found',
             ];
         }
 
@@ -164,9 +164,9 @@ class CategoryController extends Controller implements HasMiddleware
             if ($validate->fails()) {
                 // return an error
                 $data = [
-                  'status' => 'error',
+                    'status' => 'error',
                     'code' => 400,
-                   'message' => 'Category not updated',
+                    'message' => 'Category not updated',
                 ];
             } else {
                 // update the category
@@ -180,26 +180,26 @@ class CategoryController extends Controller implements HasMiddleware
                     $category->update($params_array);
                     // return a success
                     $data = [
-                     'status' =>'success',
+                        'status' =>'success',
                         'code' => 200,
-                       'message' => 'Category updated',
+                        'message' => 'Category updated',
                         'category' => $category,
                     ];
                 } else {
                     // return an error
                     $data = [
-                      'status' => 'error',
+                        'status' => 'error',
                         'code' => 404,
-                      'message' => 'Category not found',
+                        'message' => 'Category not found',
                     ];
                 }
             }
         } else {
             // return an error
             $data = [
-              'status' => 'error',
+                'status' => 'error',
                 'code' => 400,
-             'message' => 'Invalid data',
+                'message' => 'Invalid data',
             ];
         }
 
@@ -221,16 +221,16 @@ class CategoryController extends Controller implements HasMiddleware
             $category->delete();
             // return a success
             $data = [
-            'status' =>'success',
+                'status' =>'success',
                 'code' => 200,
-              'message' => 'Category deleted',
+                'message' => 'Category deleted',
             ];
         } else {
             // return an error
             $data = [
-            'status' => 'error',
+                'status' => 'error',
                 'code' => 404,
-             'message' => 'Category not found',
+                'message' => 'Category not found',
             ];
         }
 

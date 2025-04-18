@@ -33,4 +33,26 @@ export class CategoryService {
       .set('Authorization', token);
     return this.http.post(this.apiUrl + 'categories', params, { headers: headers });
   }
+
+  // update category
+  updateCategory(token: any, id: any, category: any): Observable<any> {
+    let json = JSON.stringify(category);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Authorization', token); 
+    return this.http.put(this.apiUrl + 'categories/' + id, params, { headers: headers });
+  }
+
+  // get one category
+  getCategory(id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    return this.http.get(this.apiUrl + 'categories/' + id, { headers: headers });
+  }
+
+  // delete category
+  deleteCategory(token: any, id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Authorization', token);
+    return this.http.delete(this.apiUrl + 'categories/' + id, { headers: headers });
+  }
 }

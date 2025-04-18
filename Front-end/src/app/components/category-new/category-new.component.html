@@ -30,7 +30,7 @@
                     Create a new category.
                 </p>
                 <p *ngIf="edit">
-                    Modify your category {{category.name}}.
+                    Modify your category: {{category.name}}
                 </p>
                 <div class="form-group">
                     <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="category.name" required pattern="[a-zA-Z0-9 ]+">
