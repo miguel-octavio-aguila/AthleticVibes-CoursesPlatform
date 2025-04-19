@@ -1,11 +1,15 @@
-<div style="background-color: #bbbcb7;">
+<div style="background-color: #bcb4bc;">
     <div class="container">
         <div class="row">
             <div class="col mt-3">
-                <h1>
-                    {{ title }}
-                </h1>
+                <div class="d-flex align-items-center justify-content-center gap-3" *ngIf="identity && identity.sub">
+                    <div class="home_welcome">
+                        <img src="{{ url + 'user/avatar/' + identity.image }}">
+                    </div>
+                    <span class="my-auto fw-bold" style="font-size: x-large;">These are your categories, {{ identity.name + ' ' + identity.surname + '!'}}</span>
+                </div>
                 <hr>
+                <!-- Categories Cards -->
                 <div class="row row-cols-1 row-cols-md-3 g-4">
                     <div class="col" *ngFor="let category of categories; let indice=index">
                         <article class="card card_1">
@@ -56,7 +60,9 @@
                         </div>
                     </div>
                 </div>
-                <a class="btn btn-warning" [routerLink]="['/create-category']">Create category</a>
+                <div class="d-flex justify-content-center w-100 mt-4">
+                    <a class="btn btn-button" [routerLink]="['/create-category']">Create category</a>
+                </div>
             </div>
         </div>
     </div>

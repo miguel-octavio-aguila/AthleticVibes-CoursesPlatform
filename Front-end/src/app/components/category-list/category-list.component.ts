@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { CategoryService } from '../../services/category.service';
 import { Router, RouterModule } from '@angular/router';
+import { GLOBAL } from '../../services/global';
 
 @Component({
   selector: 'app-category-list',
@@ -18,6 +19,7 @@ export class CategoryListComponent {
   public identity: any;
   public status: any;
   public token: any;
+  public url: any;
 
   constructor(
     private _router: Router,
@@ -27,6 +29,7 @@ export class CategoryListComponent {
     this.title = 'Category list';
     this.identity = this.userService.getIdentity();
     this.token = this.userService.getToken();
+    this.url = GLOBAL.url;
   }
 
   ngOnInit(): void {
