@@ -167,7 +167,10 @@ export class CourseEditComponent {
               // this.topElement.nativeElement.scrollIntoView({ behavior: 'smooth' });
               // wait to reload the page
               setTimeout(() => {
-                window.location.reload();
+                this._router.navigate(['/home']).then(() => {
+                  window.location.reload();
+                  localStorage.removeItem('Course');
+                });
               }, 1000);
             }, 100);
           }

@@ -9,6 +9,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from "@angular/common"
 
 @Component({
   selector: 'app-user-edit',
@@ -39,6 +41,8 @@ export class UserEditComponent {
     toolbarButtonsSM: ['bold', 'italic', 'underline', 'paragraphFormat'],
     // toolbarButtonsMD is for the toolbar buttons in md devices
     toolbarButtonsMD: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // backgroundColor is for the background color of the editor
+    colorsBackground: ['#61BD6D', '#1ABC9C', '#54ACD2', 'REMOVE'],
     // events is for the events that are triggered in the editor
     // initialized is for the initialized event
     events: {
@@ -55,7 +59,8 @@ export class UserEditComponent {
     private userService: UserService,
     private fileUploadService: FileUploadService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.page_title = 'User Settings';
     this.identity = this.userService.getIdentity();
@@ -74,6 +79,12 @@ export class UserEditComponent {
   }
 
   ngOnInit(): void {
+    // Import Froala plugins dynamically only in the browser context
+    if (isPlatformBrowser(this.platformId)) {
+      // Import all Froala Editor plugins.
+      // @ts-ignore
+      import('froala-editor/js/plugins.pkgd.min.js');
+    }
   }
   
   onSelect(event: any) {

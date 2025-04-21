@@ -33,8 +33,7 @@
               "node_modules/froala-editor/css/froala_style.min.css"
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
-              "node_modules/froala-editor/js/froala_editor.pkgd.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           },
           "configurations": {
@@ -97,8 +96,7 @@
               "node_modules/froala-editor/css/froala_style.min.css"
             ],
             "scripts": [
-              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
-              "node_modules/froala-editor/js/froala_editor.pkgd.min.js"
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
           }
         }
