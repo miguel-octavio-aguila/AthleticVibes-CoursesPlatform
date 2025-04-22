@@ -43,7 +43,7 @@
                                         </button>
                                     </span>
                                     <!-- Detail form -->
-                                    <form #cartForm="ngForm">
+                                    <form #cartForm="ngForm" (ngSubmit)="onSubmit(cartForm)">
                                         <button type="button" class="btn btn-admin-action me-2" id="my-detail-button" data-bs-toggle="modal" [attr.data-bs-target]="'#detail' + course.id">
                                             <i class="ti-info-alt"></i>
                                         </button>
@@ -51,7 +51,7 @@
                                             {{ ' $' + course.current_price }}
                                         </span>
                                         <!-- Add to cart -->
-                                        <input type="hidden" name="course_id" value="course.id" #name="ngModel" [(ngModel)]="course.id">
+                                        <input type="hidden" name="course_id" value="course_id" #name="ngModel" [(ngModel)]="course.id">
                                         <!-- If you have not bought it yet -->
                                         <button *ngIf="course.buy != 1 && course.cart != 1" type="submit" name="" id="my-cart-button" value="Buy it" [disabled]="cartForm.invalid" class="btn btn-admin-action" style="font-size: 20px; color: black;">
                                             <i class="ti-shopping-cart"></i>

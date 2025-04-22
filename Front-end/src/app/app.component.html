@@ -63,59 +63,56 @@
 
                                     <!-- Cart -->
                                     <li class="nav-item dropdown" *ngIf="identity && identity.sub">
-                                        <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown"data-bs-toggle="dropdown" aria-expanded="false">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
-                                                <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">2</span>
+                                                <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">
+                                                    {{ quantity ? quantity : '0' }}
+                                                </span>
                                             </i>
                                         </a>
-                                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"style="min-width: 350px;">
-                                            <!-- Cart Content-->
-                                            <div class="d-flex flex-column gap-2">
-                                                <!-- Items -->
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">Name of the product</h6>
-                                                        <small class="text-muted">Quantity: 1</small>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span>$10.00</span>
-                                                            <button class="btn btn-link text-danger p-0">
-                                                                <i class="ti-trash"></i>
-                                                            </button>
+                                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 350px;">
+                                            <li *ngIf="courses && courses.length > 0">
+                                                <!-- Cart Content -->
+                                                <div class="d-flex flex-column gap-2">
+                                                    <!-- Items -->
+                                                    <div *ngFor="let course of courses; let i = index" class="d-flex align-items-center gap-3">
+                                                        <div *ngIf="course.image">
+                                                            <a href="#">
+                                                                <img src="{{ url + 'courses/image/' + course.image }}" class="img-thumbnail" width="80" height="70">
+                                                            </a>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-0">{{ course.name }}</h6>
+                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                <span>${{ course.current_price }} x {{ quantities ? quantities[i] : 1 }}</span>
+                                                                <button class="btn btn-link text-danger p-0" (click)="deleteCart(course.id)">
+                                                                    <i class="ti-trash"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-
-                                                <!-- Items -->
-                                                <div class="d-flex align-items-center gap-3">
-                                                    <img src="ruta-imagen" class="img-thumbnail" width="80" height="70">
-                                                    <div class="flex-grow-1">
-                                                        <h6 class="mb-0">Name of the product</h6>
-                                                        <small class="text-muted">Quantity: 1</small>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span>$10.00</span>
-                                                            <button class="btn btn-link text-danger p-0">
-                                                                <i class="ti-trash"></i>
-                                                            </button>
+                                                    
+                                                    <!-- Subtotal -->
+                                                    <div class="pt-3 border-top">
+                                                        <div class="d-flex justify-content-between fw-bold">
+                                                            <span>Total:</span>
+                                                            <span>{{ total ? total : '0' }}</span>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                
-                                                <!-- Subtotal -->
-                                                <div class="pt-3 border-top">
-                                                    <div class="d-flex justify-content-between fw-bold">
-                                                        <span>Total:</span>
-                                                        <span>$20.00</span>
+                                                    
+                                                    <!-- Buttons -->
+                                                    <div class="d-grid gap-2 mt-2">
+                                                        <button class="btn btn-primary">Cart</button>
+                                                        <button class="btn btn-outline-secondary">Keep shopping</button>
                                                     </div>
                                                 </div>
-                                                
-                                                <!-- Buttons -->
-                                                <div class="d-grid gap-2 mt-2">
-                                                    <button class="btn btn-primary">Cart</button>
-                                                    <button class="btn btn-outline-secondary">Keep shooping</button>
+                                            </li>
+                                            <li *ngIf="!courses || courses.length === 0">
+                                                <div class="text-center p-3">
+                                                    <p>Your cart is empty</p>
                                                 </div>
-                                            </div>
-                                        </div>
+                                            </li>
+                                        </ul>
                                     </li>
 
                                     <!-- User -->

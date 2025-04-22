@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { GLOBAL } from '../../services/global';
+import { CartService } from '../../services/cart.service';
+import { Cart } from '../../models/Cart';
 
 @Component({
   standalone: true,
@@ -12,7 +14,7 @@ import { GLOBAL } from '../../services/global';
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
-  providers: [CourseService, UserService]
+  providers: [CourseService, UserService, CartService]
 })
 export class HomeComponent {
   public title: string;
@@ -21,15 +23,19 @@ export class HomeComponent {
   public status: any;
   public token: any;
   public url: any;
+  public cart: any;
 
   constructor(
     private _courseService: CourseService,
     private _userService: UserService,
+    private _cartService: CartService,
+    private _router: Router
   ){
     this.title = 'Home';
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
     this.url = GLOBAL.url;
+    this.cart = new Cart(1, 1, 1, 1);
   }
 
   ngOnInit(){
@@ -85,5 +91,28 @@ export class HomeComponent {
         console.log(error);
       }
     );
+  }
+
+  // onSubmit of cart
+  onSubmit(form: any){
+    if(this.identity.sub == null || this.identity.sub == undefined || this.identity.sub == ''){
+      this._router.navigate(['/login']);
+    } else if(this.identity.sub) {
+      this.cart.course_id = form.value.course_id;
+      this._cartService.store(this.token, this.cart).subscribe(
+        response => {
+          if(response.status == 'success'){
+            this.status = response.status;
+            this.cart = response;
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
+          }
+        },
+        error => {
+          console.log(error);
+        }
+      )
+    }
   }
 }

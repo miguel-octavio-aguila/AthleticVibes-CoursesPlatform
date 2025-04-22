@@ -5,13 +5,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserService } from './services/user.service';
 import { GLOBAL } from './services/global';
+import { CartService } from './services/cart.service';
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule, RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  providers: [CategoryService]
+  providers: [CategoryService, CartService]
 })
 export class AppComponent implements OnInit {
   title = 'Front-end';
@@ -20,14 +21,19 @@ export class AppComponent implements OnInit {
   public token:any;
   public url:any;
   public url_front:any;
-
   public categories: any = [];
 
-  public audio = new Audio('sonidos/carton.mp3');
+  // cart
+  public courses: any;
+  public quantity: any;
+  public quantities: any;
+  public total: any;
+  public cart_courses: any;
 
   constructor(
     private categoryService: CategoryService,
-    public userService: UserService
+    public userService: UserService,
+    private cartService: CartService
   ) {
     this.url = GLOBAL.url;
     this.url_front = GLOBAL.url_front;
@@ -37,6 +43,9 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.getCategories();
     this.identity = this.userService.getIdentity();
+    if(this.token) {
+      this.indexCart();
+    }
   }
 
   loadUser() {
@@ -45,10 +54,6 @@ export class AppComponent implements OnInit {
     if (Object.keys(this.identity).length === 0 || typeof this.identity === undefined) {
       this.identity = false;
     }
-  }
-
-  play_audio() {
-    this.audio.play();
   }
 
   getCategories() {
@@ -60,6 +65,35 @@ export class AppComponent implements OnInit {
         }
       },
       err => console.error(err)
+    );
+  }
+
+  indexCart() {
+    this.cartService.index(this.token).subscribe(
+      res => {
+        if (res.status == 'success') {
+          this.courses = res.courses;
+          this.quantity = res.cont;
+          this.quantities = res.quantities;
+          this.total = res.total;
+          this.cart_courses = res.carts;
+          
+          localStorage.setItem('cart', JSON.stringify(this.quantity));
+        }
+      },
+      err => console.error(err)
+    )
+  }
+
+  // delete cart
+  deleteCart(id: any){
+    this.cartService.delete(this.token, id).subscribe(
+      response => {
+        this.indexCart();
+      },
+      error => {
+        console.log(error);
+      }
     );
   }
 }

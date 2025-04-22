@@ -63,15 +63,13 @@ class CartController extends Controller implements HasMiddleware
             'status' => 'success',
             'code' => 200,
             'message' => 'Cart info',
-            'data' => [
-                'courses' => $courses,
-                'carts' => $carts,
-                'cont' => $carts->count(),
-                'product_data' => $product_data,
-                'quantities' => $quantities,
-                'subTotals' => $subTotals,
-                'total' => $total
-            ]
+            'courses' => $courses,
+            'carts' => $carts,
+            'cont' => $carts->count(),
+            'product_data' => $product_data,
+            'quantities' => $quantities,
+            'subTotals' => $subTotals,
+            'total' => $total
         ];
 
         return response()->json($data, $data['code']);
@@ -140,9 +138,9 @@ class CartController extends Controller implements HasMiddleware
                     $cart->save();
                     // message
                     $data = [
-                       'status' =>'success',
+                        'status' =>'success',
                         'code' => 200,
-                       'message' => 'Course added to the cart',
+                        'message' => 'Course added to the cart',
                         'data' => [
                             'cart' => $cart
                         ]
@@ -151,9 +149,9 @@ class CartController extends Controller implements HasMiddleware
             } else {
                 // message
                 $data = [
-                  'status' =>'error',
+                    'status' =>'error',
                     'code' => 400,
-                  'message' => 'Course not added to the cart',
+                    'message' => 'Course not added to the cart',
                 ];
             }
         }
@@ -192,18 +190,18 @@ class CartController extends Controller implements HasMiddleware
         // is the cart exists
         if($carts) {
             return response()->json([
-               'status' =>'success',
+                'status' =>'success',
                 'code' => 200,
-               'message' => 'Course added to the cart',
+                'message' => 'Course added to the cart',
                 'data' => [
                     'cart' => $carts
                 ]
             ], 200);
         } else {
             return response()->json([
-               'status' =>'error',
+                'status' =>'error',
                 'code' => 404,
-              'message' => 'Course not found',
+                'message' => 'Course not found',
                 'data' => [
                     'cart' => $carts
                 ]
@@ -256,9 +254,9 @@ class CartController extends Controller implements HasMiddleware
         } else {
             // message
             $data = [
-               'status' =>'error',
+                'status' =>'error',
                 'code' => 404,
-               'message' => 'Course not found',
+                'message' => 'Course not found',
                 'data' => [
                     'cart' => $cart
                 ]
