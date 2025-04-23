@@ -62,57 +62,59 @@
                                     </li>
 
                                     <!-- Cart -->
-                                    <li class="nav-item dropdown" *ngIf="identity && identity.sub">
-                                        <a class="nav-link dropdown-toggle" href="#" role="button" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="ti-shopping-cart" style="font-size: 25px; color: white;">
-                                                <span class="badge bg-success rounded-circle position-absolute translate-middle" style="font-size: 15px; top: 15%; right: -10px;">
-                                                    {{ quantity ? quantity : '0' }}
-                                                </span>
-                                            </i>
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 350px;">
-                                            <li *ngIf="courses && courses.length > 0">
+                                    <li class="nav-item menu" *ngIf="identity && identity.sub">
+                                        <div class="category_item">
+                                            <a class="nav-link category_link" style="padding: 17px 100px;" href="#">
+                                                <span>Cart</span>
+                                                <i class="ti-shopping-cart" style="font-size: 25px;"></i>
+                                                <svg viewBox="0 0 360 360" xml:space="preserve">
+                                                    <g>
+                                                        <path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                                    </g>
+                                                </svg>
+                                            </a>
+                                            <div class="category_menu">
                                                 <!-- Cart Content -->
-                                                <div class="d-flex flex-column gap-2">
-                                                    <!-- Items -->
-                                                    <div *ngFor="let course of courses; let i = index" class="d-flex align-items-center gap-3">
+                                                <div class="category_drop_item" *ngIf="courses && courses.length > 0">
+                                                    <div *ngFor="let course of courses; let i = index" class="category_drop_link d-flex align-items-center">
                                                         <div *ngIf="course.image">
-                                                            <a href="#">
+                                                            <a [routerLink]="['/course-detail', course.id]">
                                                                 <img src="{{ url + 'courses/image/' + course.image }}" class="img-thumbnail" width="80" height="70">
                                                             </a>
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-0">{{ course.name }}</h6>
-                                                            <div class="d-flex justify-content-between align-items-center">
-                                                                <span>${{ course.current_price }} x {{ quantities ? quantities[i] : 1 }}</span>
-                                                                <button class="btn btn-link text-danger p-0" (click)="deleteCart(course.id)">
-                                                                    <i class="ti-trash"></i>
-                                                                </button>
-                                                            </div>
+                                                            <span>${{ course.current_price }} x {{ quantities ? quantities[i] : 1 }}</span>
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <!-- Subtotal -->
-                                                    <div class="pt-3 border-top">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <button class="btn btn-link text-danger p-0" (click)="deleteCart(course.id)">
+                                                                <i class="ti-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>                                                        
+                                                </div>
+                                                <!-- Subtotal -->
+                                                <div *ngIf="courses && courses.length > 0">
+                                                    <div style="color: #3c342c; padding: 10px 0;">
                                                         <div class="d-flex justify-content-between fw-bold">
-                                                            <span>Total:</span>
-                                                            <span>{{ total ? total : '0' }}</span>
+                                                            <span>Total:&nbsp;</span>
+                                                            <span>${{ total ? total : '0' }} USD</span>
                                                         </div>
                                                     </div>
-                                                    
-                                                    <!-- Buttons -->
-                                                    <div class="d-grid gap-2 mt-2">
-                                                        <button class="btn btn-primary">Cart</button>
-                                                        <button class="btn btn-outline-secondary">Keep shopping</button>
+                                                </div>
+                                                <!-- Buttons -->
+                                                <div class="category_drop_item" *ngIf="courses && courses.length > 0">
+                                                    <a class="category_drop_link" routerLink="/cart">View Cart</a>
+                                                </div>    
+                                                <!-- Empty Cart -->
+                                                <div class="category_drop_item" *ngIf="!courses || courses.length === 0">
+                                                    <div class="category_drop_link text-center">
+                                                        <p>Your cart is empty</p>
+                                                        <a class="btn btn-outline-secondary mt-2" routerLink="/home">Continue Shopping</a>
                                                     </div>
                                                 </div>
-                                            </li>
-                                            <li *ngIf="!courses || courses.length === 0">
-                                                <div class="text-center p-3">
-                                                    <p>Your cart is empty</p>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                            </div>
+                                        </div>
                                     </li>
 
                                     <!-- User -->
@@ -130,7 +132,6 @@
                                                 </svg>
                                             </a>
                                             <div class="category_menu">
-
                                                 <div class="dropdown-divider"></div>
                                                 
                                                 <!-- User info -->

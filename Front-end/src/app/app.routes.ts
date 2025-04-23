@@ -9,6 +9,7 @@ import { CourseEditComponent } from './components/course-edit/course-edit.compon
 import { CategoryListComponent } from './components/category-list/category-list.component';
 import { CategoryNewComponent } from './components/category-new/category-new.component';
 import { CategoryEditComponent } from './components/category-edit/category-edit.component';
+import { CartComponent } from './components/cart/cart.component';
 
 export const routes: Routes = [
     {
@@ -54,5 +55,9 @@ export const routes: Routes = [
     {
         path: 'category-edit/:id',
         component: CategoryEditComponent
+    },
+    {
+        path: 'cart',
+        component: CartComponent
     },
 ];

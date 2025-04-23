@@ -1,0 +1,117 @@
+<main class="main mt-2">
+    <nav aria-label="breadcrumb" class="breadcrumb-nav" style="--bs-breadcrumb-divider: '>';">
+        <div class="container">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page">
+                    <a [routerLink]="['/home']">
+                        <i class="ti-home"></i>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="ti-shopping-cart"></i>
+                </li>
+            </ol>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <table class="table table-cart" *ngIf="quantities[0] >= 1">
+                    <thead routerLink="/home">
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">Course</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let course of courses; let i = index">
+                            <th scope="row">{{ i + 1 }}</th>
+                            <td>
+                                <figure class="product-img">
+                                    <a [routerLink]="['/course-detail', course.id]" class="product-img">
+                                        <img src="{{ url + 'courses/image/' + course.image }}" alt="course" width="150px" height="80px">
+                                    </a>
+                                </figure>
+                            </td>
+                            <td>
+                                ${{ course.current_price }}
+                            </td>
+                            <td>
+                                {{ course.detail }}
+                            </td>
+                            <td>
+                                ${{ subtotals[i] }}
+                            </td>
+                            <div>
+                                <a (click)="deleteCart(course.id)" class="cursor-pointer">
+                                    <i class="ti-trash"></i>
+                                </a>
+                            </div>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="text-center" *ngIf="quantities[0] || quantities[0] >= 1">
+                                <a routerLink="/home" class="btn btn-outline-secondary">
+                                    Continue Shopping
+                                </a>
+                                <a routerLink="/home" class="btn btn-outline-secondary">
+                                    Checkout
+                                </a>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-2" *ngIf="quantities[0] || quantities[0] >= 1">
+                <div>
+                    <h3>
+                        Details
+                    </h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td>Discount</td>
+                                <td>$0.00</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Subtotal</td>
+                                <td>
+                                    ${{ total }}
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Total</th>
+                                <th>
+                                    ${{ total }}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <hr>
+            <h2 class="h4 pt-2 mb-4" *ngIf="quantities[0] && quantities[0] > 0">
+                Payment Methods
+            </h2>
+            <div class="row pb-4">
+                <div class="col">
+                    <div class="accordion-alt">
+                        
+                    </div>
+                </div>
+            </div>
+            <!-- Payment button -->
+            <form class="col-12 col-md-12 col-lg-12" #saleNew="ngForm" (ngSubmit)="onSubmit(saleNew)">
+                <input type="submit" value="Checkout" class="btn btn-primary btn-block" [disabled]="saleNew.invalid">
+            </form>
+        </div>
+    </div>
+</main>

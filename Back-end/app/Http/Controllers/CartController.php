@@ -286,9 +286,9 @@ class CartController extends Controller implements HasMiddleware
 
             // message
             $data = [
-               'status' =>'success',
+                'status' =>'success',
                 'code' => 200,
-               'message' => 'Cart deleted',
+                'message' => 'Cart deleted',
                 'data' => [
                     'cart' => $cart
                 ]
@@ -296,9 +296,9 @@ class CartController extends Controller implements HasMiddleware
         } else {
             // message
             $data = [
-              'status' =>'error',
+                'status' =>'error',
                 'code' => 404,
-              'message' => 'Cart not found',
+                'message' => 'Cart not found',
                 'data' => [
                     'cart' => $cart
                 ]
