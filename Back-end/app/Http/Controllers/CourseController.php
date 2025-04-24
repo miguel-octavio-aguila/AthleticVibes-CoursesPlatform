@@ -10,6 +10,7 @@ use App\Models\Sale;
 use App\Models\Video;
 use App\Models\Comment;
 use App\Models\Responxe;
+use App\Models\Checkbox;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -254,6 +255,7 @@ class CourseController extends Controller implements HasMiddleware
         $sales = Sale::where('course_id', $id)->get();
         $videos = Video::where('course_id', $id)->get();
         $course = Course::where('id', $id)->first();
+        $checkboxes = Checkbox::where('course_id', $id)->get();
 
         // delete sales
         if ($sales && count($sales) >= 1) {
@@ -273,6 +275,12 @@ class CourseController extends Controller implements HasMiddleware
                         $responses = Responxe::where('comment_id', $comment->id)->get();
                         if ($responses && count($responses) >= 1) {
                             foreach ($responses as $response) {
+                                // delete checkboxes
+                                if ($checkboxes && count($checkboxes) >= 1) {
+                                    foreach ($checkboxes as $checkbox) {
+                                        $checkbox->delete();
+                                    }
+                                }
                                 $response->delete();
                             }
                         }
@@ -342,7 +350,7 @@ class CourseController extends Controller implements HasMiddleware
 
         // validate the image
         $validate = Validator::make($request->all(), [
-            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif,webp,avif'
         ]);
 
         // save the image
@@ -350,7 +358,8 @@ class CourseController extends Controller implements HasMiddleware
             $data = [
                 'code' => 400,
                 'status' => 'error',
-                'message' => 'Error uploading image'
+                'message' => 'Error uploading image',
+                'error' => $validate->errors(),
             ];
         } else {
             $image_name = time() . $image->getClientOriginalName();

@@ -61,6 +61,9 @@ export class CartComponent {
     this.cartService.delete(this.token, id).subscribe(
       response => {
         this.indexCart();
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       },
       error => {
         console.log(error);

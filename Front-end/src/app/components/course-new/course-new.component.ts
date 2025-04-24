@@ -88,9 +88,11 @@ export class CourseNewComponent {
   // creaate a promise with no value 
   uploadCourse(): Promise<void> {
     return new Promise((resolve, reject) => {
+      console.log('Uploading file:', this.files[0].name, this.files[0].type, this.files[0].size);
       // Check if files are selected
       this.fileUploadService.uploadCourse(this.files[0]).subscribe({
         next: (response: any) => {
+          console.log('Upload response:', response);
           // Check if the response contains an image
           if (response.image) {
             // Update the user object with the new image
@@ -109,7 +111,7 @@ export class CourseNewComponent {
           }
         },
         error: (error) => {
-          console.log(error);
+          console.log('Upload error details:', error);
           this.status = 'error';
           this.uploading = false;
           reject(error);
@@ -168,6 +170,7 @@ export class CourseNewComponent {
               // wait to reload the page
               setTimeout(() => {
                 window.location.reload();
+                localStorage.removeItem('Course');
               }, 1000);
             }, 100);
           }
