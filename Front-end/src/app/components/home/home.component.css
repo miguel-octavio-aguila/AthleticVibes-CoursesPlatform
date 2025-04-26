@@ -23,30 +23,168 @@
     border: 1px solid white;
     box-shadow: 12px 17px 51px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(6px);
-    border-radius: 10px;
-    text-align: center;
+    border-radius: 15px;
     transition: all 0.5s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     user-select: none;
     font-weight: bolder;
     color: black;
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    padding: 15px;
 }
 
 .card_1:hover {
-    border: 1px solid black;
     transform: scale(1.05);
+    border: 1px solid black;
 }
 
-.video-image img{
-    transition: all 400ms;
+/* Card layout */
+.card_inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+        "title title"
+        "desc image"
+        "actions actions";
+    height: 100%;
+    gap: 10px;
+    align-items: center; /* Added to help vertical alignment within grid rows */
+}
+
+.card_left {
+    grid-area: desc; /* Explicitly assign grid area */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Keep vertical centering for description */
+    align-self: center; /* Align the container itself vertically in the grid cell */
+}
+
+.card_right {
+    grid-area: image;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Changed justify-content to center for initial vertical alignment */
+    justify-content: center;
+    height: 100%;
+}
+
+.card_heading {
+    grid-area: title;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-align: center;
+    /* Only transition transform here for smoother visual movement */
+    transition: transform 0.5s linear; /* Changed timing function to linear */
+    position: relative;
+}
+
+.card_details_preview {
+    font-size: 0.9em;
+    margin-top: 8px;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    text-align: left;
+    display: block;
+    padding-right: 10px;
+}
+
+.card_image_container {
+    /* Removed grid-area as it's now on card_right */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* Ensure image transition matches title transition speed */
+    transition: transform 0.5s linear; /* Changed timing function to linear */
+    max-height: 180px;
+    height: 100%; /* Allow height to fill */
+    width: 100%; /* Ensure width is consistent */
+    overflow: hidden;
+}
+
+.video_image {
+    width: 100%;
+    height: 100%; /* Make video image container fill its parent */
+    overflow: hidden;
+    border-radius: 10px;
+    display: flex; /* Added for centering image inside */
+    align-items: center; /* Added for centering image inside */
+    justify-content: center; /* Added for centering image inside */
+}
+
+.video_image img {
+    max-width: 100%; /* Use max-width/max-height to prevent distortion */
+    max-height: 100%;
+    height: auto; /* Adjust height automatically */
+    width: auto;  /* Adjust width automatically */
+    transition: all 0.5s; /* Keep opacity transition */
     opacity: 0.8;
+    object-fit: contain; /* Use contain or cover based on desired image scaling */
+    border-radius: 10px; /* Apply radius here if needed */
 }
 
-.video-image img:hover{
+.video_image img:hover {
     opacity: 1;
     transform: scale(1.05);
+}
+
+.card_actions {
+    grid-area: actions;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(40px);
+    /* Match transition speed */
+    transition: opacity 0.5s linear, transform 0.5s linear;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 10px;
+    height: auto;
+}
+
+.card_1:hover .card_heading {
+    /* Apply transform and text-align on hover */
+    transform: translateX(-180px);
+    /* Explicitly define transition for hover state if needed, matching base */
+    transition: transform 0.5s linear;
+}
+
+.card_1:hover .card_actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.card_1:hover .card_image_container {
+    /* Keep the upward movement */
+    transform: translateY(-60px);
+    /* Explicitly define transition for hover state, matching base */
+    transition: transform 0.5s linear;
+}
+
+.card_price {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 8px;
+}
+
+.card_buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.card_buttons form {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
 }
 
 /* Buttons */
@@ -84,11 +222,11 @@
 }
 
 .btn-admin-action:hover {
-    color: rgba(125,105,106,255); 
+    color: rgba(125,105,106,255);
 }
 
 .btn-admin-action:hover::before {
-    transform: scaleX(1); 
+    transform: scaleX(1);
 }
 
 /* Modal */

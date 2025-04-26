@@ -10,66 +10,79 @@
                 </div>
                 <hr>
                 <!-- Courses cards -->
-                <div class="row row-cols-1 row-cols-md-3 g-4">
+                <div class="row row-cols-2 g-4">
                     <div class="col" *ngFor="let course of courses; let indice=index">
                         <article class="card card_1">
-                            <div class="card-body">
-                                <div class="card-title text-center">
-                                    <h3 class="fs-5">
-                                        {{ course.name }}
-                                    </h3>
+                            <div class="card_inner">
+                                <div class="card_heading">
+                                    {{ course.name }}
                                 </div>
-                                <div class="video-image w-100" *ngIf="course.url && course.url != null">
-                                    <a href="">
-                                        <img [src]="getThumbnail(course.url,'maxresdefault')" height="180px" class="w-100" style="border-radius: 10px;">
-                                    </a>
+
+                                <div class="card_left">
+                                    <div class="card_details_preview">
+                                        {{ course.detail }}
+                                    </div>
                                 </div>
-                                <div class="video-image w-100" *ngIf="!course.url || course.url == null">
-                                    <a href="">
-                                        <img src="images/novideo.jpg" height="180px" class="w-100" style="border-radius: 10px;">
-                                    </a>
-                                </div>
-                                <!-- Buttons if you are the admin -->
-                                <div class="video-buttons mt-3">
-                                    <span *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                        <a class="btn btn-admin-action me-2" id="my-edit-button">
-                                            <i class="ti-plus"></i>
-                                        </a>
-                                        <a class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">
-                                            <i class="ti-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + course.id">
-                                            <i class= "ti-trash"></i>
-                                        </button>
-                                    </span>
-                                    <!-- Detail form -->
-                                    <form #cartForm="ngForm" (ngSubmit)="onSubmit(cartForm)">
-                                        <button type="button" class="btn btn-admin-action me-2" id="my-detail-button" data-bs-toggle="modal" [attr.data-bs-target]="'#detail' + course.id">
-                                            <i class="ti-info-alt"></i>
-                                        </button>
-                                        <span style="color: black;">
-                                            {{ ' $' + course.current_price }}
-                                        </span>
-                                        <!-- Add to cart -->
-                                        <input type="hidden" name="course_id" value="course_id" #name="ngModel" [(ngModel)]="course.id">
-                                        <!-- If you have not bought it yet -->
-                                        <button *ngIf="course.buy != 1 && course.cart != 1" type="submit" name="" id="my-cart-button" value="Buy it" [disabled]="cartForm.invalid" class="btn btn-admin-action" style="font-size: 20px; color: black;">
-                                            <i class="ti-shopping-cart"></i>
-                                        </button>
-                                        <!-- If you already bought it -->
-                                        <a *ngIf="course.buy == 1" class="btn btn-dark ml-2 button" id="my-detail-button">
-                                            Go to course
-                                        </a>
-                                    </form>
+
+                                <div class="card_right">
+                                    <div class="card_image_container">
+                                        <div class="video_image" *ngIf="course.url && course.url != null">
+                                            <a href="">
+                                                <img [src]="getThumbnail(course.url,'maxresdefault')" alt="{{ course.name }}">
+                                            </a>
+                                        </div>
+                                        <div class="video_image" *ngIf="!course.url || course.url == null">
+                                            <a href="">
+                                                <img src="images/novideo.jpg" alt="No video available">
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <!-- Price that will appear on hover -->
+                                    <div class="card_actions">
+                                        <div class="card_price">
+                                            ${{ course.current_price }}
+                                        </div>
+
+                                        <!-- Buttons if you are the admin -->
+                                        <div class="card_buttons">
+                                            <span *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
+                                                <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                                    <i class="ti-plus"></i>
+                                                </a>
+                                                <a class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">
+                                                    <i class="ti-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + course.id">
+                                                    <i class= "ti-trash"></i>
+                                                </button>
+                                                <form #cartForm="ngForm" (ngSubmit)="onSubmit(cartForm)">                                                    
+                                                    <!-- Add to cart -->
+                                                    <input type="hidden" name="course_id" value="course_id" #name="ngModel" [(ngModel)]="course.id">
+    
+                                                    <!-- If you have not bought it yet -->
+                                                    <button *ngIf="course.buy != 1 && course.cart != 1" type="submit" name="" id="my-cart-button" value="Buy it" [disabled]="cartForm.invalid" class="btn btn-admin-action" style="font-size: 20px; color: black;">
+                                                        <i class="ti-shopping-cart"></i>
+                                                    </button>
+    
+                                                    <!-- If you already bought it -->
+                                                    <a *ngIf="course.buy == 1" class="btn btn-dark ml-2 button" id="my-detail-button">
+                                                        Go to course
+                                                    </a>
+                                                </form>
+                                            </span>
+
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </article>
+
                         <!-- Detail Modal -->
                         <div class="modal fade" [id]="'detail' + course.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel">
+                                        <h1 class="modal_title fs-5" id="exampleModalLabel">
                                             {{ course.name }}
                                         </h1>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -85,12 +98,13 @@
                                 </div>
                             </div>
                         </div>
+        
                         <!-- Delete Modal -->
                         <div class="modal fade" [id]="'delete' + course.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel">
+                                        <h1 class="modal_title fs-5" id="exampleModalLabel">
                                             Are you sure you want to delete this course?
                                         </h1>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
