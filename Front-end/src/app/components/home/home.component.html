@@ -2,8 +2,8 @@
     <div class="container">
         <div class="row">
             <div class="col mt-3">
-                <div class="d-flex align-items-center justify-content-center gap-3" *ngIf="identity && identity.sub">
-                    <div class="home_welcome">
+                <div class="d-flex align-items-center justify-content-center gap-3" *ngIf="identity && identity.sub" data-aos="fade-right" data-aos-offset="300" data-aos-easing="ease-in-sine">
+                    <div *ngIf="identity && identity.image" class="home_welcome">
                         <img src="{{ url + 'user/avatar/' + identity.image }}">
                     </div>
                     <span class="my-auto fw-bold" style="font-size: x-large;">Hello again, {{ identity.name + ' ' + identity.surname + '!'}}</span>
@@ -12,7 +12,7 @@
                 <!-- Courses cards -->
                 <div class="row row-cols-2 g-4">
                     <div class="col" *ngFor="let course of courses; let indice=index">
-                        <article class="card card_1">
+                        <article class="card card_1" data-aos="zoom-in" data-aos-duration="1500">
                             <div class="card_inner">
                                 <div class="card_heading">
                                     {{ course.name }}
@@ -45,17 +45,17 @@
 
                                         <!-- Buttons if you are the admin -->
                                         <div class="card_buttons">
-                                            <span *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                            <span>
+                                                <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button">
                                                     <i class="ti-plus"></i>
                                                 </a>
-                                                <a class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">
+                                                <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">
                                                     <i class="ti-pencil"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + course.id">
+                                                <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + course.id">
                                                     <i class= "ti-trash"></i>
                                                 </button>
-                                                <form #cartForm="ngForm" (ngSubmit)="onSubmit(cartForm)">                                                    
+                                                <form *ngIf="identity" #cartForm="ngForm" (ngSubmit)="onSubmit(cartForm)">                                                    
                                                     <!-- Add to cart -->
                                                     <input type="hidden" name="course_id" value="course_id" #name="ngModel" [(ngModel)]="course.id">
     
@@ -70,7 +70,6 @@
                                                     </a>
                                                 </form>
                                             </span>
-
                                         </div>
                                     </div>
                                 </div>

@@ -1,4 +1,4 @@
-<div class="general">
+<div class="general" data-aos="flip-up" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
     <div class="form-box">
         <div class="form-value">
             <div class="alert alert-success" *ngIf="status == 'success'">
@@ -48,10 +48,10 @@
                     </small>
                 </div>
                 <div class="form-group">
-                    <div class="edit-container">
+                    <div *ngIf="identity && identity.image" class="edit-container">
                         <p class="edit-label" for="image">Avatar</p>
                         <!-- show the image -->
-                        <div *ngIf="identity && identity.image" class="edit-image-container">
+                        <div class="edit-image-container">
                             <img src="{{ url + 'user/avatar/' + identity.image }}" class="edit-image">
                         </div>
                     </div>

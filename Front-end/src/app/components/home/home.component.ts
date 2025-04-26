@@ -7,6 +7,7 @@ import { RouterModule, Router } from '@angular/router';
 import { GLOBAL } from '../../services/global';
 import { CartService } from '../../services/cart.service';
 import { Cart } from '../../models/Cart';
+import * as AOS from 'aos';
 
 @Component({
   standalone: true,
@@ -40,12 +41,12 @@ export class HomeComponent {
 
   ngOnInit(){
     this.getCourses(); 
+    AOS.init();
   }
 
   getCourses(){
     this._courseService.getCourses().subscribe(
       response => {
-        console.log(response);
         if(response.status == 'success'){
           this.courses = response.courses;
         }

@@ -1,4 +1,4 @@
-<div class="general">
+<div class="general" data-aos="flip-up" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
     <div class="form-box">
         <div class="form-value">
             <div class="alert alert-success" *ngIf="status == 'success' && !edit">
@@ -33,10 +33,10 @@
                     Modify your course: {{course.name}}.
                 </p>
                 <div class="form-group">
-                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="[a-zA-Z0-9 ]+">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="course.name" required pattern="^[a-zA-Z0-9 ]{1,20}$" maxlength="20">
                     <label for="name">Course name</label>
                     <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
-                        Course name is required and must contain only letters.
+                        Course name is required and must contain only letters (Max.Length 20).
                     </small>
                 </div>
                 <div class="form-group">
@@ -47,9 +47,9 @@
                     </select>
                     <label for="category_id">Categories</label>
                 </div>
-                <div class="form-group">
-                    <textarea type="text" name="detail" class="form-control" #detail="ngModel" [(ngModel)]="course.detail" required></textarea>
-                    <label for="detail">Description</label>
+                <div class="form-group" style="border: transparent;">
+                    <textarea type="text" name="detail" class="form-control" #detail="ngModel" [froalaEditor]="froala_options" [froalaModel]="course.detail" [(ngModel)]="course.detail" required></textarea>
+                    <label for="detail" class="description-label">Description</label>
                     <small *ngIf="!detail.valid && detail.touched" class="invalid-feedback d-block">
                         Description is required.
                     </small>

@@ -8,6 +8,7 @@ import { CategoryService } from '../../services/category.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 
 // this is a global variable for iziToast
@@ -15,7 +16,7 @@ declare var iziToast: any;
 
 @Component({
   selector: 'app-course-new',
-  imports: [CommonModule, FormsModule, NgxDropzoneModule],
+  imports: [CommonModule, FormsModule, NgxDropzoneModule, FroalaEditorModule, FroalaViewModule],
   templateUrl: './course-new.component.html',
   styleUrl: './course-new.component.css',
   providers: [UserService, CourseService, CategoryService]
@@ -33,6 +34,29 @@ export class CourseNewComponent {
   public categories: any;
   public resetVar = true;
   public uploading = false;
+
+  // froala_options
+  public froala_options: Object = {
+    // chatCounter: true is for the chat counter 
+    charCounterCount: true,
+    // toolbarButtons is for the toolbar buttons
+    toolbarButtons: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // toolbarButtonsXS is for the toolbar buttons in xs devices
+    toolbarButtonsXS: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // toolbarButtonsSM is for the toolbar buttons in sm devices
+    toolbarButtonsSM: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // toolbarButtonsMD is for the toolbar buttons in md devices
+    toolbarButtonsMD: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // backgroundColor is for the background color of the editor
+    colorsBackground: ['#61BD6D', '#1ABC9C', '#54ACD2', 'REMOVE'],
+    // events is for the events that are triggered in the editor
+    // initialized is for the initialized event
+    events: {
+      initialized: function () {
+        console.log('Froala Editor Initialized');
+      }
+    }
+  };
 
   // ngx-dropzone options
   files: File[] = [];
@@ -119,6 +143,12 @@ export class CourseNewComponent {
       });
     });
   }
+
+  stripHtml(html: string): string {
+    const temporalElement = document.createElement('div');
+    temporalElement.innerHTML = html;
+    return temporalElement.textContent || temporalElement.innerText || '';
+  }
   
   // onSubmit method to handle form submission
   // form is the form object that is passed from the template
@@ -134,6 +164,10 @@ export class CourseNewComponent {
         await this.uploadCourse();
       }
       this.course.category_id = Number(this.course.category_id);
+      if (form.valid) {
+        // Limpia el HTML de la descripción antes de guardar
+        this.course.detail = this.stripHtml(this.course.detail);
+      }
       // Save the user data
       this._courseService.create(this.token, this.course).subscribe({
         next: (response) => {
