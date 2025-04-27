@@ -115,16 +115,16 @@ class SaleController extends Controller implements HasMiddleware
                 } else {
                     $data = [
                         'code' => 400,
-                       'status' =>'error',
-                       'message' => 'There is no video for this course'
+                        'status' =>'error',
+                        'message' => 'There is no video for this course'
                     ];
                 }
             }
         } else {
             $data = [
                 'code' => 400,
-               'status' =>'error',
-               'message' => 'There is no course in the cart'
+                'status' =>'error',
+                'message' => 'There is no course in the cart'
             ];
         }
 

@@ -10,7 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { NgxDropzoneModule } from 'ngx-dropzone';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
-
 // this is a global variable for iziToast
 declare var iziToast: any;
 

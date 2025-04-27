@@ -36,4 +36,11 @@ export class CartService {
       .set('Authorization', token);
     return this._http.delete(this.url + 'carts/' + id, { headers: headers });
   }
+
+  //delete all
+  deleteAll(token: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Authorization', token);
+    return this._http.delete(this.url + 'carts/deleteCart', { headers: headers });
+  }
 }

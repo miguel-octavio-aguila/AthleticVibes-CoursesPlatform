@@ -117,9 +117,9 @@
                         </div>
                     </div>
                     <!-- Botón de pago -->
-                    <form #saleNew="ngForm" (ngSubmit)="onSubmit(saleNew)">
-                        <input type="submit" value="Checkout" class="btn btn-primary btn-block" [disabled]="saleNew.invalid">
-                    </form>
+                    <div class="d-flex justify-content-center w-100 mt-4" data-aos="zoom-in" data-aos-duration="1500">
+                        <a class="btn btn-button" (click)="onSubmit()">Checkout</a>
+                    </div>
                 </div>
             </div>
         </div>
