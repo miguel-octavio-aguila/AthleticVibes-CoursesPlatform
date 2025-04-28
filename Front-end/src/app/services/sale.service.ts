@@ -22,4 +22,10 @@ export class SaleService {
     const headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
     return this._http.post(this.url + 'sales', params, { headers: headers });
   }
+
+  // get sales
+  getSales(token: any): Observable<any> {
+    const headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
+    return this._http.get(this.url + 'sales' , { headers: headers });
+  }
 }

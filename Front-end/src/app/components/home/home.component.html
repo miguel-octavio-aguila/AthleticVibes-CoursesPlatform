@@ -39,7 +39,7 @@
                                     </div>
                                     <!-- Price that will appear on hover -->
                                     <div class="card_actions">
-                                        <div class="card_price">
+                                        <div *ngIf="course.buy != 1 && course.cart != 1" class="card_price">
                                             ${{ course.current_price }}
                                         </div>
 
@@ -65,7 +65,7 @@
                                                     </button>
     
                                                     <!-- If you already bought it -->
-                                                    <a *ngIf="course.buy == 1" class="btn btn-dark ml-2 button" id="my-detail-button">
+                                                    <a *ngIf="course.buy == 1" class="btn btn-course">
                                                         Go to course
                                                     </a>
                                                 </form>

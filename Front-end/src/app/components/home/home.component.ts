@@ -7,6 +7,7 @@ import { RouterModule, Router } from '@angular/router';
 import { GLOBAL } from '../../services/global';
 import { CartService } from '../../services/cart.service';
 import { Cart } from '../../models/Cart';
+import { SaleService } from '../../services/sale.service';
 import * as AOS from 'aos';
 
 @Component({
@@ -15,7 +16,7 @@ import * as AOS from 'aos';
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
-  providers: [CourseService, UserService, CartService]
+  providers: [CourseService, UserService, CartService, SaleService]
 })
 export class HomeComponent {
   public title: string;
@@ -30,6 +31,7 @@ export class HomeComponent {
     private _courseService: CourseService,
     private _userService: UserService,
     private _cartService: CartService,
+    private _saleService: SaleService,
     private _router: Router
   ){
     this.title = 'Home';
@@ -40,7 +42,11 @@ export class HomeComponent {
   }
 
   ngOnInit(){
-    this.getCourses(); 
+    if (this.identity.sub) {
+      this.getSales();
+    } else {
+      this.getCourses(); 
+    }
     AOS.init();
   }
 
@@ -115,5 +121,21 @@ export class HomeComponent {
         }
       )
     }
+  }
+
+  // get sales
+  getSales(){
+    this._saleService.getSales(this.token).subscribe(
+      response => {
+        if(response.status =='success'){
+          this.courses = response.courseStatus;
+        } else {
+          this._router.navigate(['/home']);
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    );
   }
 }

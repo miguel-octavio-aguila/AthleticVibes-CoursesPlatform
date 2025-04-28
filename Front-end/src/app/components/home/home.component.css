@@ -149,7 +149,7 @@
 
 .card_1:hover .card_heading {
     /* Apply transform and text-align on hover */
-    transform: translateX(-180px);
+    transform: translateX(-165px);
     /* Explicitly define transition for hover state if needed, matching base */
     transition: transform 0.5s linear;
 }
@@ -226,6 +226,18 @@
 
 .btn-admin-action:hover::before {
     transform: scaleX(1);
+}
+
+.btn-course{
+    width: 100%;
+    height: 40px;
+    border-radius: 40px;
+    background: #fff;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
 }
 
 /* Modal */
