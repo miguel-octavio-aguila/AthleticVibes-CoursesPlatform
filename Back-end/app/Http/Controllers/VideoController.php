@@ -365,14 +365,14 @@ class VideoController extends Controller implements HasMiddleware
                 
                 $data = [
                     'code' => 200,
-                   'status' =>'success',
+                    'status' =>'success',
                     'video' => $video,
                 ];
             } else {
                 $data = [
                     'code' => 404,
-                   'status' => 'error',
-                   'message' => 'Video not found',
+                    'status' => 'error',
+                    'message' => 'Video not found',
                 ];
             }
         } else {

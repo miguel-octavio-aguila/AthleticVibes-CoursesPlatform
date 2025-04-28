@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { RouterModule } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { UserEditComponent } from './components/user-edit/user-edit.component';
@@ -10,6 +9,7 @@ import { CategoryListComponent } from './components/category-list/category-list.
 import { CategoryNewComponent } from './components/category-new/category-new.component';
 import { CategoryEditComponent } from './components/category-edit/category-edit.component';
 import { CartComponent } from './components/cart/cart.component';
+import { VideoNewComponent } from './components/video-new/video-new.component';
 
 export const routes: Routes = [
     {
@@ -60,4 +60,8 @@ export const routes: Routes = [
         path: 'cart',
         component: CartComponent
     },
+    {
+        path: 'create-video/:id',
+        component: VideoNewComponent
+    }
 ];

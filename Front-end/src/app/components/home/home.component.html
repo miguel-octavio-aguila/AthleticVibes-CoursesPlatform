@@ -46,7 +46,7 @@
                                         <!-- Buttons if you are the admin -->
                                         <div class="card_buttons">
                                             <span>
-                                                <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button">
+                                                <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/create-video', course.id]">
                                                     <i class="ti-plus"></i>
                                                 </a>
                                                 <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/course-edit', course.id]">

@@ -31,7 +31,6 @@ export class CourseNewComponent {
   public url_back: any;
   public url: any;
   public categories: any;
-  public resetVar = true;
   public uploading = false;
 
   // froala_options
@@ -111,11 +110,9 @@ export class CourseNewComponent {
   // creaate a promise with no value 
   uploadCourse(): Promise<void> {
     return new Promise((resolve, reject) => {
-      console.log('Uploading file:', this.files[0].name, this.files[0].type, this.files[0].size);
       // Check if files are selected
       this.fileUploadService.uploadCourse(this.files[0]).subscribe({
         next: (response: any) => {
-          console.log('Upload response:', response);
           // Check if the response contains an image
           if (response.image) {
             // Update the user object with the new image
