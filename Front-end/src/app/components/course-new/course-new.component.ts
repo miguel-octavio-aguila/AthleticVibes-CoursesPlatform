@@ -99,12 +99,6 @@ export class CourseNewComponent {
   onRemoveAll(): void {
     // Limpiar el array de archivos
     this.files = [];
-    
-    // Si necesitas realizar alguna acción adicional, como limpiar el modelo
-    if (this.course && this.course.image) {
-      // Opcional: Borrar la referencia a la imagen en el modelo
-      // this.user.image = null;
-    }
   }
 
   // creaate a promise with no value 

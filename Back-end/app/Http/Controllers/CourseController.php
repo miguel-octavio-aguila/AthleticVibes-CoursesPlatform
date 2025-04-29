@@ -143,7 +143,12 @@ class CourseController extends Controller implements HasMiddleware
         if (is_object($course)) {
             // save the number of accordion
             $vector = [];
-            array_push($vector, $course->accordion);
+
+            // save the number of accordion
+            // with this we have the number of accordion for the sections
+            for ($i = 1; $i <= $course->accordion; $i++) {
+                array_push($vector, $i);
+            }
 
             $data = [
                 'code' => 200,

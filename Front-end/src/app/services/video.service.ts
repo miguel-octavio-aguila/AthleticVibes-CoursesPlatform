@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class VideoService {
   public url: any;
+  public video: any;
 
   constructor(
     public _http: HttpClient
@@ -15,12 +16,23 @@ export class VideoService {
     this.url = GLOBAL.url;
   }
 
+  // get videos
+  getVideos(): Observable<any> {
+    let video = JSON.parse(localStorage.getItem('Video') || '{}');
+    if (video && video != 'undefined') {
+        this.video = video;
+    } else {
+        this.video = null;
+    }
+    return this.video;
+  }
+
   // create de course
   create(token: any, video: any): Observable<any> {
     if (video.url){
       video.url = GLOBAL.htmlEntities(video.url);
     }
-    if (video.contesnt) {
+    if (video.content) {
       video.content = GLOBAL.htmlEntities(video.content);
     }
 

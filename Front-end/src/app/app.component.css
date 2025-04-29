@@ -84,17 +84,34 @@ section {
     line-height: inherit;
 }
 
+.menu .category_item {
+    position: relative;
+}
+
 .menu .category_link {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 12px 60px;
+    padding: 12px 25px;
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
     z-index: 1;
+    white-space: nowrap;
+}
+
+.menu .category_link.cart-icon {
+    padding: 12px 25px !important;
+}
+
+.menu .category_item:hover .category_link {
+    padding: 12px 60px;
+}
+
+.menu .category_item:hover .category_link.cart-icon {
+    padding: 17px 100px !important;
 }
 
 .menu .category_link::after {
@@ -122,7 +139,7 @@ section {
     position: relative;
 }
 
-.menu .category_item .category_menu {
+.menu .category_menu {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -140,7 +157,7 @@ section {
     z-index: 1;
     pointer-events: none;
     list-style: none;
-    background-color: white; /* Fondo para el menú desplegable */
+    background-color: white;
 }
 
 .menu .category_item:hover .category_menu {
@@ -150,10 +167,17 @@ section {
     pointer-events: auto;
     border-top: transparent;
     border-color: white;
+    width: auto;
+    min-width: 100%;
+}
+
+.menu .category_item:hover .category_menu.cart-menu,
+.menu .category_item:hover .category_menu.user-menu {
+    width: 100px;
 }
 
 .menu .category_item:hover .category_link {
-    color: #333; /* Color para mejor contraste al hacer hover */
+    color: #333;
     border-radius: 16px 16px 0 0;
 }
 
@@ -163,7 +187,7 @@ section {
 }
 
 .menu .category_item:hover .category_link svg {
-    fill: #3c342c; /* Color para mejor contraste al hacer hover */
+    fill: #3c342c;
     transform: rotate(-180deg);
 }
 
@@ -179,7 +203,7 @@ section {
     position: relative;
     text-align: center;
     transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
-    color: #3c342c; /* Color para el texto de los items del menú */
+    color: #3c342c;
 }
 
 .category_menu .category_drop_item:last-child .category_drop_link {
@@ -217,3 +241,16 @@ section {
     margin: 8px 0;
 }
 
+@media (max-width: 992px) {
+    .menu .category_link {
+        padding: 8px 15px;
+    }
+    
+    .menu .category_item {
+        margin-right: 10px;
+    }
+    
+    .menu .category_item:hover .category_link {
+        padding: 8px 30px;
+    }
+}

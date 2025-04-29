@@ -1,1 +1,128 @@
-<p>video-new works!</p>
+<div class="general" data-aos="flip-up" data-aos-easing="ease-out-cubic" data-aos-duration="2000">
+    <div class="form-box">
+        <div class="form-value">
+            <div class="alert alert-success" *ngIf="status == 'success' && !edit">
+                <p style="text-align: center;">
+                    <strong>Video created successfully!</strong>
+                </p>
+            </div>
+            <div class="alert alert-success" *ngIf="status == 'success' && edit">
+                <p style="text-align: center;">
+                    <strong>Video updated successfully!</strong>
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && !edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Video not created. 
+                </p>
+            </div>
+            <div class="alert alert-danger" *ngIf="status == 'error' && edit">
+                <p style="text-align: center;">
+                    <strong>Error!</strong> Video not updated. 
+                </p>
+            </div>
+            <!-- Video create form -->
+            <form #videoForm="ngForm" (ngSubmit)="onSubmit(videoForm)">
+                <h1 >
+                    {{ title }}
+                    <br>
+                    for the course:
+                    <br>
+                    {{course.name}}
+                </h1>
+                <p *ngIf="status != 'success' && !edit">
+                    Create a new video to start teaching.
+                </p>
+                <p *ngIf="edit">
+                    Modify your video: {{video.title}}.
+                </p>
+                <div class="form-group">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="video.title" required pattern="^[a-zA-Z0-9 ]{1,20}$" maxlength="20">
+                    <label for="name">Video title</label>
+                    <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
+                        Video title is required and must contain only letters (Max.Length 20).
+                    </small>
+                </div>
+                <div class="form-group" style="border: transparent;">
+                    <textarea type="text" name="content" class="form-control" #content="ngModel" [froalaEditor]="froala_options" [froalaModel]="video.content" [(ngModel)]="video.content" required></textarea>
+                    <label for="content" class="description-label">Content</label>
+                    <small *ngIf="!content.valid && content.touched" class="invalid-feedback d-block">
+                        Content is required.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="url" #url="ngModel" [(ngModel)]="video.url" class="form-control" required>
+                    <label for="url">URL of the video</label>
+                    <small *ngIf="!url.valid && url.touched" class="invalid-feedback d-block">
+                        Invalid URL.
+                    </small>
+                </div>
+                <div class="form-group">        
+                    <!-- Dropzone -->
+                    <div class="dropzone-container">
+                        <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'file/txt,file/docx,file/doc,file/pdf,file/rar'" (change)="onSelect($event)">
+                            <ngx-dropzone-label>
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                </svg>
+                                <p>Browse File to upload!</p>
+                            </ngx-dropzone-label>
+                            <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+                                <ngx-dropzone-label>
+                                    <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                        <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                                    </svg>
+                                    <span>{{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)</span>
+                                </ngx-dropzone-label>
+                            </ngx-dropzone-preview>
+                        </ngx-dropzone>
+
+                        <!-- File status footer -->
+                        <div class="file-status-footer">
+                            <svg class="file-icon" fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                            </svg>
+                            <p>
+                                <span *ngIf="files?.length === 0">Not selected file</span>
+                                <span *ngIf="files?.length === 1">{{ files[0].name }}</span>
+                                <span *ngIf="files && files.length > 1">{{ files.length }} files selected</span>
+                            </p>
+                            <svg class="delete-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" (click)="onRemoveAll()">
+                                <path d="M5.16565 10.1534C5.07629 8.99181 5.99473 8 7.15975 8H16.8402C18.0053 8 18.9237 8.9918 18.8344 10.1534L18.142 19.1534C18.0619 20.1954 17.193 21 16.1479 21H7.85206C6.80699 21 5.93811 20.1954 5.85795 19.1534L5.16565 10.1534Z" stroke="currentColor" stroke-width="2"></path>
+                                <path d="M19.5 5H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                <path d="M10 3C10 2.44772 10.4477 2 11 2H13C13.5523 2 14 2.44772 14 3V5H10V3Z" stroke="currentColor" stroke-width="2"></path>
+                            </svg>
+                        </div>
+
+                        <div class="upload-status">
+                            <span *ngIf="!uploading">Upload file</span>
+                            <span *ngIf="uploading">Uploading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <select name="section" #section="ngModel" [(ngModel)]="video.section" class="form-control">
+                        <option *ngFor="let item of accordion" value="{{ item }}">
+                            Section: {{ item }}
+                        </option>
+                    </select>
+                    <label for="accordion">Sections of the course</label>
+                    <small *ngIf="!section.valid && section.touched" class="invalid-feedback d-block">
+                        Must select a section.
+                    </small>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="accordion_title" #accordion_title="ngModel" [(ngModel)]="video.accordion_title" class="form-control" required>
+                    <label for="accordion_title">Section title</label>
+                    <small *ngIf="!accordion_title.valid && accordion_title.touched" class="invalid-feedback d-block">
+                        Section title is required.
+                    </small>
+                </div>
+                <input *ngIf="status != 'success' && !edit" type="submit" name="" value="Save" class="btn btn-button" [disabled]="videoForm.invalid || uploading">
+                <input *ngIf="edit" type="submit" name="" value="Save Changes" class="btn btn-button" [disabled]="videoForm.invalid || uploading">
+            </form>
+        </div>
+    </div>
+</div>

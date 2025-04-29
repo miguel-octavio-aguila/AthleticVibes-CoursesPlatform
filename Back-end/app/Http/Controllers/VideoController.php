@@ -77,11 +77,9 @@ class VideoController extends Controller implements HasMiddleware
                 return response()->json($validate->errors(), 400);
             } else {
                 // be sure that the file and accordion_title are set
-                if (!isset($params->file) && !isset($params->accordion_title)) {
-                    $params_array['file'] = null;
-                    $params_array['accordion_title'] = null;
-                }
-
+                $params_array['file'] = $params_array['file'] ?? null;
+                $params_array['accordion_title'] = $params_array['accordion_title'] ?? null;
+                
                 // save the data
                 $video = new Video();
                 $video->user_id = $params_array['user_id'];
@@ -94,6 +92,7 @@ class VideoController extends Controller implements HasMiddleware
                 $video->accordion_title = $params_array['accordion_title'];
                 $video->save();
 
+                
                 return response()->json([
                     'code' => 200,
                     'status' => 'success',
@@ -105,6 +104,8 @@ class VideoController extends Controller implements HasMiddleware
                 'code' => 400,
                 'status' => 'error',
                 'message' => 'Data is not valid',
+                'error' => 'Data validation not performed',
+                'params_array' => $params_array,
             ]);
         }
     }

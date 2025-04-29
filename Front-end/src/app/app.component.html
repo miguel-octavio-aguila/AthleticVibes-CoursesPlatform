@@ -20,6 +20,29 @@
                             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                                 <!-- Left menu -->
                                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" *ngIf="categories">
+                                    
+                                    <!-- Search -->
+                                    <li class="nav-item ms-3">
+                                        <form>
+                                            <div class="input-group">
+                                                <button type="submit" class="btn btn-outline-light">
+                                                    <i class="ti-search"></i>
+                                                </button>
+                                                <input type="search" id="search" class="form-control" name="title" placeholder="Search..." required>
+                                            </div>
+                                        </form>
+                                    </li>
+                                </ul>
+                                
+                                <!-- Right Menu -->
+                                <ul class="navbar-nav ms-auto align-items-center">
+                                    <!-- Learning -->
+                                    <li class="nav-item" *ngIf="identity && identity.sub">
+                                        <a class="nav-link" style="color:white;">
+                                            Learning
+                                        </a>
+                                    </li>
+                                    
                                     <!-- Categories dropdown -->
                                     <li class="nav-item menu">
                                         <div class="category_item">
@@ -39,33 +62,10 @@
                                         </div>
                                     </li>
 
-                                    <!-- Search -->
-                                    <li class="nav-item ms-3">
-                                        <form>
-                                            <div class="input-group">
-                                                <button type="submit" class="btn btn-outline-light">
-                                                    <i class="ti-search"></i>
-                                                </button>
-                                                <input type="search" id="search" class="form-control" name="title" placeholder="Search..." required>
-                                            </div>
-                                        </form>
-                                    </li>
-                                </ul>
-
-                                <!-- Right Menu -->
-                                <ul class="navbar-nav ms-auto align-items-center">
-                                    <!-- Learning -->
-                                    <li class="nav-item" *ngIf="identity && identity.sub">
-                                        <a class="nav-link" style="color:white;">
-                                            Learning
-                                        </a>
-                                    </li>
-
                                     <!-- Cart -->
                                     <li class="nav-item menu" *ngIf="identity && identity.sub">
                                         <div class="category_item">
-                                            <a class="nav-link category_link" style="padding: 17px 100px;" href="#">
-                                                <span>Cart</span>
+                                            <a class="nav-link category_link cart-icon" href="#">
                                                 <i class="ti-shopping-cart" style="font-size: 25px;"></i>
                                                 <svg viewBox="0 0 360 360" xml:space="preserve">
                                                     <g>
@@ -73,7 +73,7 @@
                                                     </g>
                                                 </svg>
                                             </a>
-                                            <div class="category_menu">
+                                            <div class="category_menu cart-menu">
                                                 <!-- Cart Content -->
                                                 <div class="category_drop_item" *ngIf="courses && courses.length > 0">
                                                     <div *ngFor="let course of courses; let i = index" class="category_drop_link d-flex align-items-center">
@@ -130,7 +130,7 @@
                                                     </g>
                                                 </svg>
                                             </a>
-                                            <div class="category_menu">
+                                            <div class="category_menu user-menu">
                                                 <div class="dropdown-divider"></div>
                                                 
                                                 <!-- User info -->

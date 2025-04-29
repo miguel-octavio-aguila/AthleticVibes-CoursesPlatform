@@ -8,13 +8,15 @@ import { FileUploadService } from '../../services/file.upload.service';
 import { Video } from '../../models/Video';
 import { CommonModule } from '@angular/common';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+import { FormsModule } from '@angular/forms';
+import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 
 // this is a global variable for iziToast
 declare var iziToast: any;
 
 @Component({
   selector: 'app-video-new',
-  imports: [CommonModule, NgxDropzoneModule],
+  imports: [CommonModule, NgxDropzoneModule, FormsModule, FroalaEditorModule, FroalaViewModule],
   templateUrl: './video-new.component.html',
   styleUrl: './video-new.component.css',
   providers: [VideoService, UserService, CourseService, FileUploadService]
@@ -65,14 +67,15 @@ export class VideoNewComponent {
     private _courseService: CourseService,
     private fileUploadService: FileUploadService
   ){
-    this.title = 'Save a new video for the course';
+    this.title = 'Save a new video';
     this.url = GLOBAL.url;
+    this.video = this._videoService.getVideos();
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
     this.edit = false;
     this.video_ = new Video(
       this.video.id,
-      this.video.user_id,
+      this.video.user_id = this.identity.sub ,
       this.video.course_id,
       this.video.title,
       this.video.content,
@@ -102,6 +105,7 @@ export class VideoNewComponent {
           if (response.status == 'success') {
             this.course = response.course;
             this.accordion = response.accordion;
+            this.video.course_id = id;
           } else {
             this.status = 'error on getCourse()';
           }
@@ -158,6 +162,7 @@ export class VideoNewComponent {
   }
 
   async onSubmit(form: any) {
+    localStorage.setItem('Video', JSON.stringify(this.video));
     // try catch is used to handle errors that may occur during the execution of the code inside the try block
     try {
       // First, check if the user has selected any files to upload
@@ -173,17 +178,30 @@ export class VideoNewComponent {
         if (this.video.file == '') {
           this.video.file = null;
         }
+
+        // Convert string IDs to numbers
         this.video.course_id = Number(this.video.course_id);
         this.video.user_id = Number(this.video.user_id);
+        this.video.section = Number(this.video.section);
+
         if (form.valid) {
-          // Limpia el HTML de la descripción antes de guardar
+          // Clean HTML from description before saving
           this.video.content = this.stripHtml(this.video.content);
         }
+
         // Save the video data
         this._videoService.create(this.token, this.video).subscribe({
           next: (response) => {
+            console.log(response);
+            console.log(this.video);
+            console.log(this.token);
+            
+            
             if (!response.video || !response || response.status == 'error') {
               this.status = 'error';
+              console.log(response);
+              console.log(this.video);
+              
               // iziToast
               iziToast.show({
                 title: 'Error',

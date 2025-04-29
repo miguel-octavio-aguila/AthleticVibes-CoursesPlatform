@@ -109,7 +109,7 @@
                 </div>
                 <div class="form-group">
                     <input type="text" name="url" #url="ngModel" [(ngModel)]="course.url" class="form-control" required>
-                    <label for="url">URL of the video</label>
+                    <label for="url">URL of the course</label>
                     <small *ngIf="!url.valid && url.touched" class="invalid-feedback d-block">
                         Invalid URL.
                     </small>

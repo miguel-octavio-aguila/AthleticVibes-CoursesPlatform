@@ -24,7 +24,7 @@ export class CourseService {
         this.course = null;
     }
     return this.course;
-}
+  }
 
   // create method
   create(token: string, course: any): Observable<any> {
