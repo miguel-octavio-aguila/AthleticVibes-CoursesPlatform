@@ -30,7 +30,7 @@ export class VideoNewComponent {
   public identity: any;
   public status: any;
   public edit: any;
-  public course: any;
+  public course: any = { name: ''};
   public accordion: Array<any> = [];
   public uploading = false;
 

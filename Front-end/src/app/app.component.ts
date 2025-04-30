@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { UserService } from './services/user.service';
 import { GLOBAL } from './services/global';
 import { CartService } from './services/cart.service';
+import * as AOS from 'aos';
 
 @Component({
   selector: 'app-root',
@@ -45,6 +46,11 @@ export class AppComponent implements OnInit {
     this.identity = this.userService.getIdentity();
     if(this.token) {
       this.indexCart();
+    }
+    document.onreadystatechange = function () {
+      if (document.readyState == "complete") {
+        AOS.init();
+      }
     }
   }
 

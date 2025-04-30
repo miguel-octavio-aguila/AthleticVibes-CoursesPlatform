@@ -10,6 +10,7 @@ import { CategoryNewComponent } from './components/category-new/category-new.com
 import { CategoryEditComponent } from './components/category-edit/category-edit.component';
 import { CartComponent } from './components/cart/cart.component';
 import { VideoNewComponent } from './components/video-new/video-new.component';
+import { CourseDetailComponent } from './components/course-detail/course-detail.component';
 
 export const routes: Routes = [
     {
@@ -63,5 +64,9 @@ export const routes: Routes = [
     {
         path: 'create-video/:id',
         component: VideoNewComponent
+    },
+    {
+        path: 'course/:id',
+        component: CourseDetailComponent
     }
 ];

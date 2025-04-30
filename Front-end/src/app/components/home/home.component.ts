@@ -8,7 +8,6 @@ import { GLOBAL } from '../../services/global';
 import { CartService } from '../../services/cart.service';
 import { Cart } from '../../models/Cart';
 import { SaleService } from '../../services/sale.service';
-import * as AOS from 'aos';
 
 @Component({
   standalone: true,
@@ -47,7 +46,6 @@ export class HomeComponent {
     } else {
       this.getCourses(); 
     }
-    AOS.init();
   }
 
   getCourses(){

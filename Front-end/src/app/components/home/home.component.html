@@ -27,12 +27,12 @@
                                 <div class="card_right">
                                     <div class="card_image_container">
                                         <div class="video_image" *ngIf="course.url && course.url != null">
-                                            <a href="">
+                                            <a [routerLink]="['/course', course.id]">
                                                 <img [src]="getThumbnail(course.url,'maxresdefault')" alt="{{ course.name }}">
                                             </a>
                                         </div>
                                         <div class="video_image" *ngIf="!course.url || course.url == null">
-                                            <a href="">
+                                            <a [routerLink]="['/course', course.id]">
                                                 <img src="images/novideo.jpg" alt="No video available">
                                             </a>
                                         </div>
@@ -65,7 +65,7 @@
                                                     </button>
     
                                                     <!-- If you already bought it -->
-                                                    <a *ngIf="course.buy == 1" class="btn btn-course">
+                                                    <a [routerLink]="['/course', course.id]" *ngIf="course.buy == 1" class="btn btn-course">
                                                         Go to course
                                                     </a>
                                                 </form>

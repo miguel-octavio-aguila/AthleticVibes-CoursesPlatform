@@ -44,4 +44,11 @@ export class VideoService {
 
     return this._http.post(this.url + 'videos', params, { headers: headers });
   }
+
+  //get videos by course
+  getVideosByCourse(id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+
+    return this._http.get(this.url + 'videos/getVideosByCourse/' + id, { headers: headers });
+  }
 }
