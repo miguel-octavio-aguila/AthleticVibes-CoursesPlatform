@@ -2,12 +2,15 @@ import { Component } from '@angular/core';
 import { VideoService } from '../../services/video.service';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+
+declare var $: any;
 
 @Component({
   selector: 'app-course-detail',
-  imports: [],
+  imports: [CommonModule, RouterModule],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.css',
   providers: [VideoService, CourseService, UserService]
@@ -80,5 +83,17 @@ export class CourseDetailComponent {
         }
       )
     })
+  }
+
+  hide_d() {
+    $('#multiCollapseChat').hide();
+    $('#multiCollapseContent').hide();
+    $('#multiCollapseDescription').show();
+  }
+
+  hide_c() {
+    $('#multiCollapseChat').hide();
+    $('#multiCollapseContent').show();
+    $('#multiCollapseDescription').hide();
   }
 }

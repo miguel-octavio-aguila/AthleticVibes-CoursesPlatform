@@ -1,0 +1,131 @@
+.accordion-page {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    color: black;
+}
+
+.accordion-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+.accordion {
+    --border-color: #223;
+    display: grid;
+    grid-template-areas: "entries" "images";
+    border: 1px solid var(--border-color);
+    border-radius: .25rem;
+    overflow: hidden;
+}
+
+@media (min-width: 700px) {
+    .accordion {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: "entries images";
+    }
+}
+
+.accordion-entries {
+    grid-area: entries;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.accordion-images {
+    grid-area: images;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1;
+    padding: 2rem;
+}
+
+.accordion-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity .3s, transform .3s;
+    opacity: 0;
+    transform: scale(1.1);
+}
+
+.default-image {
+    opacity: 1;
+    transform: scale(1);
+}
+
+details{
+    border: none;
+}
+
+.accordion-item {
+    background: transparent;
+    border-bottom: 1px solid black;
+    border-radius: 0%;
+}
+
+.accordion-header {
+    cursor: pointer;
+    font-weight: 700;
+    padding: 1rem 0;
+    font-size: 1.25rem;
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.accordion-header::-webkit-details-marker {
+    display: none;
+}
+
+[open] .accordion-header {
+    color: black;
+}
+
+.toggle-icon {
+    opacity: 1;
+    transition: opacity .3s;
+    fill: black;
+}
+
+[open] .toggle-icon {
+    opacity: 0;
+}
+
+.accordion-content {
+    padding: 0 0 1rem;
+}
+
+.content-item {
+    margin-top: .5rem;
+}
+
+:root {
+    interpolate-size: allow-keywords;
+}
+
+
+details summary {
+    display: flex;
+}
+
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details::details-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s, content-visiblity 0.3s;
+    transition-behavior: allow-discrete;
+}
+
+details[open]::details-content {
+    height: auto;
+}
