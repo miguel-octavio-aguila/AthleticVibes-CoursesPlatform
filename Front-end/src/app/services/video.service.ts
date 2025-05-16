@@ -51,4 +51,34 @@ export class VideoService {
 
     return this._http.get(this.url + 'videos/getVideosByCourse/' + id, { headers: headers });
   }
+
+  // get video
+  getVideo(id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    return this._http.get(this.url + 'videos/' + id, { headers: headers });
+  }
+
+  // update video
+  update(token: any, video: any, id: any): Observable<any> {
+    if (video.content) {
+      video.content = GLOBAL.htmlEntities(video.content);
+    }
+    if (video.url) {
+      video.url = GLOBAL.htmlEntities(video.url);
+    }
+    let json = JSON.stringify(video);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                   .set('Authorization', token);
+    return this._http.put(this.url + 'videos/' + id, params, { headers: headers });
+  }
+
+  // update title
+  updateTitle(token: any, video: any, id: any): Observable<any> {
+    let json = JSON.stringify(video);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                  .set('Authorization', token);
+    return this._http.put(this.url + 'videos/updateTitle/' + id, params, { headers: headers });
+  }
 }

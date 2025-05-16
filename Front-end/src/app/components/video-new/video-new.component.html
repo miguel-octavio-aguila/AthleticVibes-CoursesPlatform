@@ -117,7 +117,7 @@
                     <input type="text" name="accordion_title" #accordion_title="ngModel" [(ngModel)]="video.accordion_title" class="form-control" required>
                     <label for="accordion_title">Section title</label>
                     <small *ngIf="!accordion_title.valid && accordion_title.touched" class="invalid-feedback d-block">
-                        Section title is required.
+                        Section title is required. <small>(if a section has not been created, create it first. If a section has been created, let this field blank.)</small>
                     </small>
                 </div>
                 <input *ngIf="status != 'success' && !edit" type="submit" name="" value="Save" class="btn btn-button" [disabled]="videoForm.invalid || uploading">

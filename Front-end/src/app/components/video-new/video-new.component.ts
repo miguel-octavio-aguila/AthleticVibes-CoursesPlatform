@@ -249,5 +249,4 @@ export class VideoNewComponent {
       console.log(error);
     }
   }
-
 }

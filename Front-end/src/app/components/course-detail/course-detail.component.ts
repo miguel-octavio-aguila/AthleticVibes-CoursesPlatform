@@ -23,6 +23,9 @@ export class CourseDetailComponent {
   public accordion: Array<any> = [];
   public status: any;
   public is_course: any;
+  public contentAccordionOpen: boolean = false;
+  public video: any;
+  public is_video: any;
 
   constructor(
     private _videoService: VideoService,
@@ -33,15 +36,14 @@ export class CourseDetailComponent {
     private sanitizer: DomSanitizer
   ){
     this.is_course = true;
+    this.is_video = false;
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
   }
 
   ngOnInit(): void {
     this.getVideosByCourse();
-    if (this.identity.sub) {
-      this.getCourse();
-    }
+    this.getCourse();
   }
 
   getCourse() {
@@ -85,6 +87,27 @@ export class CourseDetailComponent {
     })
   }
 
+  getVideo(id: any) {
+    this._videoService.getVideo(id).subscribe(
+      response => {
+        if (response.status == 'success') {
+          this.is_course = false;
+          this.is_video = true;
+          this.video = response.video;
+          // for the youtube video
+          var results = this.video.url.match('[\\?&]v=([^&#]*)');
+          var video = (results === null) ? this.video.url : results[1];
+          this.video.url = this.sanitizer.bypassSecurityTrustResourceUrl('https://www.youtube.com/embed/' + video + '?controls=0');
+        } else {
+          this.status = 'error on getVideo()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
   hide_d() {
     $('#multiCollapseChat').hide();
     $('#multiCollapseContent').hide();
@@ -95,5 +118,30 @@ export class CourseDetailComponent {
     $('#multiCollapseChat').hide();
     $('#multiCollapseContent').show();
     $('#multiCollapseDescription').hide();
+  }
+
+  toggleContentAccordion() {
+    this.contentAccordionOpen = !this.contentAccordionOpen;
+    
+    // if the accordion is closed, we close all the accordion
+    if (!this.contentAccordionOpen) {
+      setTimeout(() => {
+        // Wait for the transition to finish
+        const detailsElements = document.querySelectorAll('details[name="courseAccordion"]');
+        detailsElements.forEach(element => {
+          if (element.hasAttribute('open')) {
+            (element as HTMLDetailsElement).open = false;
+          }
+        });
+      }, 100);
+    } else {
+      // if the accordion is opened, we open the first video 
+      setTimeout(() => {
+        const detailsElements = document.querySelectorAll('details[name="courseAccordion"]');
+        if (detailsElements.length > 0) {
+          (detailsElements[0] as HTMLDetailsElement).open = true;
+        }
+      }, 300);
+    }
   }
 }

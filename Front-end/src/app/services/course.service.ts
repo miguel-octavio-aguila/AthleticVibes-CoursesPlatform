@@ -48,7 +48,7 @@ export class CourseService {
     return this.http.get(this.url + 'courses', { headers: headers });
   }
 
-  // uodate de course
+  // update the course
   update(token: any, course: any, id: any): Observable<any> {
     if (course.detail) {
       course.detail = GLOBAL.htmlEntities(course.detail);
@@ -65,9 +65,19 @@ export class CourseService {
 
   // get course info
   getCourseInfo(id: any, token: any): Observable<any> {
-    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
-                                   .set('Authorization', token);
-    return this.http.get(this.url + 'courses/' + id, { headers: headers });
+    if (token) {
+      let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                    .set('Authorization', token);
+      return this.http.get(this.url + 'courses/' + id, { headers: headers });
+    } else {
+      return this.getCourseInfo_2(id);
+    }
+  }
+
+  // get courses without the token
+  getCourseInfo_2(id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+      return this.http.get(this.url + 'courses/getCourse/' + id, { headers: headers });
   }
 
   // delete course

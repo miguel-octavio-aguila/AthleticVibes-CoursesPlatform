@@ -11,6 +11,7 @@ import { CategoryEditComponent } from './components/category-edit/category-edit.
 import { CartComponent } from './components/cart/cart.component';
 import { VideoNewComponent } from './components/video-new/video-new.component';
 import { CourseDetailComponent } from './components/course-detail/course-detail.component';
+import { VideoEditComponent } from './components/video-edit/video-edit.component';
 
 export const routes: Routes = [
     {
@@ -68,5 +69,9 @@ export const routes: Routes = [
     {
         path: 'course/:id',
         component: CourseDetailComponent
+    },
+    {
+        path: 'video-edit/:id',
+        component: VideoEditComponent
     }
 ];
