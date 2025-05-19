@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { GLOBAL } from '../../services/global';
 import { VideoService } from '../../services/video.service';
 import { UserService } from '../../services/user.service';
@@ -17,7 +17,7 @@ declare var iziToast: any;
 
 @Component({
   selector: 'app-video-edit',
-  imports: [CommonModule, NgxDropzoneModule, FormsModule, FroalaEditorModule, FroalaViewModule],
+  imports: [CommonModule, NgxDropzoneModule, FormsModule, FroalaEditorModule, FroalaViewModule, RouterModule],
   templateUrl: '../video-new/video-new.component.html',
   styleUrl: '../video-new/video-new.component.css'
 })
@@ -33,7 +33,7 @@ export class VideoEditComponent {
   public course: any = { name: '' };
   public accordion: Array<any> = [];
   public uploading = false;
-  public videos: any;
+  public videos: any[];
 
   // froala_options
   public froala_options: Object = {
@@ -55,6 +55,7 @@ export class VideoEditComponent {
 
   constructor(
     private _route: ActivatedRoute,
+    private _router: Router,
     private _videoService: VideoService,
     private _userService: UserService,
     private _courseService: CourseService,
@@ -65,11 +66,12 @@ export class VideoEditComponent {
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
     this.edit = true;
+    this.videos = []; // Initialize videos array
     
     // Initialize with empty object - we'll populate it later
     this.video_ = new Video(
       0, // Default id
-      this.identity.sub,
+      0, // Default user_id
       0, // Default course_id
       '', // Default title
       '', // Default content
@@ -106,7 +108,7 @@ export class VideoEditComponent {
                     // Now initialize the video_ object with proper values
                     this.video_ = new Video(
                       this.video.id,
-                      this.identity.sub,
+                      this.video.user_id,
                       this.video.course_id,
                       this.video.title,
                       this.video.content,
@@ -192,7 +194,6 @@ export class VideoEditComponent {
           if (response.file) {
             this.video_.file = response.file;
             this.video.file = response.file;
-            localStorage.setItem('Video', JSON.stringify(this.video));
             this.uploading = false;
             resolve();
           } else {
@@ -238,6 +239,10 @@ export class VideoEditComponent {
       this.video.user_id = Number(this.video.user_id);
       this.video.section = Number(this.video.section);
 
+      // Sanitize YouTube URL by removing the app=desktop parameter
+      const sanitizedUrl = form.value.url.replace('?app=desktop&', '?');
+      this.video.url = sanitizedUrl;
+      
       // Clean HTML content
       if (this.video.content) {
         this.video.content = this.stripHtml(this.video.content);
@@ -247,22 +252,53 @@ export class VideoEditComponent {
       this._videoService.getVideosByCourse(this.video.course_id).subscribe({
         next: (response) => {
           if (response.status === 'success') {
-            this.videos = response.videos;
+            this.status = 'success';
+            
+            // Fix: Check if videos exist in the response and assign them properly
+            // The API returns "video" (singular) not "videos" (plural)
+            if (response.videos) {
+              this.videos = response.videos;
+            } else if (response.video && Array.isArray(response.video)) {
+              this.videos = response.video;
+            } else {
+              this.videos = []; // Initialize as empty array if no videos found
+            }
             
             // Handle accordion title updates if needed
-            const accordionTitle = form.value.accordion_title;
-            if (accordionTitle && accordionTitle.trim() !== '') {
-              for (const vid of this.videos) {
-                if (form.value.section == vid.section && vid.accordion_title != null) {
-                  this.update_title(vid.id);
-                  break;
+            if (form.value.accordion_title == '') {
+              form.value.accordion_title = null;
+            }
+            
+            if (form.value.accordion_title == '' || form.value.accordion_title == null) {
+              // No accordion title to process
+            } else {
+              // Make sure this.videos is iterable before using forEach or for...of
+              if (Array.isArray(this.videos)) {
+                for (const vid of this.videos) {
+                  if (form.value.section == vid['section'] && vid['accordion_title'] != null) {
+                    this.update_title(vid['id']);
+                    break;
+                  }
                 }
               }
             }
             
+            localStorage.setItem('Video', JSON.stringify(this.video));
             // Update the video
             this.update_video();
+            setTimeout(() => {
+              // Scroll to the top of the page in a smooth way
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // wait to reload the page
+              setTimeout(() => {
+                this._router.navigate(['/course/', this.video.course_id]).then(() => {
+                  window.location.reload();
+                  localStorage.removeItem('Video');
+                });
+              }, 1000);
+            }, 100);
           } else {
+            this.status = 'error';
             this.handleError('Failed to get videos for this course');
           }
         },
@@ -296,6 +332,7 @@ export class VideoEditComponent {
         if (response.status === 'success') {
           this.handleSuccess('The video has been updated successfully');
         } else {
+          console.log(response);
           this.handleError('The video has not been updated');
         }
       },

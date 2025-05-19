@@ -66,10 +66,10 @@
                                                         <div class="video-title" *ngIf="!identity.sub || !course.buy">{{ contentVideo.title }}</div>
                                                     </div>
                                                     <div class="video-actions" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/video-edit', video.id]">
+                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]">
                                                             <i class="ti-pencil"></i>
                                                         </a>
-                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + video.id">
+                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + contentVideo.id">
                                                             <i class= "ti-trash"></i>
                                                         </button>
                                                     </div>
@@ -105,7 +105,7 @@
                             <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
                                 Close
                             </button>
-                            <button type="button" class="btn btn-admin-action" style="color: black;">
+                            <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteVideo(video.id)">
                                 <i class= "ti-trash"></i>
                             </button>
                         </div>

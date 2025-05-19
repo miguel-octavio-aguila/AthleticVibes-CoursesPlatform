@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use App\Models\Video;
+use App\Models\Sale;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\JwtAuth;
 use App\Models\Checkbox;
@@ -68,7 +69,7 @@ class VideoController extends Controller implements HasMiddleware
                 'course_id' => 'required',
                 'title' => 'required',
                 'content' => 'required',
-                'url' => 'required',
+                'url' => 'required|string',
                 'section' => 'required',
             ]);
 
@@ -169,49 +170,54 @@ class VideoController extends Controller implements HasMiddleware
                 'course_id' => 'required',
                 'title' => 'required',
                 'content' => 'required',
-                'url' => 'required',
+                'url' => 'required|string',
                 'section' => 'required',
             ]);
 
             // if the data fails
             if ($validate->fails()) {
                 return response()->json($validate->errors(), 400);
+            }
+            // be sure that the file and accordion_title are set
+            $params_array['file'] = $params_array['file'] ?? null;
+            $params_array['accordion_title'] = $params_array['accordion_title'] ?? null;
+
+            // remove the data that we don't want to update
+            unset($params_array['id']);
+            unset($params_array['user_id']);
+            unset($params_array['created_at']);
+            unset($params_array['user']);
+
+            // update the data
+            $video = Video::where('id', $id)
+                ->where('user_id', $this->getIdentity($request)->sub)
+                ->first();
+
+            // if the video exists and is an object
+            if (!empty($video) && is_object($video)) {
+                $video->update($params_array);
+
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'video' => $video,
+                    'user' => $this->getIdentity($request),
+                    'changes' => $params_array,
+                ];
             } else {
-                // remove the data that we don't want to update
-                unset($params_array['id']);
-                unset($params_array['user_id']);
-                unset($params_array['created_at']);
-                unset($params_array['user']);
-
-                // update the data
-                $video = Video::where('id', $id)
-                    ->where('user_id', $this->getIdentity($request)->sub)
-                    ->first();
-
-                // if the video exists and is an object
-                if (!empty($video) && is_object($video)) {
-                    $video->update($params_array);
-
-                    $data = [
-                        'code' => 200,
-                        'status' => 'success',
-                        'video' => $video,
-                        'user' => $this->getIdentity($request),
-                        'changes' => $params_array,
-                    ];
-                } else {
-                    $data = [
-                        'code' => 404,
-                        'status' => 'error',
-                        'message' => 'Video not found',
-                    ];
-                }
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Video not found',
+                ];
             }
         } else {
             return response()->json([
                 'code' => 400,
                 'status' => 'error',
                 'message' => 'Data is not valid',
+                'error' => 'Data validation not performed',
+                'params_array' => $params_array,
             ]);
         }
 
@@ -226,10 +232,14 @@ class VideoController extends Controller implements HasMiddleware
         // get auth user
         $user = $this->getIdentity($request);
 
-        // get the video
-        $video = Video::where('id', $id)
-            ->where('user_id', $user->sub)
-            ->first();
+        $video = Video::where('id', $id)->where('user_id', $user->sub)->first();
+        $sales = Sale::where('video_id', $id)->get();
+
+        if ($sales && count($sales) >= 1) {
+            foreach ($sales as $sale) {
+                $sale->delete();
+            }
+        }
 
         // if the video exists and is an object
         if (!empty($video) && is_object($video)) {

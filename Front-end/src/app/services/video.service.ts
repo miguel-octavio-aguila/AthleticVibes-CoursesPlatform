@@ -81,4 +81,11 @@ export class VideoService {
                                   .set('Authorization', token);
     return this._http.put(this.url + 'videos/updateTitle/' + id, params, { headers: headers });
   }
+
+  // delete video
+  delete(token: any, id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                   .set('Authorization', token);
+    return this._http.delete(this.url + 'videos/' + id, { headers: headers });
+  }
 }

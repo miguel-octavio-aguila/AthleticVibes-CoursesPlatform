@@ -108,6 +108,24 @@ export class CourseDetailComponent {
     )
   }
 
+  deleteVideo(id: any) {
+    this._videoService.delete(this.token, id).subscribe(
+      response => {
+        if (response.status =='success') {
+          this.getVideosByCourse();
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          this.status = 'error on deleteVideo()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
   hide_d() {
     $('#multiCollapseChat').hide();
     $('#multiCollapseContent').hide();

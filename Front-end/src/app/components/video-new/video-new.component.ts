@@ -33,23 +33,16 @@ export class VideoNewComponent {
   public course: any = { name: ''};
   public accordion: Array<any> = [];
   public uploading = false;
+  public videos: any[] = [];
 
   // froala_options
   public froala_options: Object = {
-    // chatCounter: true is for the chat counter 
     charCounterCount: true,
-    // toolbarButtons is for the toolbar buttons
     toolbarButtons: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsXS is for the toolbar buttons in xs devices
     toolbarButtonsXS: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsSM is for the toolbar buttons in sm devices
     toolbarButtonsSM: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsMD is for the toolbar buttons in md devices
     toolbarButtonsMD: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // backgroundColor is for the background color of the editor
     colorsBackground: ['#61BD6D', '#1ABC9C', '#54ACD2', 'REMOVE'],
-    // events is for the events that are triggered in the editor
-    // initialized is for the initialized event
     events: {
       initialized: function () {
         console.log('Froala Editor Initialized');
@@ -73,9 +66,10 @@ export class VideoNewComponent {
     this.identity = this._userService.getIdentity();
     this.token = this._userService.getToken();
     this.edit = false;
+
     this.video_ = new Video(
       this.video.id,
-      this.video.user_id = this.identity.sub ,
+      this.video.user_id = this.identity.sub,
       this.video.course_id,
       this.video.title,
       this.video.content,
@@ -86,7 +80,29 @@ export class VideoNewComponent {
   }
 
   ngOnInit(): void {
-    this.getCourse();
+    this.loadData();
+  }
+  
+  loadData(): void {
+    this._route.params.subscribe(params => {
+      let id = +params['id'];
+      this._courseService.getCourseInfo(id, this.token).subscribe({
+        next: (response) => {
+          if (response.status == 'success') {
+            this.course = response.course;
+            this.accordion = response.accordion;
+            this.video.course_id = id;
+            this.getVideos();
+          } else {
+            this.handleError('Error loading course data');
+          }
+        },
+        error: (error) => {
+          console.error('Course loading error:', error);
+          this.handleError('Error loading course data');
+        }
+      });
+    });
   }
   
   onSelect(event: any) {
@@ -97,57 +113,56 @@ export class VideoNewComponent {
     this.files.splice(this.files.indexOf(event), 1);
   }
 
-  getCourse() {
-    this._route.params.subscribe(params => {
-      let id = +params['id'];
-      this._courseService.getCourseInfo(id, this.token).subscribe(
-        response => {
-          if (response.status == 'success') {
-            this.course = response.course;
-            this.accordion = response.accordion;
-            this.video.course_id = id;
-          } else {
-            this.status = 'error on getCourse()';
-          }
-        },
-        error => {
-          console.log(error);
-        }
-      )
-    })
-  }
-
   onRemoveAll(): void {
-    // Limpiar el array de archivos
     this.files = [];
   }
 
-  // creaate a promise with no value 
+  handleError(message: string): void {
+    this.status = 'error';
+    iziToast.show({
+      title: 'Error',
+      titleColor: '#FF0000',
+      color: '#FFF',
+      class: 'text-danger',
+      position: 'topRight',
+      message: message
+    });
+  }
+
+  handleSuccess(message: string): void {
+    this.status = 'success';
+    iziToast.show({
+      title: 'Success',
+      titleColor: '#1DC74C',
+      color: '#FFF',
+      class: 'text-success',
+      position: 'topRight',
+      message: message
+    });
+  }
+
   uploadVideo(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Check if files are selected
+      if (this.files.length === 0) {
+        resolve(); // No files to upload
+        return;
+      }
+      
+      this.uploading = true;
       this.fileUploadService.uploadVideo(this.files[0]).subscribe({
         next: (response: any) => {
-          // Check if the response contains an file
           if (response.file) {
-            // Update the user object with the new file
             this.video_.file = response.file;
             this.video.file = response.file;
-            // Save the new image in local storage
-            localStorage.setItem('Video', JSON.stringify(this.course));
-            // To indicate that the image is uploaded and the uploading is finished
             this.uploading = false;
-            // Indicate success of the promise
             resolve();
           } else {
-            this.status = 'error';
             this.uploading = false;
-            reject('Error uploading file');
+            reject('Error uploading file: No file received in response');
           }
         },
         error: (error) => {
-          console.log('Upload error details:', error);
-          this.status = 'error';
+          console.error('Upload error details:', error);
           this.uploading = false;
           reject(error);
         }
@@ -156,97 +171,165 @@ export class VideoNewComponent {
   }
 
   stripHtml(html: string): string {
+    if (!html) return '';
     const temporalElement = document.createElement('div');
     temporalElement.innerHTML = html;
     return temporalElement.textContent || temporalElement.innerText || '';
   }
 
   async onSubmit(form: any) {
+    if (!form.valid) {
+      this.handleError('Please fill all required fields correctly');
+      return;
+    }
+    
     localStorage.setItem('Video', JSON.stringify(this.video));
-    // try catch is used to handle errors that may occur during the execution of the code inside the try block
+    
     try {
-      // First, check if the user has selected any files to upload
+      // First upload the file if any
       if (this.files.length > 0) {
-        this.uploading = true;
-        // Call the uploadImage method to upload the image
-        // and await for it to finish before proceeding
         await this.uploadVideo();
       }
+      
       this._route.params.subscribe(params => {
         let id = +params['id'];
         this.video.course_id = id;
-        if (this.video.file == '') {
+
+        // Process the form data
+        if (this.video.file === '') {
           this.video.file = null;
         }
 
-        // Convert string IDs to numbers
+        // Ensure numeric types
         this.video.course_id = Number(this.video.course_id);
         this.video.user_id = Number(this.video.user_id);
         this.video.section = Number(this.video.section);
 
-        if (form.valid) {
-          // Clean HTML from description before saving
+        // Sanitize YouTube URL by removing the app=desktop parameter
+        const sanitizedUrl = form.value.url.replace('?app=desktop&', '?');
+        this.video.url = sanitizedUrl;
+        
+        // Clean HTML content
+        if (this.video.content) {
           this.video.content = this.stripHtml(this.video.content);
         }
 
-        // Save the video data
-        this._videoService.create(this.token, this.video).subscribe({
+        // Get all videos for this course and check for accordion title
+        this._videoService.getVideosByCourse(this.video.course_id).subscribe({
           next: (response) => {
-            console.log(response);
-            console.log(this.video);
-            console.log(this.token);
-            
-            
-            if (!response.video || !response || response.status == 'error') {
-              this.status = 'error';
-              console.log(response);
-              console.log(this.video);
+            if (response.status === 'success') {
+              // Assign videos
+              if (response.videos) {
+                this.videos = response.videos;
+              } else if (response.video && Array.isArray(response.video)) {
+                this.videos = response.video;
+              } else {
+                this.videos = [];
+              }
               
-              // iziToast
-              iziToast.show({
-                title: 'Error',
-                titleColor: '#FF0000',
-                color: '#FFF',
-                class: 'text-danger',
-                position: 'topRight',
-                message: 'The video has not been created.'
-              });
+              // Handle accordion title updates
+              if (form.value.accordion_title === '') {
+                form.value.accordion_title = null;
+                this.video.accordion_title = null;
+              }
+              
+              // Check if we need to clear accordion titles for other videos
+              if (form.value.accordion_title !== '' && form.value.accordion_title !== null) {
+                this.checkAndClearAccordionTitles(form.value.section);
+              }
+              
+              // Save the video
+              this.create_video();
             } else {
-              this.status = 'success';
-              // iziToast
-              iziToast.show({
-                title: 'Success',
-                titleColor: '#1DC74C',
-                color: '#FFF',
-                class: 'text-success',
-                position: 'topRight',
-                message: 'The video has been created successfully.'
-              });
-              this.video = response.video;
-              localStorage.setItem('Video', JSON.stringify(this.video));
-              // Make a timeout to scroll to the top of the page after 100ms
-              setTimeout(() => {
-                // Scroll to the top of the page in a smooth way
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                // Alternative using ViewChild:
-                // this.topElement.nativeElement.scrollIntoView({ behavior: 'smooth' });
-                // wait to reload the page
-                setTimeout(() => {
-                  window.location.reload();
-                  localStorage.removeItem('Video');
-                }, 1000);
-              }, 100);
+              this.handleError('Failed to get videos for this course');
             }
           },
           error: (error) => {
-            this.status = 'error';
-            console.log(error);
+            console.error('Error fetching videos:', error);
+            this.handleError('Failed to get videos for this course');
           }
         });
       });
     } catch (error) {
-      this.status = 'error';
-      console.log(error);
+      console.error('Error during submission:', error);
+      this.handleError('An error occurred during submission');
     }
+  }
+
+  checkAndClearAccordionTitles(section: number): void {
+    if (!Array.isArray(this.videos) || this.videos.length === 0) {
+      return;
+    }
+
+    // Find videos in the same section with accordion_title
+    for (const vid of this.videos) {
+      if (vid.section == section && vid.accordion_title != null) {
+        this.update_title(vid.id);
+        break;
+      }
+    }
+  }
+
+  create_video() {
+    // Save the video data
+    this._videoService.create(this.token, this.video).subscribe({
+      next: (response) => {
+        if (!response.video || !response || response.status == 'error') {
+          this.handleError('The video has not been created.');
+        } else {
+          this.handleSuccess('The video has been created successfully.');
+          
+          localStorage.setItem('Video', JSON.stringify(this.video));
+          
+          // Smooth scroll to top and reload page
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+              window.location.reload();
+              localStorage.removeItem('Video');
+            }, 1000);
+          }, 100);
+        }
+      },
+      error: (error) => {
+        console.error('Error creating video:', error);
+        this.handleError('Error creating video: ' + (error.message || 'Unknown error'));
+      }
+    });
+  }
+
+  update_title(id: any) {
+    this._videoService.updateTitle(this.token, this.video, id).subscribe({
+      next: (response) => {
+        if (response.status !== 'success') {
+          console.warn('Title update was not successful');
+        }
+      },
+      error: (error) => {
+        console.error('Error updating title:', error);
+      }
+    });
+  }
+
+  getVideos() {
+    // Get all videos for this course
+    this._videoService.getVideosByCourse(this.video.course_id).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          if (response.videos) {
+            this.videos = response.videos;
+          } else if (response.video && Array.isArray(response.video)) {
+            this.videos = response.video;
+          } else {
+            this.videos = [];
+          }
+        } else {
+          this.handleError('The videos have not been loaded.');
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching videos:', error);
+      }
+    });
   }
 }
