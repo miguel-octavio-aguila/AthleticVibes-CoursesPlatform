@@ -12,6 +12,7 @@ import { CartComponent } from './components/cart/cart.component';
 import { VideoNewComponent } from './components/video-new/video-new.component';
 import { CourseDetailComponent } from './components/course-detail/course-detail.component';
 import { VideoEditComponent } from './components/video-edit/video-edit.component';
+import { VideoDetailComponent } from './components/video-detail/video-detail.component';
 
 export const routes: Routes = [
     {
@@ -73,5 +74,9 @@ export const routes: Routes = [
     {
         path: 'video-edit/:id',
         component: VideoEditComponent
+    },
+    {
+        path: 'video-detail/:id',
+        component: VideoDetailComponent
     }
 ];

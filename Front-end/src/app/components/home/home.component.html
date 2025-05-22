@@ -27,7 +27,10 @@
                                 <div class="card_right">
                                     <div class="card_image_container">
                                         <div class="video_image" *ngIf="course.url && course.url != null">
-                                            <a [routerLink]="['/course', course.id]">
+                                            <a *ngIf="course.buy == 1" [routerLink]="['/video-detail', course.video]">
+                                                <img [src]="getThumbnail(course.url,'maxresdefault')" alt="{{ course.name }}">
+                                            </a>
+                                            <a *ngIf="course.buy != 1" [routerLink]="['/course', course.id]">
                                                 <img [src]="getThumbnail(course.url,'maxresdefault')" alt="{{ course.name }}">
                                             </a>
                                         </div>
