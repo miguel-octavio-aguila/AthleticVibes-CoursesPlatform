@@ -126,19 +126,29 @@ export class CourseDetailComponent {
     )
   }
 
+  // Method to show Questions and Answers
+  show_chat() {
+    $('#multiCollapseDescription').hide();
+    $('#multiCollapseContent').hide();
+    $('#multiCollapseChat').show();
+  }
+
+  // Method to show Description
   hide_d() {
     $('#multiCollapseChat').hide();
     $('#multiCollapseContent').hide();
     $('#multiCollapseDescription').show();
   }
 
-  hide_c() {
-    $('#multiCollapseChat').hide();
-    $('#multiCollapseContent').show();
-    $('#multiCollapseDescription').hide();
-  }
-
+  // Method to show Content
   toggleContentAccordion() {
+    // Hide the other multicollapses
+    $('#multiCollapseChat').hide();
+    $('#multiCollapseDescription').hide();
+    
+    // Show the Content collapse
+    $('#multiCollapseContent').show();
+    
     this.contentAccordionOpen = !this.contentAccordionOpen;
     
     // if the accordion is closed, we close all the accordion

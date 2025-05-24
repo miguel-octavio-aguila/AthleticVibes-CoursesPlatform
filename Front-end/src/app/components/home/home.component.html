@@ -35,6 +35,9 @@
                                             </a>
                                         </div>
                                         <div class="video_image" *ngIf="!course.url || course.url == null">
+                                            <a [routerLink]="['/video-detail',  course.video]">
+                                                <img src="images/novideo.jpg" alt="No video available">
+                                            </a>
                                             <a [routerLink]="['/course', course.id]">
                                                 <img src="images/novideo.jpg" alt="No video available">
                                             </a>
@@ -68,7 +71,7 @@
                                                     </button>
     
                                                     <!-- If you already bought it -->
-                                                    <a [routerLink]="['/course', course.id]" *ngIf="course.buy == 1" class="btn btn-course">
+                                                    <a [routerLink]="['/video-detail', course.video]" *ngIf="course.buy == 1" class="btn btn-course">
                                                         Go to course
                                                     </a>
                                                 </form>

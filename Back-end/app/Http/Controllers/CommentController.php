@@ -133,13 +133,15 @@ class CommentController extends Controller implements HasMiddleware
                 'code' => 200,
                 'comments' => $commentsArray,
                 'cont' => $comments->count(),
-                'response_cont' => $response_cont
+                'response_cont' => $response_cont,
+                'users' => $users
             ];
         } else {
             $data = [
-               'status' => 'error',
-                'code' => 404,
-               'message' => 'There are no comments',
+                'status' => 'success',
+                'code' => 200,
+                'state' => 'empty',
+                'message' => 'There are no comments',
             ];
         }
 
