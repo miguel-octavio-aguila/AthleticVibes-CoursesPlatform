@@ -162,33 +162,4 @@ export class VideoDetailComponent {
     $('#multiCollapseChat').hide();
     $('#multiCollapseDescription').show();
   }
-
-  // Method to show Content
-  toggleContentAccordion() {
-    // Show the Content collapse
-    $('#multiCollapseContent').show();
-    
-    this.contentAccordionOpen = !this.contentAccordionOpen;
-    
-    // if the accordion is closed, we close all the accordion
-    if (!this.contentAccordionOpen) {
-      setTimeout(() => {
-        // Wait for the transition to finish
-        const detailsElements = document.querySelectorAll('details[name="courseAccordion"]');
-        detailsElements.forEach(element => {
-          if (element.hasAttribute('open')) {
-            (element as HTMLDetailsElement).open = false;
-          }
-        });
-      }, 100);
-    } else {
-      // if the accordion is opened, we open the first video 
-      setTimeout(() => {
-        const detailsElements = document.querySelectorAll('details[name="courseAccordion"]');
-        if (detailsElements.length > 0) {
-          (detailsElements[0] as HTMLDetailsElement).open = true;
-        }
-      }, 300);
-    }
-  }
 }
