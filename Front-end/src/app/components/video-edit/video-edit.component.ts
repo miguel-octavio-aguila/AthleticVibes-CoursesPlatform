@@ -291,7 +291,7 @@ export class VideoEditComponent {
               window.scrollTo({ top: 0, behavior: 'smooth' });
               // wait to reload the page
               setTimeout(() => {
-                this._router.navigate(['/course/', this.video.course_id]).then(() => {
+                this._router.navigate(['/video-detail/', this.video.id]).then(() => {
                   window.location.reload();
                   localStorage.removeItem('Video');
                 });

@@ -21,7 +21,7 @@ class CommentController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('api.auth', except: ['show']),
+            new Middleware('api.auth', except: ['show', 'getImage']),
         ];
     }
 
