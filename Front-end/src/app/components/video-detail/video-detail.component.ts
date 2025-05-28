@@ -3,6 +3,7 @@ import { GLOBAL } from '../../services/global';
 import { VideoService } from '../../services/video.service';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
+import { ReponseService } from '../../services/reponse.service';
 import { FileUploadService } from '../../services/file.upload.service'; 
 import { Router, ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -23,7 +24,7 @@ declare var iziToast: any;
   imports: [RouterModule, CommonModule, FormsModule, NgxDropzoneModule, FroalaEditorModule, FroalaViewModule],
   templateUrl: './video-detail.component.html',
   styleUrl: './video-detail.component.css',
-  providers: [VideoService, CourseService, UserService, CommentService, FileUploadService]
+  providers: [VideoService, CourseService, UserService, CommentService, FileUploadService, ReponseService]
 })
 export class VideoDetailComponent {
   public identity: any;
@@ -44,6 +45,13 @@ export class VideoDetailComponent {
   public show = false;
   public uploading = false;
   public showImg = false;
+  public answers: any[] = [];
+  public activeResponses: { [key: number]: boolean } = {};
+  public responses: any;
+  public users_responses: any;
+  public comment_user: any;
+  public user_comment: any;
+  public created_at: any;
 
   // froala_options
   public froala_options: Object = {
@@ -77,6 +85,7 @@ export class VideoDetailComponent {
     private _userService: UserService,
     private _commentService: CommentService,
     private fileUploadService: FileUploadService,
+    private _reponseService: ReponseService,
     private _route: ActivatedRoute,
     private _router: Router,
     private sanitizer: DomSanitizer
@@ -295,10 +304,30 @@ export class VideoDetailComponent {
     });
   }
 
+  loadAnswersForComment(commentId: number) {
+    this._reponseService.getReponses(this.token, commentId).subscribe({
+      next: (response) => {
+        if (response.status === 'success') {
+          this.responses = response.responses;
+          this.users_responses = response.users;
+          this.comment_user = response.comment;
+          this.user_comment = response.user;
+          this.created_at = response.created_at;
+          // Actualizar las respuestas para este comentario específico
+          //this.updateAnswersForComment(commentId, response.answers);
+        }
+      },
+      error: (error) => {
+        console.log('Error loading answers:', error);
+      }
+    });
+  }
+
   // Method to show Questions and Answers
-  show_chat() {
+  show_chat(id: any) {
     $('#multiCollapseDescription').hide();
     $('#multiCollapseChat').show();
+    this.loadAnswersForComment(id);
   }
 
   // Method to show Description
@@ -326,6 +355,32 @@ export class VideoDetailComponent {
     } else {
       $('#imageComment' + id).show();
       this.showImg = true;
+    }
+  }
+
+  // method to show the reponses
+  showResponses(commentId: any) {
+    const id = Number(commentId);
+    const targetId = `#responsesCollapse${id}`;
+    
+    if(this.activeResponses[id]) {
+      $(targetId).hide();
+      this.activeResponses[id] = false;
+    } else {
+      // Close all other answers
+      Object.keys(this.activeResponses).forEach(key => {
+        const keyNum = Number(key);
+        if(this.activeResponses[keyNum] && keyNum !== id) {
+          $(`#responsesCollapse${keyNum}`).hide();
+          this.activeResponses[keyNum] = false;
+        }
+      });
+      
+      $(targetId).show();
+      this.activeResponses[id] = true;
+
+      // Load answers for the comment
+      this.loadAnswersForComment(id);
     }
   }
 

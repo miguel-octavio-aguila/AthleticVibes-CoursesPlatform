@@ -20,7 +20,7 @@
                                             <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
                                         </svg>
                                     </summary>
-                                    <!-- Contenr for each section -->
+                                    <!-- Content for each section -->
                                     <div class="accordion-content">
                                         <ng-container *ngFor="let contentVideo of videos">
                                             <div *ngIf="contentVideo.section == item" class="content-item">
@@ -59,9 +59,11 @@
     <!-- Comments Area -->
     <div class="comments">
         <div class="comments-buttons" style="display: flex; justify-content: center;">
-            <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseChat" role="button" aria-expanded="false" (click)="show_chat()">
-                Questions and Answers
-            </a>
+            <ng-container *ngFor="let comment of comments; let first = first">
+                <a *ngIf="first" class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseChat" role="button" aria-expanded="false" (click)="show_chat(comment.id)">
+                    Questions and Answers
+                </a>
+            </ng-container>
             <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseDescription" role="button" aria-expanded="false" (click)="show_des()">
                 Description
             </a>
@@ -90,11 +92,19 @@
                                 </div>
                                 <span class="my-auto">{{ user.name }} - {{ comment.created_at | date: 'dd/MM/yy'}}</span>
                             </a>
+                            <div *ngIf="user_comment" style="display: inline-flex">
+                                <div class="" *ngIf="identity && (identity.sub == user_comment.id)">
+                                    <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                        <i class="ti-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
                             <br>
                             <strong><i class="title-comment">{{ comment.title }}</i></strong>
-                            <a data-bs-toggle="collapse" id="#multiCollapseResponses" role="button" aria-expanded="false" style="display: flex; justify-content: flex-end;">
+                            <a data-bs-toggle="collapse" [attr.data-bs-target]="'#responsesCollapse' + comment.id" role="button" aria-expanded="false" style="display: flex; justify-content: flex-end;" (click)="showResponses(comment.id)">
                                 <i class="bi-twitch">{{ response_cont[index] }}</i>
                             </a>
+
                             <!-- comment content -->
                             <p>{{comment.comment}}</p>
                             <p *ngIf="comment.image">
@@ -105,6 +115,47 @@
                             <div class="collapse" id="imageComment{{comment.id}}">
                                 <div class="card card-body" *ngIf="comment.image">
                                     <img src="{{ url + 'comments/image/' + comment.image }}" class="image-comment">
+                                </div>
+                            </div>
+
+                            <!-- Answers section for this specific comment -->
+                            <div class="collapse" id="responsesCollapse{{comment.id}}">
+                                <div class="card card-body mt-2">
+                                    <div *ngFor="let response of responses; let index2 = index">
+                                        <ng-container *ngIf="response.comment_id === comment.id">
+                                            <div *ngFor="let user_r of users_responses; let i2 = index">
+                                                <div *ngIf="index2 == i2">
+                                                    <a class="profile">
+                                                        <div *ngIf="user_r && user_r.image" class="avatar_nav"  style="margin-bottom: 10px;">
+                                                            <img src="{{ url + 'user/avatar/' + user_r.image }}">
+                                                        </div>
+                                                        <span class="my-auto">{{ user_r.name }} - {{ response.created_at | date: 'dd/MM/yy'}}</span>
+                                                    </a>
+                                                    <div *ngIf="users_responses" style="display: inline-flex">
+                                                        <div class="" *ngIf="identity && identity.sub == users_responses[index2].id">
+                                                            <a class="btn btn-admin-action me-2" id="my-edit-button">
+                                                                <i class="ti-pencil"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <br>
+    
+                                                    <!-- Answer content -->
+                                                    <p>{{response.response}}</p>
+                                                    <p *ngIf="response.image">
+                                                        <a class="image-comment" data-bs-toggle="collapse" [attr.data-bs-target]="'#imageResponse' + response.id" role="button" aria-expanded="false" aria-controls="imageResponse" (click)="showImage(response.id)">
+                                                            <i class="bi-card-image"></i>
+                                                        </a>
+                                                    </p>
+                                                    <div class="collapse" id="imageResponse{{response.id}}">
+                                                        <div class="card card-body" *ngIf="response.image">
+                                                            <img src="{{ url + 'responses/image/' + responses.image }}" class="image-comment">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </div>
                                 </div>
                             </div>
                         </div>
