@@ -55,8 +55,8 @@ Route::get('/api/comments/image/{filename}', [CommentController::class, 'getImag
 Route::resource('/api/comments', CommentController::class);
 
 // Response routes
-Route::post('/api/reponses/upload', [ResponseController::class, 'upload']);
-Route::get('/api/reponses/image/{filename}', [ResponseController::class, 'getImage']);
+Route::post('/api/responses/upload', [ResponseController::class, 'upload']);
+Route::get('/api/responses/image/{filename}', [ResponseController::class, 'getImage']);
 Route::resource('/api/responses', ResponseController::class);
 
 // Checkbox routes

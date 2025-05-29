@@ -35,4 +35,17 @@ export class CommentService {
 
     return this._http.post(this.url + 'comments', params, { headers: headers });
   }
+
+  // update comment
+  update(token: string, comment: any): Observable<any> {
+    if(comment.comment) {
+      comment.comment = GLOBAL.htmlEntities(comment.comment);
+    }
+    let json = JSON.stringify(comment);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                 .set('Authorization', token);
+
+    return this._http.put(this.url + 'comments/' + comment.id, params, { headers: headers });
+  }
 }

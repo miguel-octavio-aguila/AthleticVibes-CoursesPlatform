@@ -282,8 +282,26 @@ details[open]::details-content {
 }
 
 .image-comment {
+    width: 100%;
     max-width: 100%;
     height: auto;
+    max-height: 600px;
+}
+
+.collapse .card-body .form-div .formResponse {
+    display: grid;
+    grid-template-areas: 
+        "title title"
+        "descriptionComment1 imageComment1"
+        "save save";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, auto);
+    gap: 15px;
+    background-color: #bbbcb7;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    padding: 20px;
 }
 
 .collapse .card-body .form-div form {
@@ -315,6 +333,33 @@ details[open]::details-content {
     backdrop-filter: blur(15px);
 }
 
+.course-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.course-label {
+    display: block;
+    font-size: 1em; /* text-sm */
+    font-weight: 500; /* font-medium */
+    color: #3c342c; /* text-custom-brown */
+    position: static;
+    transform: none;
+    margin: 0;
+}
+
+.course-image-container {
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.course-image {
+    width: 4rem; /* w-16 */
+    object-fit: cover; /* object-cover */
+}
+
 /* Form */
 .link-collapse{
     text-decoration: none;
@@ -325,6 +370,7 @@ details[open]::details-content {
     display: flex;
     justify-content: flex-end;
 }
+
 .title {
     grid-area: title;
     display: flex;
@@ -336,7 +382,19 @@ details[open]::details-content {
     padding: 10px;
 }
 
-.form-group1 {
+.form-group2 {
+    grid-area: descriptionComment1;
+    position: relative;
+}
+
+.form-group3 {
+    grid-area: imageComment1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.form-group4 {
     grid-area: titleComment;
     position: relative;
     margin: 30px 0px;
@@ -344,16 +402,19 @@ details[open]::details-content {
     border-bottom: 2px solid #3c342c;
 }
 
-.form-group2 {
+.form-group5 {
     grid-area: descriptionComment;
     position: relative;
 }
 
-.form-group3 {
+.form-group6 {
     grid-area: imageComment;
     position: relative;
     display: flex;
     align-items: center;
+    flex-direction: column;        
+    align-items: flex-start;          
+    gap: 1rem; 
 }
 
 form input[type="submit"] {
@@ -606,6 +667,9 @@ ngx-dropzone-preview ngx-dropzone-label span {
     background: transparent !important;
     border: 2px solid #3c342c;
     color: #3c342c;
+    min-height: 150px; 
+    max-width: 100%;
+    width: 100%;
 }
 
 :host ::ng-deep .fr-toolbar {
@@ -626,12 +690,26 @@ ngx-dropzone-preview ngx-dropzone-label span {
     background: transparent !important;
     border: transparent;
     color: #3c342c;
+    width: 100%;
+    max-width: 100%;
 }
 
 :host ::ng-deep .fr-element {
     background: transparent !important;
     border: transparent;
     color: #3c342c;
+    min-height: 120px;  
+    max-height: 400px; 
+    overflow-y: auto; 
+    overflow-x: hidden; 
+    word-wrap: break-word; 
+    word-break: break-word; 
+    white-space: pre-wrap;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    padding: 10px;
+    resize: none;
 }
 
 :host ::ng-deep .fr-second-toolbar {

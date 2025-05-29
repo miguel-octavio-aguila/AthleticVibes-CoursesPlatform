@@ -21,7 +21,7 @@ class ResponseController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('api.auth', except: ['show']),
+            new Middleware('api.auth', except: ['show', 'getImage']),
         ];
     }
 
@@ -94,7 +94,7 @@ class ResponseController extends Controller implements HasMiddleware
             $data = [
                 'status' => 'error',
                 'code' => 400,
-               'message' => 'The response is not valid',
+                'message' => 'The response is not valid',
             ];
         }
 
@@ -166,15 +166,15 @@ class ResponseController extends Controller implements HasMiddleware
             // validate the data
             $validate = Validator::make($params_array, [
                 'comment_id' =>'required',
-               'response' =>'required',
+                'response' =>'required',
             ]);
 
             // if the validation fails
             if ($validate->fails()) {
                 $data = [
-                   'status' => 'error',
+                    'status' => 'error',
                     'code' => 400,
-                   'message' => 'Incorrect data',
+                    'message' => 'Incorrect data',
                 ];
             } else {
                 // update the response
@@ -198,24 +198,24 @@ class ResponseController extends Controller implements HasMiddleware
 
                     // return the response
                     $data = [
-                      'status' =>'success',
+                        'status' =>'success',
                         'code' => 200,
-                       'message' => 'The response has been updated',
-                       'response' => $response,
+                        'message' => 'The response has been updated',
+                        'response' => $response,
                     ];
                 } else {
                     $data = [
-                       'status' => 'error',
+                        'status' => 'error',
                         'code' => 400,
-                       'message' => 'The response does not exist',
+                        'message' => 'The response does not exist',
                     ];
                 }
             }
         } else {
             $data = [
-              'status' => 'error',
+                'status' => 'error',
                 'code' => 404,
-              'message' => 'The data is not valid',
+                'message' => 'The data is not valid',
             ];
         }
 

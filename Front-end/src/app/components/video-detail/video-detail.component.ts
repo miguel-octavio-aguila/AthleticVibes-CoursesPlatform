@@ -13,6 +13,8 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 import { CommentService } from '../../services/comment.service';
 import { Comment } from '../../models/Comment';
+import { Responxe } from '../../models/Responxe';
+declare const bootstrap: any;
 // jQuery is already declared globally via 'declare var $: any'
 
 declare var $: any;
@@ -42,14 +44,18 @@ export class VideoDetailComponent {
   public users: any;
   public url: any;
   public is_edit: any;
-  public show = false;
   public uploading = false;
+  public show = false;
   public showImg = false;
+  public showResponse = false;
+  public showCommentEdit = false;
   public answers: any[] = [];
   public activeResponses: { [key: number]: boolean } = {};
+  public responxe_: any;
+  public responxe: any;
   public responses: any;
-  public users_responses: any;
-  public comment_user: any;
+  public users_responses: any[] = [];
+  public comment_user: any = {};
   public user_comment: any;
   public created_at: any;
 
@@ -85,7 +91,7 @@ export class VideoDetailComponent {
     private _userService: UserService,
     private _commentService: CommentService,
     private fileUploadService: FileUploadService,
-    private _reponseService: ReponseService,
+    private _responseService: ReponseService,
     private _route: ActivatedRoute,
     private _router: Router,
     private sanitizer: DomSanitizer
@@ -112,6 +118,22 @@ export class VideoDetailComponent {
       '',
       ''
     )
+
+    this.responxe = {
+      id: null,
+      user_id: this.identity?.sub || null,
+      comment_id: null,
+      response: '',
+      image: null
+    };
+    
+    this.responxe_ = new Responxe(
+      0,
+      0,
+      0,
+      '',
+      ''
+    )
   }
 
   ngOnInit(): void {
@@ -126,6 +148,16 @@ export class VideoDetailComponent {
       this.comment.title,
       this.comment.comment,
       this.comment.image
+    )
+  }
+
+  public newResponse() {
+    this.responxe_ = new Responxe (
+      this.responxe.id,
+      this.responxe.user_id = this.identity.sub,
+      this.responxe.comment_id,
+      this.responxe.response,
+      this.responxe.image
     )
   }
 
@@ -179,6 +211,69 @@ export class VideoDetailComponent {
             this.comment.image = response.image;
             // Save the new image in local storage
             localStorage.setItem('Comment', JSON.stringify(this.comment));
+            // To indicate that the image is uploaded and the uploading is finished
+            this.uploading = false;
+            // Indicate success of the promise
+            resolve();
+          } else {
+            this.status = 'error';
+            this.uploading = false;
+            reject('Error uploading image');
+          }
+        },
+        error: (error) => {
+          console.log('Upload error details:', error);
+          this.status = 'error';
+          this.uploading = false;
+          reject(error);
+        }
+      });
+    });
+  }
+
+  uploadCommentEdit(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if files are selected
+      this.fileUploadService.uploadComment(this.files[0]).subscribe({
+        next: (response: any) => {
+          // Check if the response contains an image
+          if (response.image) {
+            // Update the user object with the new image
+            this.comment_user.image = response.image;
+            // Save the new image in local storage
+            localStorage.setItem('Comment', JSON.stringify(this.comment_user));
+            // To indicate that the image is uploaded and the uploading is finished
+            this.uploading = false;
+            // Indicate success of the promise
+            resolve();
+          } else {
+            this.status = 'error';
+            this.uploading = false;
+            reject('Error uploading image');
+          }
+        },
+        error: (error) => {
+          console.log('Upload error details:', error);
+          this.status = 'error';
+          this.uploading = false;
+          reject(error);
+        }
+      });
+    });
+  }
+
+  uploadResponse(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if files are selected
+      this.fileUploadService.uploadResponse(this.files[0]).subscribe({
+        next: (response: any) => {
+          // Check if the response contains an image
+          if (response.image) {
+            // Update the user object with the new image
+            this.responxe_.image = response.image;
+            this.responxe.image = response.image;
+            // Save the new image in local storage
+            localStorage.setItem('Response', JSON.stringify(this.responxe));
             // To indicate that the image is uploaded and the uploading is finished
             this.uploading = false;
             // Indicate success of the promise
@@ -293,6 +388,7 @@ export class VideoDetailComponent {
             this.comments = response.comments;
             this.response_cont = response.response_cont;            
             this.users = response.users;
+
           } else if (response.status == 'success' && response.state == 'empty') {
             this.comments = null;
           }
@@ -305,7 +401,7 @@ export class VideoDetailComponent {
   }
 
   loadAnswersForComment(commentId: number) {
-    this._reponseService.getReponses(this.token, commentId).subscribe({
+    this._responseService.getReponses(this.token, commentId).subscribe({
       next: (response) => {
         if (response.status === 'success') {
           this.responses = response.responses;
@@ -315,6 +411,9 @@ export class VideoDetailComponent {
           this.created_at = response.created_at;
           // Actualizar las respuestas para este comentario específico
           //this.updateAnswersForComment(commentId, response.answers);
+          // initialize the response
+          this.newResponse();
+          this.responxe.comment_id = this.comment_user.id;
         }
       },
       error: (error) => {
@@ -347,6 +446,17 @@ export class VideoDetailComponent {
     }
   }
 
+  // method to show the form to create a response
+  showFormResponse() {
+    if(this.show === true) {
+      $('#multiCollapseResponse').hide();
+      this.show = false;
+    } else {
+      $('#multiCollapseResponse').show();
+      this.show = true;
+    }
+  }
+
   // method to show the image of the comment
   showImage(id: any) {
     if(this.showImg === true) {
@@ -355,6 +465,17 @@ export class VideoDetailComponent {
     } else {
       $('#imageComment' + id).show();
       this.showImg = true;
+    }
+  }
+
+  // method to show the image of the response
+  showImageResponse(id: any) {
+    if(this.showResponse === true) {
+      $('#imageResponse').hide();
+      this.showResponse = false;
+    } else {
+      $('#imageResponse' + id).show();
+      this.showResponse = true;
     }
   }
 
@@ -383,6 +504,29 @@ export class VideoDetailComponent {
       this.loadAnswersForComment(id);
     }
   }
+  
+  // method to show the form to edit a comment
+  showFormEditComment(id: number): void {
+    this.comment_user = this.comments.find((c: any) => c.id === id);
+    this.is_edit = true;
+  
+    const el        = document.getElementById('multiCollapseCommentEdit' + id);
+    if (!el) {
+      return; 
+    }
+
+    const collapse  = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
+
+    if (el.classList.contains('show')) {
+      collapse.hide();
+    } else {
+      el.addEventListener('shown.bs.collapse', () => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, { once: true });
+
+      collapse.show();
+    }
+  }
 
   stripHtml(html: string): string {
     if (!html) return '';
@@ -391,6 +535,7 @@ export class VideoDetailComponent {
     return temporalElement.textContent || temporalElement.innerText || '';
   }
 
+  // for the new comment
   async onSubmit(form: any) {
     try {
       if (this.files && this.files.length > 0) {
@@ -436,6 +581,103 @@ export class VideoDetailComponent {
       console.error('Error uploading comment:', error);
       this.status = 'error';
       this.handleError('Error uploading comment');
+    }
+  }
+
+  // for the new response
+  async onSubmitResponse(form: any) {
+    try {
+      if (this.files && this.files.length > 0) {
+        this.uploading = true;
+        await this.uploadResponse();
+      }
+      
+      this.responxe.user_id = Number(this.responxe.user_id);
+      this.responxe.comment_id = Number(this.responxe.comment_id);
+      
+      if(form.valid) {
+        this.responxe.response = this.stripHtml(this.responxe.response);
+      }
+
+      this._responseService.createResponse(this.token, this.responxe).subscribe({
+        next: (response) => {
+          if (response.status == 'success') {
+            this.responxe = response.response;
+            this.loadAnswersForComment(this.comment_user.id);
+            this.handleSuccess('Response created successfully');
+            setTimeout(() => {
+              // Scroll to the top of the page in a smooth way
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // wait to reload the page
+              setTimeout(() => {
+                this._router.navigate(['/video-detail/', this.video.id]).then(() => {
+                  window.location.reload();
+                  localStorage.removeItem('Response');
+                });
+              }, 1000);
+            }, 100);
+          } else {
+            this.status = 'error';
+            this.handleError('Error creating response');
+          }
+        },
+        error: (error) => {
+          this.status = 'error';
+          console.log(error);
+        }
+      });
+    } catch (error) {
+      console.error('Error uploading response:', error);
+      this.status = 'error';
+      this.handleError('Error uploading response');
+    }
+  }
+
+  // to edit a comment
+  async onSubmitEditComment(form: any) {
+    try {
+      if (this.files && this.files.length > 0) {
+        this.uploading = true;
+        await this.uploadCommentEdit();
+      }
+      
+      this.comment_user.user_id = Number(this.comment_user.user_id);
+      this.comment_user.video_id = Number(this.comment_user.video_id);
+      
+      if(form.valid) {
+        this.comment_user.comment = this.stripHtml(this.comment_user.comment);
+      }
+
+      this._commentService.update(this.token, this.comment_user).subscribe({
+        next: (response) => {
+          if (response.status == 'success') {
+            this.getComments();
+            this.handleSuccess('Comment edited successfully');
+            setTimeout(() => {
+              // Scroll to the top of the page in a smooth way
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // wait to reload the page
+              setTimeout(() => {
+                this._router.navigate(['/video-detail/', this.video.id]).then(() => {
+                  window.location.reload();
+                  localStorage.removeItem('Comment');
+                });
+              }, 1000);
+            }, 100);
+          } else {
+            this.status = 'error';
+            this.handleError('Error editing comment');
+          }
+        },
+        error: (error) => {
+          this.status = 'error';
+          console.log(error);
+        }
+      });
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      this.status = 'error';
+      this.handleError('Error editing comment');
     }
   }
 }
