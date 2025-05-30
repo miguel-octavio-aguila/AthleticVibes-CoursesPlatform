@@ -39,7 +39,7 @@
                                                         <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]">
                                                             <i class="ti-pencil"></i>
                                                         </a>
-                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + contentVideo.id">
+                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteVideo' + contentVideo.id">
                                                             <i class= "ti-trash"></i>
                                                         </button>
                                                     </div>
@@ -86,20 +86,22 @@
                 <div *ngFor="let comment of comments; let index=index" class="card-comment mb-3">
                     <div *ngFor="let user of users; let i=index">
                         <div *ngIf="index == i" style="margin: 20px;">
-                            <a class="profile">
-                                <div *ngIf="user && user.image" class="avatar_nav"  style="margin-bottom: 10px;">
-                                    <img src="{{ url + 'user/avatar/' + user.image }}">
-                                </div>
-                                <span class="my-auto">{{ user.name }} - {{ comment.created_at | date: 'dd/MM/yy'}}</span>
-                            </a>
-                            <div *ngIf="user_comment" style="display: inline-flex">
-                                <div class="" *ngIf="identity && (identity.sub == user_comment.id)">
-                                    <a class="btn btn-admin-action me-2" data-bs-toggle="collapse" [attr.data-bs-target]="'#multiCollapseCommentEdit' + comment.id" role="button" aria-expanded="false" (click)="showFormEditComment(comment.id)">
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <a class="profile" style="display: flex; align-items: center;">
+                                    <div *ngIf="user && user.image" class="avatar_nav" style="margin-bottom: 10px;">
+                                        <img src="{{ url + 'user/avatar/' + user.image }}">
+                                    </div>
+                                    <span>{{ user.name }} - {{ comment.created_at | date: 'dd/MM/yy'}}</span>
+                                </a>
+                                <div *ngIf="user_comment && identity && identity.sub == user_comment.id" style="display: flex;">
+                                    <a class="btn btn-admin-action" data-bs-toggle="collapse" [attr.data-bs-target]="'#multiCollapseCommentEdit' + comment.id" role="button" (click)="showFormEditComment(comment.id)">
                                         <i class="ti-pencil"></i>
                                     </a>
+                                    <button type="button" class="btn btn-admin-action" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteComment' + comment.id">
+                                        <i class="ti-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <br>
                             <strong><i class="title-comment">{{ comment.title }}</i></strong>
                             <a data-bs-toggle="collapse" [attr.data-bs-target]="'#responsesCollapse' + comment.id" role="button" aria-expanded="false" style="display: flex; justify-content: flex-end; text-decoration: none; color: inherit;" (click)="showResponses(comment.id)">
                                 <i class="bi-twitch">{{ response_cont[index] }}</i>
@@ -225,20 +227,24 @@
                                         <div *ngIf="response.comment_id === comment.id" class="card-comment mb-3" style="padding: 10px;">
                                             <div *ngFor="let user_r of users_responses; let i2 = index">
                                                 <div *ngIf="index2 == i2">
-                                                    <a class="profile">
-                                                        <div *ngIf="user_r && user_r.image" class="avatar_nav"  style="margin-bottom: 10px;">
-                                                            <img src="{{ url + 'user/avatar/' + user_r.image }}">
-                                                        </div>
-                                                        <span class="my-auto">{{ user_r.name }} - {{ response.created_at | date: 'dd/MM/yy'}}</span>
-                                                    </a>
-                                                    <div *ngIf="users_responses" style="display: inline-flex">
-                                                        <div class="" *ngIf="identity && identity.sub == users_responses[index2].id">
-                                                            <a class="btn btn-admin-action me-2" id="my-edit-button">
-                                                                <i class="ti-pencil"></i>
-                                                            </a>
+                                                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                                        <a class="profile">
+                                                            <div *ngIf="user_r && user_r.image" class="avatar_nav"  style="margin-bottom: 10px;">
+                                                                <img src="{{ url + 'user/avatar/' + user_r.image }}">
+                                                            </div>
+                                                            <span class="my-auto">{{ user_r.name }} - {{ response.created_at | date: 'dd/MM/yy'}}</span>
+                                                        </a>
+                                                        <div *ngIf="users_responses" style="display: flex">
+                                                            <div class="" *ngIf="identity && identity.sub == users_responses[index2].id">
+                                                                <a class="btn btn-admin-action" data-bs-toggle="collapse" [attr.data-bs-target]="'#multiCollapseResponseEdit' + response.id" role="button" aria-expanded="false" aria-controls="multicollapseResponseEdit" (click)="showFormEditResponse(response.id)">
+                                                                    <i class="ti-pencil"></i>
+                                                                </a>
+                                                                <button type="button" class="btn btn-admin-action" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteResponse' + response.id">
+                                                                    <i class="ti-trash"></i>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <br>
     
                                                     <!-- Answer content -->
                                                     <p>{{response.response}}</p>
@@ -256,15 +262,110 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Responses edit form -->
+                                    <ng-container *ngFor="let response of responses">
+                                        <div class="form-box">
+                                            <div class="form-value">
+                                                <div class="collapse" [attr.id]="'multiCollapseResponseEdit' + response.id" style="scroll-margin-top: 100px;">
+                                                    <div class="card card-body">
+                                                        <div class="form-div" *ngIf="is_edit">
+                                                            <!-- Comment create form -->
+                                                            <div class="alert alert-success" *ngIf="status == 'success' && !is_edit">
+                                                                <p style="text-align: right;">
+                                                                    <strong>Response created successfully!</strong>
+                                                                </p>
+                                                            </div>
+                                                            <div class="alert alert-success" *ngIf="status == 'success' && is_edit">
+                                                                <p style="text-align: right;">
+                                                                    <strong>Response updated successfully!</strong>
+                                                                </p>
+                                                            </div>
+                                                            <form #responseEditForm="ngForm" (ngSubmit)="onSubmitEditResponse(responseEditForm)" class="formResponse">
+                                                                <p class="title" *ngIf="status != 'success' && !is_edit">
+                                                                    Create a new response.
+                                                                </p>
+                                                                <p class="title" *ngIf="is_edit">
+                                                                    Modify your response.
+                                                                </p>
+                                                                <div class="form-group2 form-group" style="border: transparent;">
+                                                                    <label for="response" class="description-label">Response</label>
+                                                                    <textarea type="text" name="response" class="form-control" #responseField="ngModel" [froalaEditor]="froala_options" [froalaModel]="response.response" [(ngModel)]="response.response" required></textarea>
+                                                                    <small *ngIf="!responseField.valid && responseField.touched" class="invalid-feedback d-block">
+                                                                        Response is required.
+                                                                    </small>
+                                                                </div>
+                                                                <div class="form-group3 form-group">
+                                                                    <div *ngIf="is_edit && response.image != null" class="course-container">
+                                                                        <p class="course-label" for="image">Image of the respose</p>
+                                                                        <!-- show the image -->
+                                                                        <div class="course-image-container">
+                                                                            <img [src]="url + 'responses/image/' + response.image" class="course-image">
+                                                                        </div>
+                                                                    </div>                                                
+                                                                    <!-- Dropzone -->
+                                                                    <div class="dropzone-container">
+                                                                        <ngx-dropzone [multiple]="false" [maxFileSize]="600000000" [accept]="'image/*'" (change)="onSelect($event)">
+                                                                            <ngx-dropzone-label>
+                                                                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                    <path d="M7 10V9C7 6.23858 9.23858 4 12 4C14.7614 4 17 6.23858 17 9V10C19.2091 10 21 11.7909 21 14C21 15.4806 20.1956 16.8084 19 17.5M7 10C4.79086 10 3 11.7909 3 14C3 15.4806 3.8044 16.8084 5 17.5M7 10C7.43285 10 7.84965 10.0688 8.24006 10.1959M12 12V21M12 12L15 15M12 12L9 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                                                                </svg>
+                                                                                <p>Browse File to upload!</p>
+                                                                            </ngx-dropzone-label>
+                                                                            <ngx-dropzone-preview *ngFor="let f of files" [removable]="true" (removed)="onRemove(f)">
+                                                                                <ngx-dropzone-label>
+                                                                                    <svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                                                                        <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                                                                                    </svg>
+                                                                                    <span>{{ f.name }} ({{ f.size / 1024 | number:'1.0-2' }} KB)</span>
+                                                                                </ngx-dropzone-label>
+                                                                            </ngx-dropzone-preview>
+                                                                        </ngx-dropzone>
+                            
+                                                                        <!-- File status footer -->
+                                                                        <div class="file-status-footer">
+                                                                            <svg class="file-icon" fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
+                                                                                <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
+                                                                            </svg>
+                                                                            <p>
+                                                                                <span *ngIf="files?.length === 0">Not selected file</span>
+                                                                                <span *ngIf="files?.length === 1">{{ files[0].name }}</span>
+                                                                                <span *ngIf="files && files.length > 1">{{ files.length }} files selected</span>
+                                                                            </p>
+                                                                            <svg class="delete-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" (click)="onRemoveAll()">
+                                                                                <path d="M5.16565 10.1534C5.07629 8.99181 5.99473 8 7.15975 8H16.8402C18.0053 8 18.9237 8.9918 18.8344 10.1534L18.142 19.1534C18.0619 20.1954 17.193 21 16.1479 21H7.85206C6.80699 21 5.93811 20.1954 5.85795 19.1534L5.16565 10.1534Z" stroke="currentColor" stroke-width="2"></path>
+                                                                                <path d="M19.5 5H4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                                                                                <path d="M10 3C10 2.44772 10.4477 2 11 2H13C13.5523 2 14 2.44772 14 3V5H10V3Z" stroke="currentColor" stroke-width="2"></path>
+                                                                            </svg>
+                                                                        </div>
+                            
+                                                                        <div class="upload-status">
+                                                                            <span *ngIf="!uploading">Upload image</span>
+                                                                            <span *ngIf="uploading">Uploading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <input *ngIf="status != 'success' && !is_edit" type="submit" name="" value="Save" class="btn btn-button2" [disabled]="responseEditForm.invalid || uploading">
+                                                                <input *ngIf="is_edit" type="submit" name="" value="Save Changes" class="btn btn-button2" [disabled]="responseEditForm.invalid || uploading">
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+
                                     <!-- Responses form -->
                                     <div class="form-box">
                                         <div class="form-value">
                                             <div class="comment-collapse">
-                                                <a class="link-collapse" data-bs-toggle="collapse" [attr.data-bs-target]="'#multiCollapseResponse'" role="button" aria-expanded="false" (click)="showFormResponse()">
-                                                    Make a response
+                                                <a class="link-collapse" data-bs-toggle="collapse" [attr.data-bs-target]="'#multiCollapseResponse' + comment.id" role="button" aria-expanded="false" (click)="showFormResponse(comment.id)">
+                                                    Make a response for this comment
                                                 </a>
                                             </div>
-                                            <div class="collapse" id="multiCollapseResponse">
+                                            <div class="collapse" [attr.id]="'multiCollapseResponse' + comment.id">
                                                 <div class="card card-body">
                                                     <div class="form-div" *ngIf="!is_edit">
                                                         <!-- Comment create form -->
@@ -452,9 +553,9 @@
         </div>
     </div>
 
-    <!-- Delete Modal -->
+    <!-- Delete Video Modal -->
     <ng-container *ngFor="let video of videos">
-        <div class="modal fade" [id]="'delete' + video.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" [id]="'deleteVideo' + video.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -473,6 +574,64 @@
                             Close
                         </button>
                         <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteVideo(video.id)">
+                            <i class= "ti-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Delete Comment Modal -->
+    <ng-container *ngFor="let comment of comments">
+        <div class="modal fade" [id]="'deleteComment' + comment.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal_title fs-5" id="exampleModalLabel">
+                            Are you sure you want to delete this comment?
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        You are going to delete the comment: <strong>{{ comment.title }}</strong>
+                        <br>
+                        This action cannot be undone.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
+                            Close
+                        </button>
+                        <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteComment(comment.id)">
+                            <i class= "ti-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- Delete Response Modal -->
+    <ng-container *ngFor="let response of responses">
+        <div class="modal fade" [id]="'deleteResponse' + response.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal_title fs-5" id="exampleModalLabel">
+                            Are you sure you want to delete this response?
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        You are going to delete the response.
+                        <br>
+                        This action cannot be undone.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
+                            Close
+                        </button>
+                        <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteResponse(response.id)">
                             <i class= "ti-trash"></i>
                         </button>
                     </div>

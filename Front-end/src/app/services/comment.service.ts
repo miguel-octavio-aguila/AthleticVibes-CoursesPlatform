@@ -48,4 +48,12 @@ export class CommentService {
 
     return this._http.put(this.url + 'comments/' + comment.id, params, { headers: headers });
   }
+
+  // delete comment
+  delete(token: string, id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                  .set('Authorization', token);
+
+    return this._http.delete(this.url + 'comments/' + id, { headers: headers });
+  }
 }

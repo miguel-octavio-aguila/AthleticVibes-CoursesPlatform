@@ -34,4 +34,24 @@ export class ReponseService {
                                    .set('Authorization', token);
     return this._http.post(this.url + 'responses', params, { headers: headers });
   }
+
+  // update a response
+  updateResponse(token: any, response: any): Observable<any> {
+    if (response.response) {
+      response.response = GLOBAL.htmlEntities(response.response);
+    }
+
+    let json = JSON.stringify(response);
+    let params = 'json=' + json;
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                  .set('Authorization', token);
+    return this._http.put(this.url +'responses/' + response.id, params, { headers: headers });
+  }
+
+  // delete a response
+  deleteResponse(token: any, id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded')
+                                   .set('Authorization', token);
+    return this._http.delete(this.url +'responses/' + id, { headers: headers });
+  }
 }

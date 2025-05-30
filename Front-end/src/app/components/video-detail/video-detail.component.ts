@@ -58,6 +58,7 @@ export class VideoDetailComponent {
   public comment_user: any = {};
   public user_comment: any;
   public created_at: any;
+  public responseToEdit: any;
 
   // froala_options
   public froala_options: Object = {
@@ -294,6 +295,42 @@ export class VideoDetailComponent {
     });
   }
 
+  uploadResponseEdit(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if files are selected
+      this.fileUploadService.uploadResponse(this.files[0]).subscribe({
+        next: (response: any) => {
+          // Check if the response contains an image
+          if (response.image) {
+            // Update the user object with the new image
+            for (let i = 0; i < this.responses.length; i++) {
+              if (this.responses[i].id === this.responseToEdit.id) {
+                this.responses[i].image = response.image;
+                break;
+              }
+            }
+            // Save the new image in local storage
+            localStorage.setItem('Comment', JSON.stringify(this.responses));
+            // To indicate that the image is uploaded and the uploading is finished
+            this.uploading = false;
+            // Indicate success of the promise
+            resolve();
+          } else {
+            this.status = 'error';
+            this.uploading = false;
+            reject('Error uploading image');
+          }
+        },
+        error: (error) => {
+          console.log('Upload error details:', error);
+          this.status = 'error';
+          this.uploading = false;
+          reject(error);
+        }
+      });
+    });
+  }
+
   getVideo() {
     this._route.params.subscribe(params => {
       let id = +params['id'];
@@ -361,24 +398,6 @@ export class VideoDetailComponent {
     )
   }
 
-  deleteVideo(id: any) {
-    this._videoService.delete(this.token, id).subscribe(
-      response => {
-        if (response.status =='success') {
-          this.getVideosByCourse();
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
-        } else {
-          this.status = 'error on deleteVideo()';
-        }
-      },
-      error => {
-        console.log(error);
-      }
-    )
-  }
-
   getComments() {
     this._route.params.subscribe(params => {
       let id = +params['id'];
@@ -422,6 +441,60 @@ export class VideoDetailComponent {
     });
   }
 
+  deleteVideo(id: any) {
+    this._videoService.delete(this.token, id).subscribe(
+      response => {
+        if (response.status =='success') {
+          this.getVideosByCourse();
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          this.status = 'error on deleteVideo()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
+  deleteComment(id: any) {
+    this._commentService.delete(this.token, id).subscribe(
+      response => {
+        if (response.status =='success') {
+          this.getComments();
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          this.status = 'error on deleteComment()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
+  deleteResponse(id: any) {
+    this._responseService.deleteResponse(this.token, id).subscribe(
+      response => {
+        if (response.status =='success') {
+          this.getComments();
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        } else {
+          this.status = 'error on deleteResponse()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
   // Method to show Questions and Answers
   show_chat(id: any) {
     $('#multiCollapseDescription').hide();
@@ -447,12 +520,13 @@ export class VideoDetailComponent {
   }
 
   // method to show the form to create a response
-  showFormResponse() {
+  showFormResponse(commentId: any) {
+    this.responxe.comment_id = commentId;
     if(this.show === true) {
-      $('#multiCollapseResponse').hide();
+      $('#multiCollapseResponse' + commentId).hide();
       this.show = false;
     } else {
-      $('#multiCollapseResponse').show();
+      $('#multiCollapseResponse' + commentId).show();
       this.show = true;
     }
   }
@@ -510,7 +584,39 @@ export class VideoDetailComponent {
     this.comment_user = this.comments.find((c: any) => c.id === id);
     this.is_edit = true;
   
-    const el        = document.getElementById('multiCollapseCommentEdit' + id);
+    const el = document.getElementById('multiCollapseCommentEdit' + id);
+    if (!el) {
+      return; 
+    }
+
+    const collapse  = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
+
+    if (el.classList.contains('show')) {
+      collapse.hide();
+    } else {
+      el.addEventListener('shown.bs.collapse', () => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, { once: true });
+
+      collapse.show();
+      $('#responsesCollapse' + id).hide();
+    }
+  }
+
+  // method to show the form to edit a response
+  showFormEditResponse(id: number): void {
+    for (const response of this.responses) {
+      if (response.id === id) {
+        this.responseToEdit = response;
+        this.is_edit = true;
+        break;
+      }
+    }
+
+    this.responseToEdit = this.responses.find((c: any) => c.id === id);
+    this.is_edit = true;
+  
+    const el = document.getElementById('multiCollapseResponseEdit' + id);
     if (!el) {
       return; 
     }
@@ -652,6 +758,7 @@ export class VideoDetailComponent {
         next: (response) => {
           if (response.status == 'success') {
             this.getComments();
+            this.loadAnswersForComment(this.comment_user.id);
             this.handleSuccess('Comment edited successfully');
             setTimeout(() => {
               // Scroll to the top of the page in a smooth way
@@ -678,6 +785,54 @@ export class VideoDetailComponent {
       console.error('Error editing comment:', error);
       this.status = 'error';
       this.handleError('Error editing comment');
+    }
+  }
+
+  // to edit a response
+  async onSubmitEditResponse(form: any) {
+    try {
+      if (this.files && this.files.length > 0) {
+        this.uploading = true;
+        await this.uploadResponseEdit();
+      }
+      
+      this.responseToEdit.user_id = Number(this.responseToEdit.user_id);
+      this.responseToEdit.comment_id = Number(this.responseToEdit.comment_id);
+      
+      if(form.valid) {
+        this.responseToEdit.response = this.stripHtml(this.responseToEdit.response);
+      }
+
+      this._responseService.updateResponse(this.token, this.responseToEdit).subscribe({
+        next: (response) => {
+          if (response.status == 'success') {
+            this.getComments();
+            this.handleSuccess('Response edited successfully');
+            setTimeout(() => {
+              // Scroll to the top of the page in a smooth way
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              // wait to reload the page
+              setTimeout(() => {
+                this._router.navigate(['/video-detail/', this.video.id]).then(() => {
+                  window.location.reload();
+                  localStorage.removeItem('Response');
+                });
+              }, 1000);
+            }, 100);
+          } else {
+            this.status = 'error';
+            this.handleError('Error editing response');
+          }
+        },
+        error: (error) => {
+          this.status = 'error';
+          console.log(error);
+        }
+      });
+    } catch (error) {
+      console.error('Error editing response:', error);
+      this.status = 'error';
+      this.handleError('Error editing response');
     }
   }
 }
