@@ -26,20 +26,22 @@
                                             <div *ngIf="contentVideo.section == item" class="content-item">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div>
-                                                        <div class="video-title" *ngIf="identity.sub && course.buy && course.buy == 1">
-                                                            <a class="video-title-a" [routerLink]="['/video-detail', contentVideo.id]">
+                                                        <div class="video-title" *ngIf="identity.sub && course.buy && course.buy == 1" style="display: flex; align-items: flex-end;">
+                                                            <a class="video-title-a" [routerLink]="['/video-detail', contentVideo.id]" style="display: flex; flex-direction: column;">
                                                                 <strong>{{ contentVideo.created_at | date:'dd/MM/yyyy' }}</strong>
-                                                                <br>
-                                                                {{ contentVideo.title }}
+                                                                <span>{{ contentVideo.title }}</span>
                                                             </a>
+                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;">
+                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);">
+                                                            </div>
                                                         </div>
                                                         <div class="video-title" *ngIf="!identity.sub || !course.buy">{{ contentVideo.title }}</div>
                                                     </div>
                                                     <div class="video-actions" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]">
+                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]" style="padding: 3px 6px;">
                                                             <i class="ti-pencil"></i>
                                                         </a>
-                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteVideo' + contentVideo.id">
+                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteVideo' + contentVideo.id" style="padding: 3px 6px;">
                                                             <i class= "ti-trash"></i>
                                                         </button>
                                                     </div>

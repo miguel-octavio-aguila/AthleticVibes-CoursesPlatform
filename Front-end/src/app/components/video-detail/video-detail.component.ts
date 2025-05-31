@@ -14,9 +14,11 @@ import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 import { CommentService } from '../../services/comment.service';
 import { Comment } from '../../models/Comment';
 import { Responxe } from '../../models/Responxe';
-declare const bootstrap: any;
-// jQuery is already declared globally via 'declare var $: any'
+import { ChartData, ChartEvent, ChartType } from 'chart.js';
 
+declare const bootstrap: any;
+
+// jquery variable
 declare var $: any;
 // this is a global variable for iziToast
 declare var iziToast: any;
@@ -59,6 +61,28 @@ export class VideoDetailComponent {
   public user_comment: any;
   public created_at: any;
   public responseToEdit: any;
+
+  // for the progress
+  public sale: any;
+  public progress_: any;
+
+  // chart graph
+  public ChartLabels: string[] = ['', 'Progress'];
+  public ChartData: ChartData<'doughnut'> = {
+    labels: this.ChartLabels,
+    datasets: [
+      { data: [ ] }
+    ]
+  };
+  public ChartType: ChartType = 'doughnut';
+
+  // events of the chart
+  public chartClicked({ event, active }: { event: ChartEvent, active: {}[] }): void {
+    console.log(event, active);
+  }
+  public chartHovered({ event, active }: { event: ChartEvent, active: {}[] }): void {
+    console.log(event, active);
+  }
 
   // froala_options
   public froala_options: Object = {
@@ -369,6 +393,32 @@ export class VideoDetailComponent {
         if (response.status == 'success') {
           this.course = response.course;
           this.accordion = response.accordion;
+          this.sale = response.sales;
+
+          if (this.sale.progress == null || this.sale.progress == 0) {
+            this.sale.progress = 0;
+            this.progress_ = 0;
+            this.ChartData = {
+              datasets: [
+                { data: [0, 100],
+                  backgroundColor: ['#007bff', '#6c757d'],
+                  borderColor: ['#007bff', '#6c757d'],
+                  hoverBackgroundColor: ['#007bff', '#6c757d'],
+                }
+              ]
+            };
+          } else {
+            this.progress_ = this.sale.progress;
+            this.ChartData = {
+              datasets: [
+                { data: [this.progress_, 100-this.progress_],
+                  backgroundColor: ['#007bff', '#6c757d'],
+                  borderColor: ['#007bff', '#6c757d'],
+                  hoverBackgroundColor: ['#007bff', '#6c757d'],
+                }
+              ]
+            };
+          }
           // for the youtube video
           var results = this.course.url.match('[\\?&]v=([^&#]*)');
           var video = (results === null) ? this.course.url : results[1];

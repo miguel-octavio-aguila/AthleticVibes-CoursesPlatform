@@ -6,11 +6,13 @@ import { RouterModule } from '@angular/router';
 import { UserService } from './services/user.service';
 import { GLOBAL } from './services/global';
 import { CartService } from './services/cart.service';
+import { ChartData, ChartEvent, ChartType } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
 import * as AOS from 'aos';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, RouterModule],
+  imports: [RouterOutlet, CommonModule, RouterModule, BaseChartDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   providers: [CategoryService, CartService]
@@ -30,6 +32,26 @@ export class AppComponent implements OnInit {
   public quantities: any;
   public total: any;
   public cart_courses: any;
+
+  // chart graph
+  public ChartData: ChartData<'doughnut'> = {
+    datasets: [
+      { data: [],
+        backgroundColor: ['#007bff', '#6c757d'],
+        borderColor: ['#007bff', '#6c757d'],
+        hoverBackgroundColor: ['#007bff', '#6c757d'],
+      }
+    ]
+  };
+  public ChartType: ChartType = 'doughnut';
+
+  // events of the chart
+  public chartClicked({ event, active }: { event: ChartEvent, active: {}[] }): void {
+    console.log(event, active);
+  }
+  public chartHovered({ event, active }: { event: ChartEvent, active: {}[] }): void {
+    console.log(event, active);
+  }
 
   constructor(
     private categoryService: CategoryService,
