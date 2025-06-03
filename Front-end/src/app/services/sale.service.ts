@@ -19,13 +19,21 @@ export class SaleService {
   createSale(token: any, user: any): Observable<any> {
     const json = JSON.stringify(user);
     const params = 'json=' + json
-    const headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
     return this._http.post(this.url + 'sales', params, { headers: headers });
   }
 
   // get sales
   getSales(token: any): Observable<any> {
-    const headers = new HttpHeaders().set('Content-Type', 'application/json').set('Authorization', token);
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
     return this._http.get(this.url + 'sales' , { headers: headers });
+  }
+
+  // update sale
+  updateSaleProgress(token: any, sale: any, id: any): Observable<any> {
+    const json = JSON.stringify(sale);
+    const params = 'json=' + json
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
+    return this._http.put(this.url +'sales/' + id, params, { headers: headers });
   }
 }

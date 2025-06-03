@@ -31,8 +31,11 @@
                                                                 <strong>{{ contentVideo.created_at | date:'dd/MM/yyyy' }}</strong>
                                                                 <span>{{ contentVideo.title }}</span>
                                                             </a>
-                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;">
-                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);">
+                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;" *ngIf="course.buy && identity.sub && course.buy == 1 && contentVideo.checkbox == 'activated'">
+                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);" checked (click)="deleteCheckbox(contentVideo.checkbox_id)">
+                                                            </div>
+                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;" *ngIf="course.buy && identity.sub && !contentVideo.checkbox">
+                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);" (click)="storeCheckbox(contentVideo.id)">
                                                             </div>
                                                         </div>
                                                         <div class="video-title" *ngIf="!identity.sub || !course.buy">{{ contentVideo.title }}</div>

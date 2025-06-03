@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CategoryService } from './services/category.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { UserService } from './services/user.service';
+import { ProgressService } from './services/progress.service';
 import { GLOBAL } from './services/global';
 import { CartService } from './services/cart.service';
 import { ChartData, ChartEvent, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import { ChangeDetectorRef } from '@angular/core';
 import * as AOS from 'aos';
 
 @Component({
@@ -56,13 +58,17 @@ export class AppComponent implements OnInit {
   constructor(
     private categoryService: CategoryService,
     public userService: UserService,
-    private cartService: CartService
+    private cartService: CartService,
+    private progressService: ProgressService,
+    private cdr: ChangeDetectorRef
   ) {
     this.url = GLOBAL.url;
     this.url_front = GLOBAL.url_front;
     this.loadUser();
   }
 
+  @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
+  
   ngOnInit(): void {
     this.getCategories();
     this.identity = this.userService.getIdentity();
@@ -74,6 +80,26 @@ export class AppComponent implements OnInit {
         AOS.init();
       }
     }
+    this.progressService.progress$.subscribe(progress => {
+      const progressPercentage = progress || 0;
+      const remaining = 100 - progressPercentage;
+      this.ChartData = {
+        labels: [],
+        datasets: [
+          { 
+            data: [progressPercentage, remaining],
+            backgroundColor: ['#3c342c', '#bcb4bc'],
+            borderColor: ['#3c342c', '#bcb4bc'],
+            hoverBackgroundColor: ['#3c342c', '#bcb4bc'],
+          }
+        ]
+      };
+    
+      if (this.chart) {
+        this.chart.update();
+      }
+      this.cdr.detectChanges();
+    });
   }
 
   loadUser() {

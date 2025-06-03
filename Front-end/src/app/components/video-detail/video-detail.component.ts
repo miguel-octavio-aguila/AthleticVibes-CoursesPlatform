@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { GLOBAL } from '../../services/global';
 import { VideoService } from '../../services/video.service';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { ReponseService } from '../../services/reponse.service';
-import { FileUploadService } from '../../services/file.upload.service'; 
+import { FileUploadService } from '../../services/file.upload.service';
+import { ProgressService } from '../../services/progress.service';
+import { CheckboxService } from '../../services/checkbox.service';
+import { SaleService } from '../../services/sale.service';
 import { Router, ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
@@ -14,6 +17,7 @@ import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 import { CommentService } from '../../services/comment.service';
 import { Comment } from '../../models/Comment';
 import { Responxe } from '../../models/Responxe';
+import { Checkbox } from '../../models/Checkbox';
 import { ChartData, ChartEvent, ChartType } from 'chart.js';
 
 declare const bootstrap: any;
@@ -28,9 +32,9 @@ declare var iziToast: any;
   imports: [RouterModule, CommonModule, FormsModule, NgxDropzoneModule, FroalaEditorModule, FroalaViewModule],
   templateUrl: './video-detail.component.html',
   styleUrl: './video-detail.component.css',
-  providers: [VideoService, CourseService, UserService, CommentService, FileUploadService, ReponseService]
+  providers: [VideoService, CourseService, UserService, CommentService, FileUploadService, ReponseService, CheckboxService, SaleService]
 })
-export class VideoDetailComponent {
+export class VideoDetailComponent implements OnDestroy {
   public identity: any;
   public token: any;
   public course: any;
@@ -61,6 +65,9 @@ export class VideoDetailComponent {
   public user_comment: any;
   public created_at: any;
   public responseToEdit: any;
+  public checkbox_: any;
+  public checkbox: any;
+  public checkboxes: any;
 
   // for the progress
   public sale: any;
@@ -117,6 +124,9 @@ export class VideoDetailComponent {
     private _commentService: CommentService,
     private fileUploadService: FileUploadService,
     private _responseService: ReponseService,
+    private _progressService: ProgressService,
+    private _checkboxService: CheckboxService,
+    private _saleService: SaleService,
     private _route: ActivatedRoute,
     private _router: Router,
     private sanitizer: DomSanitizer
@@ -158,11 +168,31 @@ export class VideoDetailComponent {
       0,
       '',
       ''
+    );
+
+    this.checkbox = {
+      id: null,
+      user_id: this.identity?.sub || null,
+      course_id: null,
+      video_id: null,
+      checkbox: 0,
+    }
+
+    this.checkbox_ = new Checkbox(
+      0,
+      0,
+      0,
+      0,
+      0
     )
   }
 
   ngOnInit(): void {
     this.getVideo();
+  }
+
+  ngOnDestroy(): void {
+    this._progressService.setProgress(0);
   }
 
   public newComment() {
@@ -183,6 +213,16 @@ export class VideoDetailComponent {
       this.responxe.comment_id,
       this.responxe.response,
       this.responxe.image
+    )
+  }
+
+  public newCheckbox() {
+    this.checkbox_ = new Checkbox (
+      this.checkbox.id,
+      this.checkbox.user_id = this.identity.sub,
+      this.checkbox.course_id,
+      this.checkbox.video_id,
+      this.checkbox.checkbox
     )
   }
 
@@ -363,15 +403,20 @@ export class VideoDetailComponent {
           if (response.status == 'success') {
             this.video = response.video;
             this.comment.video_id = this.video.id;
+            this.checkbox.video_id = this.video.id;
             // initialize the comment
             this.newComment();
+            // initialize the response
+            this.newResponse();
+
+            // initialize the checkbox
+            this.newCheckbox();
 
             // for the youtube video
             var results = this.video.url.match('[\\?&]v=([^&#]*)');
             var video = (results === null) ? this.video.url : results[1];
             this.video.url = this.sanitizer.bypassSecurityTrustResourceUrl('https://www.youtube.com/embed/' + video + '?controls=0');
 
-            this.getVideosByCourse();
             this.getCourse();
             this.getComments();
           } else {
@@ -394,31 +439,28 @@ export class VideoDetailComponent {
           this.course = response.course;
           this.accordion = response.accordion;
           this.sale = response.sales;
+          this.checkbox.course_id = this.course.id;
 
-          if (this.sale.progress == null || this.sale.progress == 0) {
-            this.sale.progress = 0;
-            this.progress_ = 0;
-            this.ChartData = {
-              datasets: [
-                { data: [0, 100],
-                  backgroundColor: ['#007bff', '#6c757d'],
-                  borderColor: ['#007bff', '#6c757d'],
-                  hoverBackgroundColor: ['#007bff', '#6c757d'],
-                }
-              ]
-            };
+          if (this.sale) {
+            if (this.sale.progress == null || this.sale.progress == 0) {
+              this.sale.progress = 0;
+              this.progress_ = 0;
+            } else {
+              this.progress_ = this.sale.progress;
+            }
           } else {
-            this.progress_ = this.sale.progress;
-            this.ChartData = {
-              datasets: [
-                { data: [this.progress_, 100-this.progress_],
-                  backgroundColor: ['#007bff', '#6c757d'],
-                  borderColor: ['#007bff', '#6c757d'],
-                  hoverBackgroundColor: ['#007bff', '#6c757d'],
-                }
-              ]
-            };
+            this.progress_ = 0;
+            this.sale = { progress: 0 };
           }
+
+          this._progressService.setProgress(this.progress_);
+
+          if (this.course.buy && this.course.buy == 1 && this.identity.sub && this.token) {
+            this.getVideoWithProgress();
+          } else {
+            this.getVideosByCourse();
+          }
+
           // for the youtube video
           var results = this.course.url.match('[\\?&]v=([^&#]*)');
           var video = (results === null) ? this.course.url : results[1];
@@ -438,6 +480,22 @@ export class VideoDetailComponent {
       response => {
         if (response.status == 'success') {
           this.videos = response.videos;
+        } else {
+          this.status = 'error';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
+  getVideoWithProgress() {
+    this._videoService.getVideoWithProgress(this.token, this.video.course_id).subscribe(
+      response => {
+        if (response.status =='success') {
+          this.videos = response.videos;
+          this.videos.result = response.result;          
         } else {
           this.status = 'error';
         }
@@ -884,5 +942,115 @@ export class VideoDetailComponent {
       this.status = 'error';
       this.handleError('Error editing response');
     }
+  }
+
+  // store checkbox
+  storeCheckbox(id: any) {
+    this.checkbox.user_id = this.sale.user_id;
+    this.checkbox.course_id = this.sale.course_id;
+    this.checkbox.video_id = id;
+    this.checkbox.checkbox = 1;
+
+    this._checkboxService.storeCheckbox(this.token, this.checkbox).subscribe(
+      response => {
+        if (response.status =='success') {
+          var courseid = this.video.course_id;
+          this._checkboxService.getCheckboxes(this.token, courseid).subscribe(
+            response => {
+              if (response.status =='success') {
+                this.checkbox = response.checkbox || [];
+                this.progress_ = 0;
+
+                for (let i = 0; i < this.checkbox.length; i++) {
+                  this.progress_ = this.videos.result + this.progress_;
+                }
+
+                this.sale.progress = this.progress_;
+
+                this._progressService.setProgress(this.progress_);
+
+                this.updateSaleProgress(this.token, this.sale);
+              } else {
+                this.status = 'error on indexCheckbox()';
+              }
+            },
+            error => {
+              console.log(error);
+            }
+          )
+        } else {
+          this.status = 'error on storeCheckbox()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
+  // update sale progress
+  updateSaleProgress(token: any, sale: any): void {
+    var id = this.sale.id;
+    this._saleService.updateSaleProgress(token, sale, id).subscribe(
+      response => {
+        if (response.status == 'success') {
+          this.sale = response.sale;
+          this.progress_ = this.sale.progress;
+          
+          setTimeout(() => {
+            this._progressService.setProgress(this.progress_);
+            
+            
+            setTimeout(() => {
+              this.getVideo();
+            }, 100);
+          }, 0);
+        } else {
+          this.status = 'error on updateSaleProgress()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
+  }
+
+  // delete checkbox
+  deleteCheckbox(id: any) {
+    this._checkboxService.deleteCheckbox(this.token, id).subscribe(
+      response => {
+        if (response.status =='success') {
+          var courseid = this.video.course_id;
+          this._checkboxService.getCheckboxes(this.token, courseid).subscribe(
+            response => {
+              if (response.status =='success') {
+                this.checkbox = response.checkbox || [];
+                this.progress_ = 0;
+
+                for (let i = 0; i < this.checkbox.length; i++) {
+                  this.progress_ = this.videos.result + this.progress_;
+                }
+
+                this.sale.progress = this.progress_;
+
+                this._progressService.setProgress(this.progress_);
+
+                this.updateSaleProgress(this.token, this.sale);
+              } else {
+                this.status = 'error on indexCheckbox()';
+              }
+            },
+            error => {
+              console.log(error);
+            }
+          )
+        } else {
+          this.status = 'error on storeCheckbox()';
+        }
+      },
+      error => {
+        console.log(error);
+      }
+    )
   }
 }

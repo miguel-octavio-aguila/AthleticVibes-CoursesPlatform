@@ -254,3 +254,40 @@ section {
         padding: 8px 30px;
     }
 }
+
+/* chart */
+.chart-container {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    padding: 8px;
+}
+
+.chart-graph {
+    width: 100px;
+    height: 100px;
+    margin-right: 12px;
+}
+
+.chart-labels {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.label-box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+.label-box.completed {
+    background-color: #3c342c;
+}
+
+.label-box.pending {
+    background-color: #bcb4bc;
+}
