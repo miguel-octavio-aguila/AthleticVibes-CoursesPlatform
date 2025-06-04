@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { RouterOutlet, Router } from '@angular/router';
 import { CategoryService } from './services/category.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -10,16 +10,17 @@ import { CartService } from './services/cart.service';
 import { ChartData, ChartEvent, ChartType } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChangeDetectorRef } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import * as AOS from 'aos';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, RouterModule, BaseChartDirective],
+  imports: [RouterOutlet, CommonModule, RouterModule, BaseChartDirective, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   providers: [CategoryService, CartService]
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   title = 'Front-end';
 
   public identity:any;
@@ -34,6 +35,10 @@ export class AppComponent implements OnInit {
   public quantities: any;
   public total: any;
   public cart_courses: any;
+
+  // search
+  isSearchActive = false;
+  text: string = '';
 
   // chart graph
   public ChartData: ChartData<'doughnut'> = {
@@ -60,6 +65,7 @@ export class AppComponent implements OnInit {
     public userService: UserService,
     private cartService: CartService,
     private progressService: ProgressService,
+    private _router: Router,
     private cdr: ChangeDetectorRef
   ) {
     this.url = GLOBAL.url;
@@ -68,18 +74,22 @@ export class AppComponent implements OnInit {
   }
 
   @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
   
   ngOnInit(): void {
     this.getCategories();
+
     this.identity = this.userService.getIdentity();
     if(this.token) {
       this.indexCart();
     }
+
     document.onreadystatechange = function () {
       if (document.readyState == "complete") {
         AOS.init();
       }
     }
+
     this.progressService.progress$.subscribe(progress => {
       const progressPercentage = progress || 0;
       const remaining = 100 - progressPercentage;
@@ -100,6 +110,13 @@ export class AppComponent implements OnInit {
       }
       this.cdr.detectChanges();
     });
+    
+    this.isSearchActive = false;
+    this.text = '';
+  }
+
+  ngAfterViewInit() {
+    this.cdr.detectChanges();
   }
 
   loadUser() {
@@ -148,5 +165,28 @@ export class AppComponent implements OnInit {
         console.log(error);
       }
     );
+  }
+
+  // search
+  toggleSearch() {
+    this.isSearchActive = !this.isSearchActive;
+
+    if (this.isSearchActive) {
+      setTimeout(() => {
+        this.searchInput.nativeElement.focus();
+      });
+    }
+  }
+
+  search() {
+    const trimmed = this.text.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    this._router.navigate(['/search', trimmed]);
+
+    this.isSearchActive = false;
+    this.text = '';
   }
 }

@@ -36,4 +36,16 @@ export class SaleService {
     const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
     return this._http.put(this.url +'sales/' + id, params, { headers: headers });
   }
+
+  // get sale by category
+  getSalesByCategory(token: any, category: any): Observable<any> {
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
+    return this._http.get(this.url +'sales/getSalesByCategory/' + category, { headers: headers });
+  }
+
+  // get sale by text
+  getSalesByText(token: any, text: any): Observable<any> {
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
+    return this._http.get(this.url +'sales/getSalesByText/' + text, { headers: headers });
+  }
 }

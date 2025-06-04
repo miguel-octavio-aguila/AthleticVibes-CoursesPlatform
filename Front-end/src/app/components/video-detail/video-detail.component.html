@@ -31,11 +31,21 @@
                                                                 <strong>{{ contentVideo.created_at | date:'dd/MM/yyyy' }}</strong>
                                                                 <span>{{ contentVideo.title }}</span>
                                                             </a>
-                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;" *ngIf="course.buy && identity.sub && course.buy == 1 && contentVideo.checkbox == 'activated'">
-                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);" checked (click)="deleteCheckbox(contentVideo.checkbox_id)">
+                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end; cursor: pointer; " *ngIf="course.buy && identity.sub && course.buy == 1 && contentVideo.checkbox == 'activated'">
+                                                                <label class="checkbox-container">
+                                                                    <input type="checkbox" value="0" checked (click)="deleteCheckbox(contentVideo.checkbox_id)">
+                                                                    <svg viewBox="0 0 64 64" height="2em" width="2em">
+                                                                        <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
+                                                                    </svg>
+                                                                </label>
                                                             </div>
-                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end;" *ngIf="course.buy && identity.sub && !contentVideo.checkbox">
-                                                                <input type="checkbox" value="0" style="width: 16px; height: 16px; transform: scale(1.2);" (click)="storeCheckbox(contentVideo.id)">
+                                                            <div style="margin-left: 10px; display: flex; align-items: flex-end; cursor: pointer; " *ngIf="course.buy && identity.sub && !contentVideo.checkbox">
+                                                                <label class="checkbox-container">
+                                                                    <input type="checkbox" value="0" (click)="storeCheckbox(contentVideo.id)">
+                                                                    <svg viewBox="0 0 64 64" height="2em" width="2em">
+                                                                        <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
+                                                                    </svg>
+                                                                </label>
                                                             </div>
                                                         </div>
                                                         <div class="video-title" *ngIf="!identity.sub || !course.buy">{{ contentVideo.title }}</div>

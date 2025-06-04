@@ -720,3 +720,34 @@ ngx-dropzone-preview ngx-dropzone-label span {
     border-top: 2px solid #3c342c;
     color: #3c342c;
 }
+
+/* checkbox */
+.checkbox-container {
+    cursor: pointer;
+}
+
+.checkbox-container input {
+    display: none;
+}
+
+.checkbox-container svg {
+    overflow: visible;
+    width: 20px;
+    height: 20px;
+}
+
+.path {
+    fill: none;
+    stroke: white;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease;
+    stroke-dasharray: 241 9999999;
+    stroke-dashoffset: 0;
+}
+
+.checkbox-container input:checked~svg .path {
+    stroke-dasharray: 70.5096664428711 9999999;
+    stroke-dashoffset: -262.2723388671875;
+}

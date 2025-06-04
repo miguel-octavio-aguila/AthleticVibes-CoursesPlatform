@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { GLOBAL } from '../../services/global';
 import { CartService } from '../../services/cart.service';
 import { Cart } from '../../models/Cart';
@@ -31,6 +31,7 @@ export class HomeComponent {
     private _userService: UserService,
     private _cartService: CartService,
     private _saleService: SaleService,
+    private _route: ActivatedRoute,
     private _router: Router
   ){
     this.title = 'Home';
@@ -41,11 +42,31 @@ export class HomeComponent {
   }
 
   ngOnInit(){
-    if (this.identity.sub) {
-      this.getSales();
-    } else {
-      this.getCourses(); 
-    }
+    this._route.params.subscribe(params => {
+      let id = +params['id'];
+      let text = params['text'];
+      if (id || text) {
+        if (this.identity.sub || this.identity.id || this.identity.name) {
+          if (id) {            
+            this.getSalesByCategory(id);
+          } else {
+            this.getSalesByText(text);
+          }
+        } else {
+          if (id) {            
+            this.getCoursesByCategory(id);
+          } else {
+            this.getCoursesByText(text);
+          }
+        }
+      } else {
+        if (this.identity.sub) {
+          this.getSales();
+        } else {
+          this.getCourses(); 
+        }
+      } 
+    });
   }
 
   getCourses(){
@@ -136,5 +157,57 @@ export class HomeComponent {
         console.log(error);
       }
     );
+  }
+
+  // get sales by category
+  getSalesByCategory(id: any){
+    this._saleService.getSalesByCategory(this.token, id).subscribe(
+      response => {
+        if(response.status =='success'){
+          this.courses = response.courseStatus;
+        } else {
+          this._router.navigate(['/home']);
+        }
+      }
+    )
+  }
+
+  // get courses by category
+  getCoursesByCategory(id: any){
+    this._courseService.getCoursesByCategory(id).subscribe(
+      response => {
+        if(response.status =='success'){
+          this.courses = response.courses;
+        } else {
+          this._router.navigate(['/home']);
+        }
+      }
+    )
+  }
+
+  // get sales by text
+  getSalesByText(text: any){
+    this._saleService.getSalesByText(this.token, text).subscribe(
+      response => {
+        if(response.status =='success'){
+          this.courses = response.courseStatus;
+        } else {
+          this._router.navigate(['/home']);
+        }
+      }
+    )
+  }
+
+  // get courses by text
+  getCoursesByText(text: any){
+    this._courseService.getCoursesByText(text).subscribe(
+      response => {
+        if(response.status =='success'){
+          this.courses = response.courses;
+        } else {
+          this._router.navigate(['/home']);
+        }
+      }
+    )
   }
 }

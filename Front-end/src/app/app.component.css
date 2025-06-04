@@ -291,3 +291,65 @@ section {
 .label-box.pending {
     background-color: #bcb4bc;
 }
+
+/* search */
+.nav-item-search  {
+    box-sizing: border-box;
+    background-color: transparent;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} 
+
+.search {
+    position: relative;
+    height: 40px;
+}
+
+.search .input-search {
+    background-color: white;
+    border: 0;
+    font-size: 16px;
+    color: #1e272e;
+    padding: 15px;
+    height: 40px;
+    width: 40px;
+    transition: width 0.8s ease;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+}
+
+.btn-search {
+    background-color: white;
+    border: 0;
+    cursor: pointer;
+    font-size: 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+    width: 40px;
+    transition:  0.8s ease;
+    border-radius: 50%;
+}
+
+.btn-search:hover{
+    background-color: white;
+}
+
+.btn-search:focus,
+.input-search:focus {
+    outline: none;
+}
+
+.search.active .input-search {
+    width: 215px;
+}
+.search.active .btn-search {
+    transform: translateX(175px);
+}

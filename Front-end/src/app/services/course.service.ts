@@ -86,4 +86,16 @@ export class CourseService {
                                   .set('Authorization', token);
     return this.http.delete(this.url + 'courses/' + id, { headers: headers });
   }
+
+  // get courses by catogory
+  getCoursesByCategory(id: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    return this.http.get(this.url + 'courses/getCoursesByCategory/' + id, { headers: headers });
+  }
+
+  // get courses by text
+  getCoursesByText(text: any): Observable<any> {
+    let headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    return this.http.get(this.url + 'courses/search/' + text, { headers: headers });
+  }
 }

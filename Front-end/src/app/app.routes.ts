@@ -78,5 +78,13 @@ export const routes: Routes = [
     {
         path: 'video-detail/:id',
         component: VideoDetailComponent
+    },
+    {
+        path: 'category/:id',
+        component: HomeComponent
+    },
+    {
+        path: 'search/:text',
+        component: HomeComponent
     }
 ];
