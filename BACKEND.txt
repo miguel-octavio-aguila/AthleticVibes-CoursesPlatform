@@ -1,0 +1,3589 @@
+BACKEND
+
+Helpers
+
+jwtauth.php
+<?php
+
+namespace App\Helpers;
+use Firebase\JWT\JWT;
+use App\Models\User;
+use Firebase\JWT\Key;
+use UnexpectedValueException;
+use DomainException;
+
+class JwtAuth
+{
+    public $key;
+
+    public function __construct()
+    {
+        $this->key
+            = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.4v6J9J9Q';
+    }
+
+    // Auth the user with the token
+    public function login($email, $password, $getToken = null)
+    {
+        // Search if the user exists
+        $user = User::where(
+            'email', $email,
+            //'password', $password
+            // the password is not needed here because it is already hashed and can not be compared
+            )->first();
+
+        // Check if the user exists
+        if (is_object($user) && password_verify($password, $user->password)) {
+            // Generate the token
+            $token = [
+                'sub' => $user->id, // sub is the user id on jwt
+                'email' => $user->email,
+                'name' => $user->name,
+                'surname' => $user->surname,
+                'role' => $user->role,
+                'description' => $user->description,
+                'image' => $user->image,
+                'iat' => time(), // iat is the time the token was generated on jwt
+                'exp' => time() + (7 * 24 * 60 * 60), // exp is the time the token expires on jwt
+                                                      // 7 days * 24 hours * 60 minutes * 60 seconds
+            ];
+
+            // Generate the token
+            $jwt = JWT::encode($token, $this->key, 'HS256'); // HS256 is the encryption method
+
+            // Decode the token
+            $decoded = JWT::decode($jwt, new Key($this->key, 'HS256'));
+
+            // Return the token
+            if (is_null($getToken)) {
+                return $jwt;
+            } else {
+                return $decoded;
+            }
+        } else {
+            // Return an error
+            return [
+                'status' => 'error',
+                'message' => 'Login failed',
+            ];
+        }
+    }
+
+    // Check if the token is valid
+    public function checkToken($jwt, $getIdentity = false)
+    {
+        $auth = false;
+
+        try {
+            //clean the token
+            $jwt = str_replace('"', '', $jwt);
+            $decoded = JWT::decode($jwt, new Key($this->key, 'HS256'));
+        } catch (UnexpectedValueException $e) { // token is invalid
+            $auth = false;
+        } catch (DomainException $e) { // token is invalid
+            $auth = false;
+        }
+
+        if (!empty($decoded) && is_object($decoded) && isset($decoded->sub)) {
+            $auth = true;
+        } else {
+            $auth = false;
+        }
+
+        if ($getIdentity) {
+            return $decoded;
+        }
+
+        return $auth;
+    }
+}
+
+Controllers
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Cart;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+
+class CartController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: []),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        //get identity of user
+        $user = $this->getIdentity($request);
+        $total = 0;
+
+        //get the cart of the user
+        $carts = Cart::where('user_id', $user->sub)->get();
+
+        // arrays
+        $products = [];
+        $quantities = [];
+        $subTotals = [];
+        $courses = [];
+
+        // get info of the cart of the user
+        foreach($carts as $cart) {
+            // save the course
+            array_push($courses, $cart->course);
+            // save the quantities
+            array_push($quantities, $cart->quantity);
+            // savethe course id
+            array_push($products, $cart->course->id);
+            // get the subtotal
+            $subTotal = $cart->course->current_price * $cart->quantity;
+            // save the subtotal
+            array_push($subTotals, $subTotal);
+            // add the subtotal to the total
+            $total += $subTotal;
+        }
+
+        // get a string of the products
+        $product_data = implode('-', $products);
+
+        // create the response
+        $data = [
+            'status' => 'success',
+            'code' => 200,
+            'message' => 'Cart info',
+            'courses' => $courses,
+            'carts' => $carts,
+            'cont' => $carts->count(),
+            'product_data' => $product_data,
+            'quantities' => $quantities,
+            'subTotals' => $subTotals,
+            'total' => $total
+        ];
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //get the data
+        $json = $request->input('json', null);
+        //convert data to array
+        $params_array = json_decode($json, true);
+
+        // get the identity of the user
+        $user = $this->getIdentity($request);
+
+        // get the product that is in the cart
+        $cart = Cart::where('user_id', $user->sub)
+            ->where('course_id', $params_array['course_id'])
+            ->first();
+
+        // if the course is in the cart
+        if ($cart) {
+            // message
+            $data = [
+                'status' =>'error',
+                'code' => 400,
+                'message' => 'Course already in the cart',
+                'data' => [
+                    'cart' => $cart
+                ]
+                ];
+        } else {
+            // if the data is no empty
+            if (!empty($params_array)) {
+                // validate the data
+                $validate = Validator::make($params_array, [
+                    'course_id' =>'required',
+                    'quantity' => 'required'
+                ]);
+                // if the data is not valid
+                if ($validate->fails()) {
+                    // message
+                    $data = [
+                        'status' =>'error',
+                        'code' => 400,
+                        'message' => 'Course not added to the cart',
+                    ];
+                } else {
+                    // save the data
+                    $cart = new Cart();
+                    $cart->user_id = $user->sub;
+                    $cart->course_id = $params_array['course_id'];
+                    $cart->quantity = $params_array['quantity'];
+                    // save the cart
+                    $cart->save();
+                    // message
+                    $data = [
+                        'status' =>'success',
+                        'code' => 200,
+                        'message' => 'Course added to the cart',
+                        'data' => [
+                            'cart' => $cart
+                        ]
+                    ];
+                }
+            } else {
+                // message
+                $data = [
+                    'status' =>'error',
+                    'code' => 400,
+                    'message' => 'Course not added to the cart',
+                ];
+            }
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id, Request $request)
+    {
+        //get identity of user
+        $user = $this->getIdentity($request);
+
+        // cart of the user
+        $carts = Cart::all()
+            ->where('user_id', $user->sub)
+            ->where('course_id', $id);
+        
+        // if the user has the course in the cart
+        foreach ($carts as $cart) {
+            // if the course is in the cart
+            if ($cart->course_id == $id) {
+                return response()->json([
+                    'status' => 'success',
+                    'code' => 200,
+                    'message' => 'Course already in the cart',
+                    'data' => [
+                        'cart' => $cart
+                    ]
+                ], 200);
+            }
+        }
+
+        // is the cart exists
+        if($carts) {
+            return response()->json([
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'Course added to the cart',
+                'data' => [
+                    'cart' => $carts
+                ]
+            ], 200);
+        } else {
+            return response()->json([
+                'status' =>'error',
+                'code' => 404,
+                'message' => 'Course not found',
+                'data' => [
+                    'cart' => $carts
+                ]
+            ], 404);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id, Request $request)
+    {
+        //get identity of user
+        $user = $this->getIdentity($request);
+
+        // cart of the user
+        $cart = Cart::where('user_id', $user->sub)
+            ->where('course_id', $id)
+            ->first();
+        
+        // if the cart exists
+        if (!empty($cart)) {
+            // delete the cart
+            $cart->delete();
+            // message
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'Course removed from the cart',
+                'data' => [
+                    'cart' => $cart
+                ]
+            ];
+        } else {
+            // message
+            $data = [
+                'status' =>'error',
+                'code' => 404,
+                'message' => 'Course not found',
+                'data' => [
+                    'cart' => $cart
+                ]
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    //delete all the cart
+    public function deleteCart(Request $request) 
+    {
+        //get identity of user
+        $user = $this->getIdentity($request);
+
+        // cart of the user
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // if the cart exists
+        if (!empty($cart)) 
+        {
+            // delete the cart
+            // foreach ($carts as $cart) {
+            //     $cart->delete();
+            // }
+            $cart->each->delete();
+
+            // message
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'Cart deleted',
+                'data' => [
+                    'cart' => $cart
+                ]
+            ];
+        } else {
+            // message
+            $data = [
+                'status' =>'error',
+                'code' => 404,
+                'message' => 'Cart not found',
+                'data' => [
+                    'cart' => $cart
+                ]
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+}
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Category;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+
+class CategoryController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['index', 'show']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //get all categories
+        $categories = Category::all();
+
+        // if the categories are not empty
+        if (is_object($categories)) {
+            // return the categories
+            $data = [
+                'status' => 'success',
+                'code' => 200,
+                'categories' => $categories,
+            ];
+        } else {
+            // return an error
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Categories not found',
+            ];
+        }
+
+        // return the data
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //recieve the data from POST
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the data is not empty
+        if (!empty($params_array)) {
+            //validate the data
+            $validate = Validator::make($params_array, [
+                'name' => 'required',
+            ]);
+
+            // if the data is valid
+            if ($validate->fails()) {
+                // return an error
+                $data = [
+                    'status' => 'error',
+                    'code' => 400,
+                    'message' => 'Category not created',
+                ];
+            } else {
+                // create the category
+                $category = new Category();
+                $category->name = $params_array['name'];
+                $category->save();
+                // return a success
+                $data = [
+                    'status' => 'success',
+                    'code' => 200,
+                    'message' => 'Category created',
+                    'category' => $category,
+                ];
+            }
+        } else {
+            // return an error
+            $data = [
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'Invalid data',
+            ];
+        }
+
+        // return the data
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //get category
+        $category = Category::find($id);
+
+        // if the category is an object
+        if (is_object($category)) {
+            // return the category
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'category' => $category,
+            ];
+        } else {
+            // return an error
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Category not found',
+            ];
+        }
+
+        // return the data
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //recieve de data 
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the data is not empty
+        if (!empty($params_array)) {
+            //validate the data
+            $validate = Validator::make($params_array, [
+                'name' =>'required',
+            ]);
+
+            // if the data is valid
+            if ($validate->fails()) {
+                // return an error
+                $data = [
+                    'status' => 'error',
+                    'code' => 400,
+                    'message' => 'Category not updated',
+                ];
+            } else {
+                // update the category
+                unset($params_array['id']);
+                unset($params_array['created_at']);
+                $category = Category::where('id', $id)->first();
+
+                // if category is not empty and is an object
+                if (!empty($category) && is_object($category)) {
+                    // update the category
+                    $category->update($params_array);
+                    // return a success
+                    $data = [
+                        'status' =>'success',
+                        'code' => 200,
+                        'message' => 'Category updated',
+                        'category' => $category,
+                    ];
+                } else {
+                    // return an error
+                    $data = [
+                        'status' => 'error',
+                        'code' => 404,
+                        'message' => 'Category not found',
+                    ];
+                }
+            }
+        } else {
+            // return an error
+            $data = [
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'Invalid data',
+            ];
+        }
+
+        // return the data
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        // get the category
+        $category = Category::where('id', $id)->first();
+
+        // if the category is not empty and is an object
+        if (!empty($category) && is_object($category)) {
+            // delete the category
+            $category->delete();
+            // return a success
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'Category deleted',
+            ];
+        } else {
+            // return an error
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Category not found',
+            ];
+        }
+
+        // return the data
+        return response()->json($data, $data['code']);
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Checkbox;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+
+class CheckboxController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //get the data from POST
+        $json = $request->input('json', null);
+        //convert the data to an array
+        $params_array = json_decode($json, true);
+
+        // if the array is not empty
+        if (!empty($params_array)) {
+            // get the identity of the user
+            $user = $this->getIdentity($request);
+
+            //validate the data
+            $validate = Validator::make($params_array, [
+                'course_id' => 'required',
+                'video_id' => 'required',
+                'checkbox' =>'required'
+            ]);
+
+            //if it fails
+            if ($validate->fails()) {
+                $data = [
+                    'status' => 'error',
+                    'code' => 404,
+                    'message' => 'The data is not valid'
+                ];
+            } else {
+                //if it passes
+                //create the checkbox
+                $checkbox = new Checkbox();
+                $checkbox->user_id = $user->sub;
+                $checkbox->course_id = $params_array['course_id'];
+                $checkbox->video_id = $params_array['video_id'];
+                $checkbox->checkbox = $params_array['checkbox'];
+                //save the checkbox
+                $checkbox->save();
+                $data = [
+                    'status' => 'success',
+                    'code' => 200,
+                    'checkbox' => $checkbox
+                ];
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'The data is not valid'
+            ];
+        }
+
+        //return the data
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id, request $request)
+    {
+        //get the identity of the user
+        $user = $this->getIdentity($request);
+
+        //get the checkbox
+        $checkbox = Checkbox::where('user_id', $user->sub)
+            ->where('course_id', $id)
+            ->get();
+
+        //return the checkbox
+        return response()->json([
+            'status' => 'success',
+            'code' => 200,
+            'checkbox' => $checkbox
+        ], 200);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id, Request $request)
+    {
+        //get the identity of the user
+        $user = $this->getIdentity($request);
+
+        //get the checkbox
+        $checkbox = Checkbox::where('user_id', $user->sub)
+            ->where('id', $id)
+            ->first();
+
+        //if it exists
+        if (!empty($checkbox)) {
+            //delete the checkbox
+            $checkbox->delete();
+            //return the checkbox
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'Checkbox deleted',
+                'checkbox' => $checkbox
+            ];
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Checkbox not found'
+            ];
+        }
+
+        //return the data
+        return response()->json($data, $data['code']);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Comment;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Http\Response;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Models\Responxe;
+
+class CommentController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['show', 'getImage']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //recieve de data of a video
+        $json = $request->input('json', null);
+        //convert data to array
+        $params_array = json_decode($json, true);
+
+        // if the array is not empty
+        if (!empty($params_array)) {
+            // get the identity of the user
+            $user = $this->getIdentity($request);
+
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'comment' => 'required',
+                'video_id' => 'required',
+                'title' =>'required'
+            ]);
+            
+            // if image data is not exists
+            if (!isset($params_array['image'])) {
+                $params_array['image'] = null;
+            }
+
+            // if it fails
+            if ($validate->fails()) {
+                $data = array(
+                    'status' => 'error',
+                    'code' => 404,
+                    'message' => 'The comment could not be saved',
+                );
+            } else {
+                // if it is correct
+                $comment = new Comment();
+                $comment->user_id = $user->sub;
+                $comment->video_id = $params_array['video_id'];
+                $comment->title = $params_array['title'];
+                $comment->comment = $params_array['comment'];
+                $comment->image = $params_array['image'];
+                // save the comment
+                $comment->save();
+                $data = [
+                    'status' => 'success',
+                    'code' => 200,
+                    'message' => 'The comment has been saved',
+                    'comment' => $comment
+                ];
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'The comment could not be saved',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        // get all comments of a video
+        $comments = Comment::all()->where('video_id', $id);
+        
+        $users = [];
+        $commentsArray = [];
+        $response_cont = [];
+
+        foreach ($comments as $comment) {
+            //the user that made the comment
+            array_push($users, $comment->user);
+
+            // the comment
+            array_push($commentsArray, $comment);
+
+            // responsesof the comment
+            array_push($response_cont, $comment->responses->count());
+        }
+
+        // if there are comments
+        if ($comments->count() > 0) {
+            $data = [
+                'status' => 'success',
+                'code' => 200,
+                'comments' => $commentsArray,
+                'cont' => $comments->count(),
+                'response_cont' => $response_cont,
+                'users' => $users
+            ];
+        } else {
+            $data = [
+                'status' => 'success',
+                'code' => 200,
+                'state' => 'empty',
+                'message' => 'There are no comments',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        // recieve the data from POST
+        $json = $request->input('json', null);
+        // convert data to array
+        $params_array = json_decode($json, true);
+
+        //if the array is not empty
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'comment' =>'required',
+                'title' =>'required'
+            ]);
+            
+            // if it fails
+            if ($validate->fails()) {
+                $data = array(
+                   'status' => 'error',
+                    'code' => 404,
+                   'message' => 'The comment could not be updated',
+                );
+            } else {
+                // if it is correct
+                unset($params_array['id']);
+                unset($params_array['user_id']);
+                unset($params_array['created_at']);
+                unset($params_array['user']);
+
+                // get the identity of the user
+                $user = $this->getIdentity($request);
+
+                // get the comment
+                $comment = Comment::where('id', $id)
+                    ->where('user_id', $user->sub)
+                    ->first();
+
+                // if the comment exists
+                if (!empty($comment) && is_object($comment)) {
+                    // update the comment
+                    $comment->update($params_array);
+                    // result
+                    $data = [
+                        'status' =>'success',
+                        'code' => 200,
+                        'message' => 'The comment has been updated',
+                        'comment' => $comment,
+                        'changes' => $params_array,
+                        'user' => $user
+                    ];
+                } else {
+                    $data = [
+                      'status' => 'error',
+                        'code' => 404,
+                      'message' => 'The comment does not exist',
+                    ];
+                }
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'Data is not correct'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+
+    }
+
+    // upload de image
+    public function upload(Request $request) 
+    {
+        // get data
+        $image = $request->file('file0');
+
+        // validate image
+        $validate = Validator::make($request->all(), [
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
+        ]);
+
+        // save image
+        if (!$image || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error uploading image'
+            ];
+        } else {
+            $image_name = time().$image->getClientOriginalName();
+            Storage::disk('comments')->put($image_name, File::get($image));
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+
+        // return response in text format
+        return response($data, $data['code'])->header('Content-Type', 'text/plain');
+    }
+
+    // get image
+    public function getImage($filename) 
+    {
+        // check if the image exists
+        $isset = Storage::disk('comments')->exists($filename);
+
+        if ($isset) {
+            $file = Storage::disk('comments')->get($filename);
+            return new Response($file, 200);
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Image not found'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //get the comment
+        $comment = Comment::where('id', $id)->first();
+        //get de response (responxe)
+        $response = Responxe::where('comment_id', $id)->first();
+
+        // if the comment exists
+        if (!empty($comment)) {
+            // delete the response
+            $comment->responses()->delete();
+            // delete the comment
+            $comment->delete();
+            $data = [
+                'status' =>'success',
+                'code' => 200,
+                'message' => 'The comment has been deleted',
+                'comment' => $comment
+            ];
+        } else {
+            $data = [
+                'status' =>'error',
+                'code' => 404,
+                'message' => 'The comment does not exist',
+                'comment' => $comment,
+                'response' => $response
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Course;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use App\Models\Sale;
+use App\Models\Video;
+use App\Models\Comment;
+use App\Models\Responxe;
+use App\Models\Checkbox;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Routing\Controllers\Middleware;
+use Symfony\Component\HttpFoundation\Response;
+
+class CourseController extends Controller implements HasMiddleware
+{
+
+    // public function __construct()
+    // {
+    //     $this->middleware('api.auth')->except(['index', 'show', 'search']);
+    // }
+    
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['index', 'search', 'getCourse', 'getCoursesByCategory', 'getImage']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $courses = Course::all();
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'courses' => $courses
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //recive de data from POST
+        $json = $request->input('json', null);
+        $params = json_decode($json); //object
+        $params_array = json_decode($json, true); //array
+
+        // check if the data is not empty
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'name' => [
+                    'required',
+                    'regex:/^[\p{L}\p{N}\s\-]+$/u',
+                    'unique:courses,name'
+                ],
+                'category_id' => 'required',
+                'image' => 'required',
+                'detail' => 'required',
+                'url' => 'required',
+                'accordion' => 'required',
+                'current_price' => 'required',
+                'previous_price' => 'required'
+            ]);
+            
+            // if the validation fails
+            if ($validate->fails()) {
+                return $params_array;
+                return response()->json($validate->errors(), 400);
+            }
+
+            // save the course
+            $course = new Course();
+            $course->name = $params_array['name'];
+            $course->category_id = $params_array['category_id'];
+            $course->image = $params_array['image'];
+            $course->detail = $params_array['detail'];
+            $course->url = $params_array['url'];
+            $course->accordion = $params_array['accordion'];
+            $course->current_price = $params_array['current_price'];
+            $course->previous_price = $params_array['previous_price'];
+            //$course->num_sales = 0;
+            $course->save();
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'course' => $course
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Data is empty'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id, Request $request)
+    {
+        // get the course
+        $course = Course::find($id);
+        // get the identity of the user
+        $user = $this->getIdentity($request);
+        
+        
+        // check if the user buy the course
+        $sales = Sale::where('user_id', $user->sub)
+            ->where('course_id', $course->id)
+            ->first();
+
+        if (!empty($sales) && is_object($sales)) {
+            $course->buy = 1;
+        }
+
+        // return the course if it is an object
+        if (is_object($course)) {
+            // save the number of accordion
+            $vector = [];
+
+            // save the number of accordion
+            // with this we have the number of accordion for the sections
+            for ($i = 1; $i <= $course->accordion; $i++) {
+                array_push($vector, $i);
+            }
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'accordion' => $vector,
+                'course' => $course,
+                'sales' => $sales
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Course does not exist'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        // recive the data from POST
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the data is not empty
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'name' => 'required',
+                'category_id' => 'required',
+                'detail' => 'required',
+                'url' => 'required',
+                'accordion' => 'required',
+                'current_price' => 'required',
+                'previous_price' => 'required'
+            ]);
+
+            // if the validation fails
+            if ($validate->fails()) {
+                return response()->json($validate->errors(), 400);
+            }
+
+            // remove the data that is not needed
+            unset($params_array['id']);
+            unset($params_array['created_at']);
+            unset($params_array['user']);
+            
+            // get the identity of the user
+            //$user = $this->getIdentity($request);
+
+            // update the course
+            $course = Course::where('id', $id)->first();
+
+            // check if the course exists
+            if (!empty($course) && is_object($course)) {
+                // update the course
+                $course->update($params_array);
+
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'course' => $course,
+                    'changes' => $params_array
+                ];
+            } else {
+                $data = [
+                    'code' => 400,
+                    'status' => 'error',
+                    'message' => 'Course does not exist'
+                ];
+            }
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Data is empty'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $sales = Sale::where('course_id', $id)->get();
+        $videos = Video::where('course_id', $id)->get();
+        $course = Course::where('id', $id)->first();
+        $checkboxes = Checkbox::where('course_id', $id)->get();
+
+        // delete sales
+        if ($sales && count($sales) >= 1) {
+            foreach ($sales as $sale) {
+                $sale->delete();
+            }
+        }
+
+        // delete videos
+        if ($videos && count($videos) >= 1) {
+            foreach ($videos as $video) {
+                $comments = Comment::where('video_id', $video->id)->get();
+                // delete comments
+                if ($comments && count($comments) >= 1) {
+                    foreach ($comments as $comment) {
+                        // delete responses
+                        $responses = Responxe::where('comment_id', $comment->id)->get();
+                        if ($responses && count($responses) >= 1) {
+                            foreach ($responses as $response) {
+                                // delete checkboxes
+                                if ($checkboxes && count($checkboxes) >= 1) {
+                                    foreach ($checkboxes as $checkbox) {
+                                        $checkbox->delete();
+                                    }
+                                }
+                                $response->delete();
+                            }
+                        }
+                        // delete comment
+                        $comment->delete();
+                    }
+                }
+                // delete video
+                $video->delete();
+            }
+        }
+
+        // check if the course exists
+        if (!empty($course) && is_object($course)) {
+            // delete the course
+            $course->delete();
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'course' => $course
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Course does not exist'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // show if the user buy or not the course
+    public function getCourse($id) 
+    {
+        $course = Course::find($id);
+        
+        // return the course if it is an object
+        if (is_object($course)) {
+            $vector = [];
+
+            // save the number of accordion
+            // with this we have the number of accordion for the sections
+            for ($i = 1; $i <= $course->accordion; $i++) {
+                array_push($vector, $i);
+            }
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'accordion' => $vector,
+                'course' => $course
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Course does not exist'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // upload the image of the course
+    public function upload(Request $request) 
+    {
+        // get the image
+        $image = $request->file('file0');
+
+        // validate the image
+        $validate = Validator::make($request->all(), [
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif,webp,avif'
+        ]);
+
+        // save the image
+        if (!$image || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error uploading image',
+                'error' => $validate->errors(),
+            ];
+        } else {
+            $image_name = time() . $image->getClientOriginalName();
+            Storage::disk('images')->put($image_name, File::get($image));
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get image
+    public function getImage($filename) 
+    {
+        // check if the image exists
+        $isset = Storage::disk('images')->exists($filename);
+
+        if ($isset) {
+            $file = Storage::disk('images')->get($filename);
+            return new Response($file, 200);
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Image not found'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // search the course
+    public function search($search) 
+    {
+        $courses = Course::where('name', 'LIKE', "%".$search."%")
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'courses' => $courses
+        ]);
+    }
+
+    // get courses by category
+    public function getCoursesByCategory($id) 
+    {
+        $courses = Course::where('category_id', $id)
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        // if courses is not empty and is an object
+        if (!empty($courses) && is_object($courses)) {
+            $data = [
+                'code' => 200,
+                'status' =>'success',
+                'courses' => $courses
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Courses does not exist'
+            ];
+        }
+
+        // return the response
+        return response()->json($data, $data['code']);
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Models\Responxe;
+use App\Helpers\JwtAuth;
+use Illuminate\Support\Facades\Validator;
+use App\Models\Comment;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\HttpFoundation\Response;
+
+class ResponseController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['show', 'getImage']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        //
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // recieve the data from POST
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the array is not empty
+        if (!empty($params_array)) {
+            // get the user identity
+            $user = $this->getIdentity($request);
+
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'comment_id' => 'required',
+                'response' => 'required',
+            ]);
+
+            // if we don't have an image from the request
+            if (!isset($params_array['image'])) {
+                $params_array['image'] = null;
+            }
+
+            // if the validation fails
+            if ($validate->fails()) {
+                $data = [
+                    'status' => 'error',
+                    'code' => 400,
+                    'message' => 'Incorrect data',
+                ];
+            } else {
+                // save the response
+                $response = new Responxe();
+                $response->user_id = $user->sub;
+                $response->comment_id = $params_array['comment_id'];
+                $response->response = $params_array['response'];
+                $response->image = $params_array['image'];
+                $response->save();
+
+                // return the response
+                $data = [
+                    'status' => 'success',
+                    'code' => 200,
+                    'message' => 'The response has been saved',
+                    'response' => $response,
+                ];
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'The response is not valid',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //get the comment
+        $comment = Comment::where('id', $id)->first();
+        
+        // arrays
+        $users = [];
+        $responses = [];
+
+        foreach ($comment->responses as $response) {
+            // save de reponse 
+            array_push($responses, $response);
+            // save the user
+            array_push($users, $response->user);
+        }
+
+        // if a response exists
+        if ($comment->responses->count() > 0) {
+            $data = [
+                'status' => 'success',
+                'code' => 200,
+                'message' => 'The response has been found',
+                'comment' => $comment,
+                'users' => $users,
+                'responses' => $responses,
+                'cont' => $comment->responses->count(),
+                'creates_at' => $comment->created_at,
+                'user' => $comment->user
+            ];
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 400,
+                'message' => 'The response does not exist',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //recieve de data from PUT 
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the array is not empty
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'comment_id' =>'required',
+                'response' =>'required',
+            ]);
+
+            // if the validation fails
+            if ($validate->fails()) {
+                $data = [
+                    'status' => 'error',
+                    'code' => 400,
+                    'message' => 'Incorrect data',
+                ];
+            } else {
+                // update the response
+                unset($params_array['id']);
+                unset($params_array['created_at']);
+                unset($params_array['user_id']);
+                unset($params_array['user']);
+
+                // get the user identity
+                $user = $this->getIdentity($request);
+
+                // get the response
+                $response = Responxe::where('id', $id)
+                    ->where('user_id', $user->sub)
+                    ->first();
+
+                // if the response exists
+                if (!empty($response) && is_object($response)) {
+                    // update the response
+                    $response->update($params_array);
+
+                    // return the response
+                    $data = [
+                        'status' =>'success',
+                        'code' => 200,
+                        'message' => 'The response has been updated',
+                        'response' => $response,
+                    ];
+                } else {
+                    $data = [
+                        'status' => 'error',
+                        'code' => 400,
+                        'message' => 'The response does not exist',
+                    ];
+                }
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'The data is not valid',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // upload de image
+    public function upload(Request $request) 
+    {
+        // get data
+        $image = $request->file('file0');
+
+        // validate image
+        $validate = Validator::make($request->all(), [
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
+        ]);
+
+        // save image
+        if (!$image || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error uploading image'
+            ];
+        } else {
+            $image_name = time().$image->getClientOriginalName();
+            Storage::disk('responses')->put($image_name, File::get($image));
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+
+        // return response in text format
+        return response($data, $data['code'])->header('Content-Type', 'text/plain');
+    }
+
+    // get image
+    public function getImage($filename) 
+    {
+        // check if the image exists
+        $isset = Storage::disk('responses')->exists($filename);
+
+        if ($isset) {
+            $file = Storage::disk('responses')->get($filename);
+            return new Response($file, 200);
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Image not found'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id, Request $request)
+    {
+        //get the user identity
+        $user = $this->getIdentity($request);
+
+        // get the response
+        $response = Responxe::where('id', $id)
+            ->where('user_id', $user->sub)
+            ->first();
+
+        // if the response exists
+        if (!empty($response)) {
+            // delete the response
+            $response->delete();
+            $data = [
+              'status' =>'success',
+                'code' => 200,
+              'message' => 'The response has been deleted',
+            ];
+        } else {
+            $data = [
+             'status' => 'error',
+                'code' => 400,
+             'message' => 'The response does not exist',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request)
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Sale;
+use App\Helpers\JwtAuth;
+use App\Models\Course;
+use App\Models\Cart;
+use App\Models\Video;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+
+class SaleController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: []),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        //get the identity of the user
+        $user = $this->getIdentity($request);
+
+        //get the sales of the user
+        $sales = Sale::where('user_id', $user->sub)->get();
+
+        // get all the courses
+        $courses = Course::all();
+
+        // get the cart of the user
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // course status
+        $courseStatus = [];
+        // check if the course is in the cart
+        foreach ($courses as $course) {
+            foreach ($sales as $sale) {
+                if ($sale->course_id == $course->id) {
+                    // add new propertie buy to the course
+                    $course->buy = 1;
+                    // add new propertie video to the course
+                    $course->video = $sale->video_id;
+                }
+            }
+            foreach($cart as $cartItem) {
+                if ($cartItem->course_id == $course->id && $cartItem->quantity == 1) {
+                    // add new propertie cartItem to the course
+                    $course->cartItem = 1;
+                }
+            }
+            // add the course to the array
+            array_push($courseStatus, $course);
+        }
+
+        // return the sales
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'sales' => $sales,
+            'courseStatus' => $courseStatus
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //get de user 
+        $user = $this->getIdentity($request);
+
+        // get cart
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // if the cart exists
+        if (!empty($cart)) {
+            // save the course
+            foreach ($cart as $cartItem) {
+                // get de videos of the course 
+                $video = Video::where('course_id', $cartItem->course_id)->get();
+                // if there is a video
+                if (!empty($video[0]->id)) {
+                    // create the sale
+                    $sale = new Sale();
+                    $sale->user_id = $cartItem->user_id;
+                    $sale->course_id = $cartItem->course_id;
+                    $sale->video_id = $video[0]->id;
+                    $sale->save();
+
+                    $data = [
+                        'code' => 200,
+                        'status' => 'success',
+                        'message' => 'Sale created successfully',
+                        'cart' => $cart
+                    ];
+                } else {
+                    $data = [
+                        'code' => 400,
+                        'status' =>'error',
+                        'message' => 'There is no video for this course'
+                    ];
+                }
+            }
+        } else {
+            $data = [
+                'code' => 400,
+                'status' =>'error',
+                'message' => 'There is no course in the cart'
+            ];
+        }
+
+        // return the response
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id, Request $request)
+    {
+        // get the user identity
+        $user = $this->getIdentity($request);
+
+        // get the sale
+        $sale = Sale::where('user_id', $user->sub)->where('course_id', $id)->first();
+
+        // if a sale exists
+        if (!empty($sale)) {
+            return response()->json([
+                'code' => 200,
+               'status' =>'success',
+               'sale' => $sale
+            ]);
+        } else {
+            return response()->json([
+                'code' => 400,
+               'status' =>'error',
+               'message' => 'Sale not found'
+            ]);
+        }
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //recieve the data from the post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the data is not null
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'course_id' => 'required',
+                'video_id' => 'required',
+                'progress' => 'required',
+            ]);
+
+            // if the data fails
+            if ($validate->fails()) {
+                return response()->json($validate->errors(), 400);
+            } else {
+                // remove the data that we don't want to update
+                unset($params_array['user_id']);
+                unset($params_array['created_at']);
+                unset($params_array['user']);
+
+                // get identity of the user
+                $user = $this->getIdentity($request);
+
+                // update the data
+                $sale = Sale::where('id', $id)->first();
+
+                // if the video exists and is an object
+                if (!empty($sale) && is_object($sale)) {
+                    $sale->update($params_array);
+
+                    $data = [
+                        'code' => 200,
+                        'status' => 'success',
+                        'sale' => $sale,
+                        'user' => $user,
+                        'changes' => $params_array,
+                    ];
+                } else {
+                    $data = [
+                        'code' => 404,
+                        'status' => 'error',
+                        'message' => 'Sale not found',
+                    ];
+                }
+            }
+        } else {
+            return response()->json([
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Data is not valid',
+            ]);
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+
+    // get my courses
+    public function getMyCourses(Request $request) 
+    {
+        // get the user identity
+        $user = $this->getIdentity($request);
+        // get the sales
+        $sales = Sale::where('user_id', $user->sub)->get();
+        // get the courses
+        $courses = Course::all();
+        // get the videos
+        $videos = Video::all();
+        // get the cart of the user
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // course status and videos
+        $courseStatus = [];
+        $videosVector = [];
+
+        // check if the course is in the cart
+        foreach ($courses as $course) {
+            foreach ($sales as $sale) {
+                if ($sale->course_id == $course->id) {
+                    // add new propertie buy to the course
+                    $course->buy = 1;
+                    // add new propertie video to the course
+                    $course->video = $sale->video_id;
+                }
+            }
+            foreach($cart as $cartItem) {
+                if ($cartItem->course_id == $course->id && $cartItem->quantity == 1) {
+                    // add new propertie cartItem to the course
+                    $course->cartItem = 1;
+                }
+            }
+            foreach($videos as $video) {
+                if ($video->course_id == $course->id && $course->buy == 1) {
+                    array_push($videosVector, $video);
+                }
+            }
+            if ($course->buy == 1) {
+                // add the course to the array
+                array_push($courseStatus, $course);
+            }
+        }
+
+        // return the sales
+        return response()->json([
+            'code' => 200,
+           'status' =>'success',
+           'sales' => $sales,
+           'courses' => $courseStatus,
+            'videos' => $videosVector
+        ]);
+    }
+
+    // get sales by category
+    public function getSalesByCategory($id, request $request) 
+    {
+        //get the identity of the user
+        $user = $this->getIdentity($request);
+
+        //get the sales of the user
+        $sales = Sale::where('user_id', $user->sub)->get();
+
+        // get all the courses
+        $courses = Course::where('category_id', $id)->get();
+
+        // get the cart of the user
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // course status
+        $courseStatus = [];
+        // check if the course is in the cart
+        foreach ($courses as $course) {
+            foreach ($sales as $sale) {
+                if ($sale->course_id == $course->id) {
+                    // add new propertie buy to the course
+                    $course->buy = 1;
+                    // add new propertie video to the course
+                    $course->video = $sale->video_id;
+                }
+            }
+            foreach($cart as $cartItem) {
+                if ($cartItem->course_id == $course->id && $cartItem->quantity == 1) {
+                    // add new propertie cartItem to the course
+                    $course->cartItem = 1;
+                }
+            }
+            // add the course to the array
+            array_push($courseStatus, $course);
+        }
+
+        // return the sales
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'sales' => $sales,
+            'courseStatus' => $courseStatus
+        ]);
+    }
+
+    // get sales by category
+    public function getSalesByText(string $text, request $request) 
+    {
+        //get the identity of the user
+        $user = $this->getIdentity($request);
+
+        //get the sales of the user
+        $sales = Sale::where('user_id', $user->sub)->get();
+
+        // get all the courses
+        $courses = Course::where('name', 'LIKE', '%'.$text.'%')
+            ->orderby('id', 'desc')
+            ->get();
+
+        // get the cart of the user
+        $cart = Cart::where('user_id', $user->sub)->get();
+
+        // course status
+        $courseStatus = [];
+        // check if the course is in the cart
+        foreach ($courses as $course) {
+            foreach ($sales as $sale) {
+                if ($sale->course_id == $course->id) {
+                    // add new propertie buy to the course
+                    $course->buy = 1;
+                    // add new propertie video to the course
+                    $course->video = $sale->video_id;
+                }
+            }
+            foreach($cart as $cartItem) {
+                if ($cartItem->course_id == $course->id && $cartItem->quantity == 1) {
+                    // add new propertie cartItem to the course
+                    $course->cartItem = 1;
+                }
+            }
+            // add the course to the array
+            array_push($courseStatus, $course);
+        }
+
+        // return the sales
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'sales' => $sales,
+            'courseStatus' => $courseStatus
+        ]);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Exception;
+use Illuminate\Http\Response;
+
+
+class UserController extends Controller
+{
+    public function test(Request $request) 
+    {
+        return 'Hello World';
+    }
+
+    public function login(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $json = $request->input('json', null);
+        $params = json_decode($json); // object (php format)
+        $params_array = json_decode($json, true); // array
+
+        // check if the data is not empty
+        if (!empty($params) && !empty($params_array)) {
+            // clean data
+            $params_array = array_map('trim', $params_array);
+
+            // validate data
+            $validate = Validator::make($params_array, [
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
+
+            // check if the validation fails
+            if ($validate->fails()) {
+                $signup = [
+                    'status' => 'error',
+                    'code' => 404,
+                    'message' => 'User not logged in',
+                    'errors' => $validate->errors()
+                ];
+            } else {
+                // generate token
+                $signup = $jwtAuth->login($params_array['email'], $params_array['password']);
+                // check if the token is requested
+                if (!empty($params_array['getToken'])) {
+                    $signup = $jwtAuth->login($params_array['email'], $params_array['password'], true);
+                }
+            }
+        } else {
+            $signup = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'User not logged in'
+            ];
+        }
+
+        // return response in json format with the token and in format of 200 that means everything is ok
+        return response()->json($signup, 200);
+    }
+
+    public function register(Request $request) 
+    {
+        // data user from POST
+        // json from the front-end
+        $json = $request->input('json', null);
+        $params = json_decode($json); // object (php format)
+        $params_array = json_decode($json, true); // array
+        
+        // check if the data is not empty
+        if (!empty($params) && !empty($params_array)) {
+            // clean data
+            $params_array = array_map('trim', $params_array);
+
+            // validate data
+            $validate = Validator::make($params_array, [
+                'name' => [
+                    'required',
+                    'regex:/^[\p{L}\s\-]+$/u'
+                ],
+                'surname' => [
+                    'required',
+                    'regex:/^[\p{L}\s\-]+$/u'
+                ],
+                'email' => 'required|email|unique:users',
+                'password' => 'required'
+            ]);
+
+            // check if the validation fails
+            if ($validate->fails()) {
+                $data = [
+                    'status' => 'error',
+                    'code' => 404,
+                    'message' => 'User not created',
+                    'errors' => $validate->errors()
+                ];
+            } else {
+                // create user
+                $user = new User();
+                $user->name = $params_array['name'];
+                $user->surname = $params_array['surname'];
+                $user->email = $params_array['email'];
+                //$user->password = hash('sha256', $params_array['password']);
+                $user->password = password_hash($params_array['password'], PASSWORD_BCRYPT);
+                $user->role = 'ROLE_USER';
+
+                // save user
+                $user->save();
+
+                $data = [
+                    'status' => 'success',
+                    'code' => 200,
+                    'message' => 'User created successfully',
+                    'user' => $user,
+                ];
+            }
+        } else {
+            $data = [
+                'status' => 'error',
+                'code' => 404,
+                'message' => 'User not created'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function update(Request $request) 
+    {
+        // check if the user is authenticated
+        $token = $request->header('Authorization');
+        $jwtAuth = new JwtAuth();
+        $checkToken = $jwtAuth->checkToken($token);
+
+        // recive data
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // check if the user is authenticated
+        if ($checkToken && !empty($params_array)) {
+            // get user data
+            $user = $jwtAuth->checkToken($token, true);
+
+            // validate data
+            $validate = Validator::make($params_array, [
+                'name' => 'required|alpha', // alpha is for letters only
+                'surname' => 'required|alpha', 
+                'email' => 'required|email|unique:users,'.$user->sub, // check if the email is unique
+            ]);
+
+            // remove the fields that we do not want to update
+            unset($params_array['sub']);
+            unset($params_array['role']);
+            unset($params_array['password']);
+            unset($params_array['created_at']);
+            unset($params_array['remember_token']);
+
+            // update user in db
+            $user_update = User::where('id', $user->sub)->update($params_array);
+
+            // return response
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'user' => $user,
+                'changes' => $params_array
+            ];
+        } else {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'User not updated'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+
+    }
+
+    public function upload(Request $request) 
+    {
+        // get data
+        $image = $request->file('file0');
+
+        // validate image
+        $validate = Validator::make($request->all(), [
+            'file0' => 'required|image|mimes:jpg,jpeg,png,gif'
+        ]);
+
+        // save image
+        if (!$image || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error uploading image'
+            ];
+        } else {
+            $image_name = time().$image->getClientOriginalName();
+            Storage::disk('users')->put($image_name, File::get($image));
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'image' => $image_name
+            ];
+        }
+
+        // return response in text format
+        return response($data, $data['code'])->header('Content-Type', 'text/plain');
+    }
+
+    public function getImage($filename) 
+    {
+        // check if the image exists
+        $isset = Storage::disk('users')->exists($filename);
+
+        if ($isset) {
+            $file = Storage::disk('users')->get($filename);
+            return new Response($file, 200);
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Image not found'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function detail($id) 
+    {
+        $user = User::find($id);
+
+        if (is_object($user)) {
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'user' => $user
+            ];
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'User not found'
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    public function logout(Request $request) 
+    {
+        // Verificar si el token está presente en el encabezado
+        $token = $request->header('Authorization');
+
+        if (!$token) {
+            return response()->json([
+                'message' => 'Token no proporcionado'
+            ], 401);
+        }
+
+        try {
+            // Decodificar el token
+            $jwtAuth = new JwtAuth();
+            $decoded = JWT::decode($token, new Key($jwtAuth->key, 'HS256'));
+
+            // Opcional: Aquí podrías manejar un "blacklist" para invalidar tokens manualmente
+            return response()->json([
+                'message' => 'Cierre de sesión exitoso'
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Token inválido o expirado'
+            ], 401);
+        }
+    }
+}
+
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Models\Video;
+use App\Models\Sale;
+use Illuminate\Support\Facades\Validator;
+use App\Helpers\JwtAuth;
+use App\Models\Checkbox;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+
+class VideoController extends Controller implements HasMiddleware
+{
+    /**
+     * Get the middleware that should be assigned to the controller.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('api.auth', except: ['index', 'show', 'getVideos', 'getVideosByCourse']),
+        ];
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $videos = Video::paginate(15)->load('course');
+        $video_paginate = Video::paginate(15);
+        return response()->json([
+            'code' => 200,
+            'satus' => 'success',
+            'videos' => $videos,
+            'video_paginate' => $video_paginate,
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //recive de data from post
+        $json = $request->input('json', null);
+        $params = json_decode($json);
+        $params_array = json_decode($json, true);
+
+        // if the data is not null
+        if (!empty($params_array)) {
+            // get the identity of the user
+            $user = $this->getIdentity($request);
+
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'user_id' => 'required',
+                'course_id' => 'required',
+                'title' => 'required',
+                'content' => 'required',
+                'url' => 'required|string',
+                'section' => 'required',
+            ]);
+
+            // if the data fails
+            if ($validate->fails()) {
+                return response()->json($validate->errors(), 400);
+            } else {
+                // be sure that the file and accordion_title are set
+                $params_array['file'] = $params_array['file'] ?? null;
+                $params_array['accordion_title'] = $params_array['accordion_title'] ?? null;
+                
+                // save the data
+                $video = new Video();
+                $video->user_id = $params_array['user_id'];
+                $video->course_id = $params_array['course_id'];
+                $video->title = $params_array['title'];
+                $video->content = $params_array['content'];
+                $video->url = $params_array['url'];
+                $video->section = $params_array['section'];
+                $video->file = $params_array['file'];
+                $video->accordion_title = $params_array['accordion_title'];
+                $video->save();
+
+                
+                return response()->json([
+                    'code' => 200,
+                    'status' => 'success',
+                    'video' => $video,
+                ]);
+            }
+        } else {
+            return response()->json([
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Data is not valid',
+                'error' => 'Data validation not performed',
+                'params_array' => $params_array,
+            ]);
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        // get the video
+        $video = Video::find($id)->load('user');
+
+        // if the video exists
+        if (is_object($video)) {
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'video' => $video,
+            ];
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Video not found',
+            ];
+        }
+
+        return response()->json($data);
+    }
+
+    // get the identity of the user
+    private function getIdentity(Request $request) 
+    {
+        $jwtAuth = new JwtAuth();
+        $token = $request->header('Authorization', null);
+        $user = $jwtAuth->checkToken($token, true);
+        return $user;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //recieve the data from the post
+        $json = $request->input('json', null);
+        $params_array = json_decode($json, true);
+
+        // if the data is not null
+        if (!empty($params_array)) {
+            // validate the data
+            $validate = Validator::make($params_array, [
+                'course_id' => 'required',
+                'title' => 'required',
+                'content' => 'required',
+                'url' => 'required|string',
+                'section' => 'required',
+            ]);
+
+            // if the data fails
+            if ($validate->fails()) {
+                return response()->json($validate->errors(), 400);
+            }
+            // be sure that the file and accordion_title are set
+            $params_array['file'] = $params_array['file'] ?? null;
+            $params_array['accordion_title'] = $params_array['accordion_title'] ?? null;
+
+            // remove the data that we don't want to update
+            unset($params_array['id']);
+            unset($params_array['user_id']);
+            unset($params_array['created_at']);
+            unset($params_array['user']);
+
+            // update the data
+            $video = Video::where('id', $id)
+                ->where('user_id', $this->getIdentity($request)->sub)
+                ->first();
+
+            // if the video exists and is an object
+            if (!empty($video) && is_object($video)) {
+                $video->update($params_array);
+
+                $data = [
+                    'code' => 200,
+                    'status' => 'success',
+                    'video' => $video,
+                    'user' => $this->getIdentity($request),
+                    'changes' => $params_array,
+                ];
+            } else {
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Video not found',
+                ];
+            }
+        } else {
+            return response()->json([
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Data is not valid',
+                'error' => 'Data validation not performed',
+                'params_array' => $params_array,
+            ]);
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id, Request $request)
+    {
+        // get auth user
+        $user = $this->getIdentity($request);
+
+        $video = Video::where('id', $id)->where('user_id', $user->sub)->first();
+        $sales = Sale::where('video_id', $id)->get();
+
+        if ($sales && count($sales) >= 1) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'You cannot delete this video because it is being used',
+            ];
+        } else {
+            foreach($video->comments as $comment) {
+                $comment->responses()->delete();
+                $comment->delete();
+            }
+
+            if(!empty($video)) {
+                $video->delete();
+                $data = [
+                    'code' => 200,
+                    'status' =>'success',
+                    'video' => $video,
+                ];
+            } else {
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Video not found',
+                ];
+            }
+        }
+
+        // if the video exists and is an object
+        if (!empty($video) && is_object($video)) {
+            $video->delete();
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'video' => $video,
+            ];
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Video not found',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // get all videos
+    public function getVideos() 
+    {
+        $videos = Video::with('course')->get();
+        return response()->json([
+            'code' => 200,
+            'status' => 'success',
+            'videos' => $videos,
+        ]);
+    }
+
+    // get the videos by course
+    public function getVideosByCourse(string $id)
+    {
+        $videos = Video::where('course_id', $id)->get();
+        
+        // view what procentage of the videos are completed
+        if(sizeof($videos) > 0) {
+            $re = sizeof($videos);
+            $result = 100/$re;
+
+            return response()->json([
+                'code' => 200,
+                'status' => 'success',
+                'videos' => $videos,
+                'result' => $result,
+            ]);
+        } else if(sizeof($videos) == 0) {
+            return response()->json([
+                'code' => 200,
+                'status' => 'success',
+                'videos' => 0,
+                'message' => 0,
+            ]);
+        } else {
+            return response()->json([
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Videos not found',
+            ]);
+        }
+    }
+
+    // get videos with the progress of the user
+    public function getVideosWithProgress(Request $request, string $id)
+    {
+        $videos = Video::where('course_id', $id)->get();
+
+        // get auth user
+        $user = $this->getIdentity($request);
+
+        // get the progress of the user with checkboxes
+        $checkboxes = Checkbox::where('course_id', $id)
+            ->where('user_id', $user->sub)
+            ->get();
+
+        // for each video with each checkbox
+        foreach($videos as $video) {
+            foreach($checkboxes as $checkbox) {
+                if($video->id == $checkbox->video_id) {
+                    $video->checkbox = 'activated';
+                    $video->checkbox_id = $checkbox->id;
+                }
+            }
+        }
+
+        // view what procentage of the videos are completed
+        if(sizeof($videos) > 0) {
+            $re = sizeof($videos);
+            $result = 100/$re;
+
+            return response()->json([
+                'code' => 200,
+                'status' => 'success',
+                'videos' => $videos,
+                'result' => $result,
+            ]);
+        } else if(sizeof($videos) == 0) {
+            return response()->json([
+                'code' => 200,
+                'status' => 'success',
+                'videos' => 0,
+                'message' => 0,
+            ]);
+        } else {
+            return response()->json([
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Videos not found',
+            ]);
+        }
+    }
+
+    // update title of the video
+    public function updateTitle($id, Request $request) 
+    {
+        // get auth from user
+        $user = $this->getIdentity($request);
+        
+        // if the id is not empty
+        if(!empty($id)) {
+            // create the video
+            $video = Video::where('id', $id)
+                ->where('user_id', $user->sub)
+                ->first();
+
+            // if the video is not empty and is an object
+            if(!empty($video) && is_object($video)) {
+                $video->accordion_title = null;
+                
+                // update
+                $video->update();
+                
+                $data = [
+                    'code' => 200,
+                    'status' =>'success',
+                    'video' => $video,
+                ];
+            } else {
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Video not found',
+                ];
+            }
+        } else {
+            $data = [
+                'code' => 404,
+              'status' => 'error',
+              'message' => 'Video not found',
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+
+    // upload the image of the course
+    public function upload(Request $request) 
+    {
+        // get the image
+        $file = $request->file('file0');
+
+        // validate the file
+        $validate = Validator::make($request->all(), [
+            'file0' => 'required|file|mimes:txt,docx,doc,pdf,rar'
+        ]);
+
+        // save the file
+        if (!$file || $validate->fails()) {
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'Error uploading file'
+            ];
+        } else {
+            $file_name = time() . $file->getClientOriginalName();
+            Storage::disk('docs')->put($file_name, File::get($file));
+
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'file' => $file_name
+            ];
+        }
+
+        return response()->json($data, $data['code']);
+    }
+}
+
+
+Middleware
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Helpers\JwtAuth;
+
+class ApiAuthMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        // check if the user is authenticated
+        $token = $request->header('Authorization');
+        $jwtAuth = new JwtAuth();
+        $checkToken = $jwtAuth->checkToken($token);
+
+        // if the token is valid
+        if ($checkToken) {
+            return $next($request);
+        } else {
+            // if the token is not valid
+            $data = [
+                'status' => 'error',
+                'code' => 401,
+                'message' => 'User not authenticated'
+            ];
+
+            return response()->json($data, $data['code']);
+        }
+    }
+}
+
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CorsMiddleware
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        return $next($request);
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:4200');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
+        
+        return $response;
+    }
+}
+
+
+Models
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Cart extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'carts';
+
+    // Updated automatically
+    protected $fillable = [
+        'quantity'
+    ];
+
+    // many to one relationship
+    public function user(){
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+
+    // many to one
+    public function course(){
+        return $this->belongsTo('App\Models\Course', 'course_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Category extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'categories';
+
+    // updated automatically
+    protected $fillable = [
+        'name'
+    ];
+
+    // one to many relationship
+    public function courses(){
+        return $this->hasMany('App\Models\Course', 'category_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Checkbox extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'checkboxes';
+
+    // many to one relationship
+    public function course() {
+        return $this->belongsTo('App\Models\Course', 'course_id');
+    }
+
+    // many to one relationship
+    public function user() {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+
+    // many to one relationship
+    public function video() {
+        return $this->belongsTo('App\Models\Video', 'video_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Comment extends Model
+{
+    //ORM 
+    use HasFactory;
+    protected $table = 'comments';
+
+    // updated automatically
+    protected $fillable = [
+        'title',
+        'comment',
+        'image',
+    ];
+
+    // many to one relationship
+    public function video() {
+        return $this->belongsTo('App\Models\Video', 'video_id');    
+    }
+
+    // many to one relationship
+    public function user() {
+        return $this->belongsTo('App\Models\User', 'user_id');    
+    }
+
+    // one to many relationship
+    public function responses() {
+        return $this->hasMany('App\Models\Responxe');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Course extends Model
+{
+    //ORM 
+    use HasFactory;
+    protected $table = 'courses';
+
+    // updated automatically
+    protected $fillable = [
+        'category_id',
+        'name',
+        'detail',
+        'image',
+        'url',
+        'accordion',
+        'current_price',
+        'previous_price',
+        'num_sales',
+    ];
+
+    // one to many relationship
+    public function videos() {
+        return $this->hasMany('App\Models\Video');
+    }
+
+    // many to many relationship
+    public function users() {
+        return $this->belongsToMany('App\Models\User', 'sales');
+    }
+
+    //many to one relationship
+    public function categories() {
+        return $this->belongsTo('App\Models\Category', 'category_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Responxe extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'responses';
+
+    //update automatically
+    protected $fillable = [
+        'response',
+        'image',
+    ];
+
+    // many to one relationship
+    public function comment() {
+        return $this->belongsTo('App\Models\Comment', 'comment_id');
+    }
+
+    // many to one relationship
+    public function user() {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Sale extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'sales';
+
+    //updated automatically
+    protected $fillable = [
+        'user_id',
+        'course_id',
+        'video_id',
+        'progress',
+    ];
+
+    // many to one relationship
+    public function course() {
+        return $this->belongsTo('App\Models\Course', 'course_id');
+    }
+
+    // many to one relationship
+    public function user() {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    // one to many relationship
+    public function sales() {
+        return $this->hasMany('App\Models\Sale');
+    }
+
+    // one to many relationship
+    public function comments() {
+        return $this->hasMany('App\Models\Comment');
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Video extends Model
+{
+    //ORM
+    use HasFactory;
+    protected $table = 'videos';
+
+    // updates automatically
+    protected $fillable = [
+        'title',
+        'content',
+        'url',
+        'file',
+        'download',
+        'section',
+        'accordion_title',
+    ];
+
+    // many to one relationship
+    public function course()
+    {
+        return $this->belongsTo('App\Models\Course', 'course_id');
+    }
+
+    // one to many relationship
+    public function comments()
+    {
+        return $this->hasMany('App\Models\Comment')->orderBy('id', 'desc');
+    }
+
+    // many to one relationship
+    public function user()
+    {
+        return $this->belongsTo('App\Models\User', 'user_id');
+    }
+}
+
+
+Providers
+
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class JwtAuthServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        require_once app_path('Helpers/JwtAuth.php');
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+routes
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\VideoController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ResponseController;
+use App\Http\Controllers\CheckboxController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CartController;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// test routes
+Route::get('/test', [UserController::class, 'test']);
+
+// Auth routes
+Route::post('/api/login', [UserController::class, 'login']);
+Route::post('/api/register', [UserController::class, 'register']);
+Route::post('/api/logout', [UserController::class, 'logout']);
+Route::put('/api/update', [UserController::class, 'update']);
+Route::post('/api/upload', [UserController::class, 'upload'])->middleware('api.auth');
+Route::get('/api/user/avatar/{filename}', [UserController::class, 'getImage']);
+Route::get('/api/user/detail/{id}', [UserController::class, 'detail']);
+
+// Course routes
+Route::get('/api/courses/getCourse/{id}', [CourseController::class, 'getCourse']);
+Route::post('/api/courses/upload', [CourseController::class, 'upload']);
+Route::get('/api/courses/search/{search}', [CourseController::class, 'search']);
+Route::get('/api/courses/getCoursesByCategory/{id}', [CourseController::class, 'getCoursesByCategory']);
+Route::get('/api/courses/image/{filename}', [CourseController::class, 'getImage']);
+Route::resource('/api/courses', CourseController::class);
+
+// Video routes
+Route::get('/api/videos/getVideos', [VideoController::class, 'getVideos']);
+Route::get('/api/videos/getVideosByCourse/{id}', [VideoController::class, 'getVideosByCourse']);
+Route::get('/api/videos/getVideosWithProgress/{id}', [VideoController::class, 'getVideosWithProgress']);
+Route::post('/api/videos/doc', [VideoController::class, 'upload']);
+Route::resource('/api/videos', VideoController::class);
+Route::put('/api/videos/updateTitle/{id}', [VideoController::class, 'updateTitle']);
+
+// Sale routes
+Route::get('/api/sales/getMyCourses', [SaleController::class, 'getMyCourses']);
+Route::get('/api/sales/getSalesByCategory/{id}', [SaleController::class, 'getSalesByCategory']);
+Route::get('/api/sales/getSalesByText/{text}', [SaleController::class, 'getSalesByText']);
+Route::resource('/api/sales', SaleController::class);
+
+// Comment routes
+Route::post('/api/comments/upload', [CommentController::class, 'upload']);
+Route::get('/api/comments/image/{filename}', [CommentController::class, 'getImage']);
+Route::resource('/api/comments', CommentController::class);
+
+// Response routes
+Route::post('/api/responses/upload', [ResponseController::class, 'upload']);
+Route::get('/api/responses/image/{filename}', [ResponseController::class, 'getImage']);
+Route::resource('/api/responses', ResponseController::class);
+
+// Checkbox routes
+Route::resource('/api/checkboxes', CheckboxController::class);
+
+// Category routes
+Route::resource('/api/categories', CategoryController::class);
+
+// Carts routes
+Route::delete('/api/carts/deleteCart', [CartController::class, 'deleteCart']);
+Route::resource('/api/carts', CartController::class);
