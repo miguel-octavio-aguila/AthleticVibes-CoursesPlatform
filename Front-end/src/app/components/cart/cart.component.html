@@ -1,19 +1,7 @@
 <div class="body">
     <div class="container">
-        <div class="row">
+        <div class="row" style="margin-top: 50px;">
             <div class="col">
-                <nav aria-label="breadcrumb" class="breadcrumb-nav">
-                    <div class="container">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item active">
-                                <i class="ti-home" routerLink="/home" style="cursor: pointer;">&nbsp;Home</i>
-                            </li>
-                            <li class="breadcrumb-item active" style="padding-left: 0;">
-                                <i class="ti-shopping-cart">&nbsp;Cart</i>
-                            </li>
-                        </ol>
-                    </div>
-                </nav>
                 <main class="main">
                     <div class="container">
                         <div class="row">
@@ -108,16 +96,15 @@
                 </main>
                 <!-- Sección de métodos de pago -->
                 <div class="payment-section" *ngIf="quantities[0] && quantities[0] > 0">
-                    <h2>Payment Methods</h2>
+                    <!-- <h2>Payment Methods</h2>
                     <div class="row">
                         <div class="col">
                             <div class="accordion-alt">
-                                <!-- Aquí irían tus opciones de pago -->
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                     <!-- Botón de pago -->
-                    <div class="d-flex justify-content-center w-100 mt-4" data-aos="zoom-in" data-aos-duration="1500">
+                    <div class="d-flex justify-content-center align-items-center w-100" data-aos="zoom-in" data-aos-duration="1500">
                         <a class="btn btn-button" (click)="onSubmit()">Checkout</a>
                     </div>
                 </div>

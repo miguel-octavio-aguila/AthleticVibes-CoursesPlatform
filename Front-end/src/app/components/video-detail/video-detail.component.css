@@ -53,8 +53,6 @@
     }
 }
 
-/* Elements inside */
-
 /* iframe */
 iframe {
     width: 100%;
@@ -79,10 +77,6 @@ iframe {
 
 .content .btn-button:hover, .comments-buttons a:hover {
     background: #e9ecef;
-}
-
-.comments-buttons {
-    margin-bottom: 15px;
 }
 
 /* accordion */
@@ -122,12 +116,13 @@ details {
     border-bottom: 1px solid black;
     border-radius: 0%;
     width: 100%;
+    margin-bottom: 20px;
 }
 
 .accordion-header {
     cursor: pointer;
     font-weight: 700;
-    padding: 1rem 0;
+    padding: 5px 0;
     font-size: 1rem; /* Reducido para el sidebar */
     color: black;
     display: flex;
@@ -321,12 +316,14 @@ details[open]::details-content {
     padding: 20px;
 }
 
-#multiCollapseChat .card-body {
+#multiCollapseChat .card-body,
+#multiCollapseDescription  .card-body {
     background: transparent;
     border: none;
 }
 
-#multiCollapseChat .card-body .card-comment {
+#multiCollapseChat .card-body .card-comment,
+#multiCollapseDescription  .card-body .card-comment {
     background-color: #bbbcb7;
     border: 2px solid rgba(255,255,255,0.5);
     border-radius: 20px;

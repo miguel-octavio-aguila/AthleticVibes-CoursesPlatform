@@ -29,25 +29,27 @@ export class UserEditComponent {
   public url: any;
   public uploading = false;
 
+  public namePattern = "^[A-Za-z0-9\\u00C0-\\u017F \\.,!?¡¿;:()'\"_-]+$";
+  public emailPattern = "^[A-Za-z0-9._%+\\-]+@[A-Za-z0-9.\\-]+\\.[A-Za-z]{2,}$";
+
   // froala_options
   public froala_options: Object = {
-    // chatCounter: true is for the chat counter 
-    charCounterCount: true,
-    // toolbarButtons is for the toolbar buttons
+    charCounterCount: false, // Deshabilitado para evitar errores
     toolbarButtons: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsXS is for the toolbar buttons in xs devices
-    toolbarButtonsXS: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsSM is for the toolbar buttons in sm devices
+    toolbarButtonsXS: ['bold', 'italic', 'underline'],
     toolbarButtonsSM: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // toolbarButtonsMD is for the toolbar buttons in md devices
     toolbarButtonsMD: ['bold', 'italic', 'underline', 'paragraphFormat'],
-    // backgroundColor is for the background color of the editor
-    colorsBackground: ['#61BD6D', '#1ABC9C', '#54ACD2', 'REMOVE'],
-    // events is for the events that are triggered in the editor
-    // initialized is for the initialized event
+    // Configuraciones que evitan errores comunes
+    specialCharactersSets: [],
+    pluginsEnabled: ['bold', 'italic', 'underline', 'paragraphFormat'],
+    // Evitar el plugin problemático
+    pluginsDisabled: ['specialCharacters', 'emoticons'],
     events: {
       initialized: function () {
-        console.log('Froala Editor Initialized');
+        console.log('Froala Editor Initialized Successfully');
+      },
+      contentChanged: function () {
+        // Manejar cambios si es necesario
       }
     }
   };
@@ -79,11 +81,16 @@ export class UserEditComponent {
   }
 
   ngOnInit(): void {
-    // Import Froala plugins dynamically only in the browser context
     if (isPlatformBrowser(this.platformId)) {
-      // Import all Froala Editor plugins.
-      // @ts-ignore
-      import('froala-editor/js/plugins.pkgd.min.js');
+      try {
+        // Usar import dinámico con manejo de errores
+        import('froala-editor/js/plugins.pkgd.min.js' as any).catch(error => {
+          console.warn('Froala plugins could not be loaded:', error);
+          // Continuar sin plugins si falla la carga
+        });
+      } catch (error) {
+        console.warn('Error loading Froala plugins:', error);
+      }
     }
   }
   

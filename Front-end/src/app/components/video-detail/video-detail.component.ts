@@ -8,7 +8,7 @@ import { FileUploadService } from '../../services/file.upload.service';
 import { ProgressService } from '../../services/progress.service';
 import { CheckboxService } from '../../services/checkbox.service';
 import { SaleService } from '../../services/sale.service';
-import { Router, ActivatedRoute, Params, RouterModule } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -374,7 +374,7 @@ export class VideoDetailComponent implements OnDestroy {
               }
             }
             // Save the new image in local storage
-            localStorage.setItem('Comment', JSON.stringify(this.responses));
+            localStorage.setItem('Response', JSON.stringify(this.responses));
             // To indicate that the image is uploaded and the uploading is finished
             this.uploading = false;
             // Indicate success of the promise
@@ -558,7 +558,8 @@ export class VideoDetailComponent implements OnDestroy {
             window.location.reload();
           }, 100);
         } else {
-          this.status = 'error on deleteVideo()';
+          this.status = 'error';
+          this.handleError('Error, you can not delete the first video');
         }
       },
       error => {

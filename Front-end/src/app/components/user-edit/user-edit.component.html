@@ -20,21 +20,21 @@
                     Modify user profile settings.
                 </p>
                 <div class="form-group">
-                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required pattern="[a-zA-Z ]+">
+                    <input type="text" name="name" #name="ngModel" class="form-control" [(ngModel)]="user.name" required  [pattern]="namePattern">
                     <label for="name">First name</label>
                     <small *ngIf="!name.valid && name.touched" class="invalid-feedback d-block">
                         First name is required and must contain only letters.
                     </small>
                 </div>
                 <div class="form-group">
-                    <input type="text" name="surname" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required pattern="[a-zA-Z\u00C0-\u00FF ]+">
+                    <input type="text" name="surname" #surname="ngModel" class="form-control" [(ngModel)]="user.surname" required  [pattern]="namePattern">
                     <label for="surname">Last name</label>
                     <small *ngIf="!surname.valid && surname.touched" class="invalid-feedback d-block">
                         Last name is required and must contain only letters.
                     </small>
                 </div>
                 <div class="form-group">
-                    <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
+                    <input type="email" class="form-control" name="email" #email="ngModel" [(ngModel)]="user.email" required  [pattern]="emailPattern">
                     <label for="email">Email</label>
                     <small *ngIf="!email.valid && email.touched" class="invalid-feedback d-block">
                         Email is required and must be a valid email address.

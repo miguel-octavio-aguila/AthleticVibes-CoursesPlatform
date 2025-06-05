@@ -88,9 +88,11 @@
         <div *ngIf="course">
             <div class="collapse" id="multiCollapseDescription">
                 <div class="card card-body">
-                    <p>
-                        {{ video.content }}
-                    </p>
+                    <div class="card-comment" style="padding: 10px;">
+                        <p>
+                            {{ video.content }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,7 +119,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <strong><i class="title-comment">{{ comment.title }}</i></strong>
+                            <strong><p class="title-comment">{{ comment.title }}</p></strong>
                             <a data-bs-toggle="collapse" [attr.data-bs-target]="'#responsesCollapse' + comment.id" role="button" aria-expanded="false" style="display: flex; justify-content: flex-end; text-decoration: none; color: inherit;" (click)="showResponses(comment.id)">
                                 <i class="bi-twitch">{{ response_cont[index] }}</i>
                             </a>

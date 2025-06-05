@@ -148,7 +148,6 @@ export class HomeComponent {
       response => {
         if(response.status =='success'){
           this.courses = response.courseStatus;
-          console.log(this.courses);
         } else {
           this._router.navigate(['/home']);
         }

@@ -236,8 +236,30 @@ class VideoController extends Controller implements HasMiddleware
         $sales = Sale::where('video_id', $id)->get();
 
         if ($sales && count($sales) >= 1) {
-            foreach ($sales as $sale) {
-                $sale->delete();
+            $data = [
+                'code' => 400,
+                'status' => 'error',
+                'message' => 'You cannot delete this video because it is being used',
+            ];
+        } else {
+            foreach($video->comments as $comment) {
+                $comment->responses()->delete();
+                $comment->delete();
+            }
+
+            if(!empty($video)) {
+                $video->delete();
+                $data = [
+                    'code' => 200,
+                    'status' =>'success',
+                    'video' => $video,
+                ];
+            } else {
+                $data = [
+                    'code' => 404,
+                    'status' => 'error',
+                    'message' => 'Video not found',
+                ];
             }
         }
 

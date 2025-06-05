@@ -34,10 +34,10 @@
                                 
                                 <!-- Right Menu -->
                                 <ul class="navbar-nav ms-auto align-items-center">
-                                    <!-- Categories dropdown -->
-                                    <li class="nav-item menu">
+                                    <!-- Learning dropdown -->
+                                    <li class="nav-item menu" *ngIf="identity.sub">
                                         <div class="category_item">
-                                            <a href="#" class="nav-link category_link">
+                                            <a [routerLink]="['/learning']" class="nav-link category_link">
                                                 <span>Learning</span>
                                                 <svg viewBox="0 0 360 360" xml:space="preserve">
                                                     <g>
@@ -55,6 +55,11 @@
                                                             <div><span class="label-box completed"></span> Completed: {{ ChartData.datasets[0].data[0] }}%</div>
                                                             <div><span class="label-box pending"></span> Pending: {{ ChartData.datasets[0].data[1] }}%</div>
                                                         </div>
+                                                    </div>
+                                                    <div style="width: 100%; color: #333; margin-top: 10px; display: flex; align-items: center; justify-content: center;">
+                                                        <a [routerLink]="['/learning']" role="button" class="category_drop_link">
+                                                            <span>Go to my courses</span>
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -174,9 +179,6 @@
                                                 <!-- Menu options -->
                                                 <div class="category_drop_item">
                                                     <a class="category_drop_link" routerLink="/settings">Settings</a>
-                                                </div>
-                                                <div class="category_drop_item">
-                                                    <a class="category_drop_link">Profile</a>
                                                 </div>
                                                 <div class="category_drop_item" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
                                                     <a class="category_drop_link" routerLink="/create-course">Create course</a>

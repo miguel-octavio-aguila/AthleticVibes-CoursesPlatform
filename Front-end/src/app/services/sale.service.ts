@@ -48,4 +48,10 @@ export class SaleService {
     const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
     return this._http.get(this.url +'sales/getSalesByText/' + text, { headers: headers });
   }
+
+  // get the courses of a sale
+  myCourses(token: any): Observable<any> {
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded').set('Authorization', token);
+    return this._http.get(this.url +'sales/getMyCourses', { headers: headers });
+  }
 }

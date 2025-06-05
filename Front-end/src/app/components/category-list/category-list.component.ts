@@ -41,7 +41,6 @@ export class CategoryListComponent {
       res => {
         if (res.status == 'success') {
           this.categories = res.categories
-          console.log(this.categories);
         }
       },
       err => console.error(err)

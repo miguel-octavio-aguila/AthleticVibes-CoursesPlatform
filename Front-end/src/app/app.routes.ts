@@ -13,6 +13,9 @@ import { VideoNewComponent } from './components/video-new/video-new.component';
 import { CourseDetailComponent } from './components/course-detail/course-detail.component';
 import { VideoEditComponent } from './components/video-edit/video-edit.component';
 import { VideoDetailComponent } from './components/video-detail/video-detail.component';
+import { LearningComponent } from './components/learning/learning.component';
+// guards
+import { identityGuard } from './guards/identity.guard';
 
 export const routes: Routes = [
     {
@@ -33,39 +36,48 @@ export const routes: Routes = [
     },
     {
         path: 'logout/:sure',
-        component: LoginComponent
+        component: LoginComponent, 
+        canActivate: [identityGuard]
     },
     {
         path: 'settings',
-        component: UserEditComponent
+        component: UserEditComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'create-course',
-        component: CourseNewComponent
+        component: CourseNewComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'course-edit/:id',
-        component: CourseEditComponent
+        component: CourseEditComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'categories',
-        component: CategoryListComponent
+        component: CategoryListComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'create-category',
-        component: CategoryNewComponent
+        component: CategoryNewComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'category-edit/:id',
-        component: CategoryEditComponent
+        component: CategoryEditComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'cart',
-        component: CartComponent
+        component: CartComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'create-video/:id',
-        component: VideoNewComponent
+        component: VideoNewComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'course/:id',
@@ -73,11 +85,13 @@ export const routes: Routes = [
     },
     {
         path: 'video-edit/:id',
-        component: VideoEditComponent
+        component: VideoEditComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'video-detail/:id',
-        component: VideoDetailComponent
+        component: VideoDetailComponent,
+        canActivate: [identityGuard]
     },
     {
         path: 'category/:id',
@@ -85,6 +99,15 @@ export const routes: Routes = [
     },
     {
         path: 'search/:text',
+        component: HomeComponent
+    },
+    {
+        path: 'learning',
+        component: LearningComponent,
+        canActivate: [identityGuard]
+    },
+    {
+        path: '**',
         component: HomeComponent
     }
 ];

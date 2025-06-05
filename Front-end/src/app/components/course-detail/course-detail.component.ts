@@ -5,6 +5,7 @@ import { UserService } from '../../services/user.service';
 import { Router, ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 
 declare var $: any;
 
@@ -19,7 +20,7 @@ export class CourseDetailComponent {
   public identity: any;
   public token: any;
   public course: any;
-  public videos: any;
+  public videos: any[] = [];
   public accordion: Array<any> = [];
   public status: any;
   public is_course: any;
@@ -42,8 +43,47 @@ export class CourseDetailComponent {
   }
 
   ngOnInit(): void {
-    this.getVideosByCourse();
-    this.getCourse();
+    // Cargar ambos datos al mismo tiempo
+    this.loadCourseData();
+  }
+
+  loadCourseData() {
+    this._route.params.subscribe(params => {
+      let id = +params['id'];
+      
+      // Usar forkJoin para cargar ambos servicios al mismo tiempo
+      forkJoin({
+        course: this._courseService.getCourseInfo(id, this.token),
+        videos: this._videoService.getVideosByCourse(id)
+      }).subscribe({
+        next: (result) => {
+          // Procesar respuesta del curso
+          if (result.course.status == 'success') {
+            this.course = result.course.course;
+            this.accordion = result.course.accordion;
+            // Para el video de YouTube
+            var results = this.course.url.match('[\\?&]v=([^&#]*)');
+            var video = (results === null) ? this.course.url : results[1];
+            this.course.url = this.sanitizer.bypassSecurityTrustResourceUrl('https://www.youtube.com/embed/' + video + '?controls=0');
+          }
+
+          // Procesar respuesta de videos
+          if (result.videos.status == 'success') {
+            this.videos = result.videos.videos || [];
+          } else {
+            this.videos = [];
+          }
+
+        },
+        error: (error) => {
+          console.log('Error loading data:', error);
+          this.status = 'error loading data';
+          // Asegurar que siempre tenemos arrays
+          this.videos = [];
+          this.accordion = [];
+        }
+      });
+    });
   }
 
   getCourse() {
@@ -75,9 +115,10 @@ export class CourseDetailComponent {
       this._videoService.getVideosByCourse(id).subscribe(
         response => {
           if (response.status == 'success') {
-            this.videos = response.videos;
+            this.videos = response.videos || [];
           } else {
             this.status = 'error';
+            this.videos = [];
           }
         },
         error => {
@@ -98,6 +139,9 @@ export class CourseDetailComponent {
           var results = this.video.url.match('[\\?&]v=([^&#]*)');
           var video = (results === null) ? this.video.url : results[1];
           this.video.url = this.sanitizer.bypassSecurityTrustResourceUrl('https://www.youtube.com/embed/' + video + '?controls=0');
+          
+          // Actualizar el iframe principal con el nuevo video
+          this.course.url = this.video.url;
         } else {
           this.status = 'error on getVideo()';
         }
@@ -113,9 +157,14 @@ export class CourseDetailComponent {
       response => {
         if (response.status =='success') {
           this.getVideosByCourse();
-          setTimeout(() => {
-            window.location.reload();
-          }, 100);
+          // Cerrar el modal manualmente
+          const modal = document.getElementById('deleteVideo' + id);
+          if (modal) {
+            const modalInstance = (window as any).bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+              modalInstance.hide();
+            }
+          }
         } else {
           this.status = 'error on deleteVideo()';
         }
@@ -134,9 +183,8 @@ export class CourseDetailComponent {
   }
 
   // Method to show Description
-  hide_d() {
+  show_des() {
     $('#multiCollapseChat').hide();
-    $('#multiCollapseContent').hide();
     $('#multiCollapseDescription').show();
   }
 

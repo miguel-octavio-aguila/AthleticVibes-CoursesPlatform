@@ -1,48 +1,17 @@
-<div class="container">
-    <div *ngIf="course" class="row">
-        <div *ngIf="is_course == true && is_video == false" class="col">
-            <iframe [src]="course.url" frameborder="0" class="w-100" height="500" id="panell" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <p [innerHTML]="course.detail"></p>
-        </div>
-        <div *ngIf="is_video == true && is_course == false" class="col">
-            <iframe [src]="video.url" frameborder="0" class="w-100" height="500" id="panell" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <p [innerHTML]="video.content"></p>
-        </div>
+<div class="full-container">
+    <!-- Video Area -->
+    <div class="video">
+        <iframe *ngIf="course && course.url" [src]="course.url" frameborder="0" id="panell" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
-    <div class="mb-3">
-        <p class="buttons" >
-            <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseChat" role="button" aria-expanded="false" (click)="show_chat()">
-                Questions and Answers
-            </a>
-            <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseDescription" role="button" aria-expanded="false" (click)="hide_d()">
-                Description
-            </a>
-            <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseContent" role="button" aria-expanded="false" (click)="toggleContentAccordion()">
-                Content
-            </a>
-        </p>
 
-        <!-- Description -->
-        <div *ngIf="course">
-            <div class="col">
-                <div class="collapse" id="multiCollapseDescription">
-                    <div class="card card-body">
-                        <p>
-                            {{ course.detail }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Content accordeon with details/summary con estilo oscuro -->
-        <div class="col-12 accordion-page" *ngIf="course" id="multiCollapseContent" class="collapse">
+    <!-- Content Area (Sidebar) -->
+    <div class="content">
+        <!-- Content accordion -->
+        <div class="accordion-page" *ngIf="course && videos && videos.length > 0 && accordion && accordion.length > 0">
             <div class="accordion-container">
                 <div class="accordion">
                     <div class="accordion-entries">
-                        <!-- Creamos un detalle por cada elemento del acordeón -->
                         <ng-container *ngFor="let item of accordion; let itemIndex=index">
-                            <!-- Buscamos el primer video de cada sección para usarlo como título del acordeón -->
                             <ng-container *ngFor="let video of videos">
                                 <details *ngIf="video.accordion_title && video.section == item" [open]="itemIndex === 0" name="courseAccordion" class="accordion-item">
                                     <summary class="accordion-header">
@@ -51,25 +20,27 @@
                                             <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
                                         </svg>
                                     </summary>
-                                    <!-- Contenido dentro de cada sección -->
+                                    <!-- Content for each section -->
                                     <div class="accordion-content">
                                         <ng-container *ngFor="let contentVideo of videos">
                                             <div *ngIf="contentVideo.section == item" class="content-item">
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div>
-                                                        <strong>{{ contentVideo.created_at | date:'dd/MM/yyyy' }}</strong>
-                                                        <div class="video-title" *ngIf="identity.sub && course.buy && course.buy == 1">
-                                                            <a (click)="getVideo(contentVideo.id)">
-                                                                {{ contentVideo.title }}
+                                                        <div class="video-title" *ngIf="identity && identity.sub && course && course.buy && course.buy == 1" style="display: flex; align-items: flex-end;">
+                                                            <a class="video-title-a" style="display: flex; flex-direction: column;" (click)="getVideo(contentVideo.id)" style="cursor: pointer;">
+                                                                <strong>{{ contentVideo.created_at | date:'dd/MM/yyyy' }}</strong>
+                                                                <span>{{ contentVideo.title }}</span>
                                                             </a>
                                                         </div>
-                                                        <div class="video-title" *ngIf="!identity.sub || !course.buy">{{ contentVideo.title }}</div>
+                                                        <div class="video-title" *ngIf="!identity || !identity.sub || !course || !course.buy">
+                                                            <span style="cursor: pointer;" (click)="getVideo(contentVideo.id)">{{ contentVideo.title }}</span>
+                                                        </div>
                                                     </div>
                                                     <div class="video-actions" *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')">
-                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action me-2" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]">
+                                                        <a *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" class="btn btn-admin-action" id="my-edit-button" [routerLink]="['/video-edit', contentVideo.id]" style="padding: 3px 6px;">
                                                             <i class="ti-pencil"></i>
                                                         </a>
-                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action me-2" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#delete' + contentVideo.id">
+                                                        <button *ngIf="identity && (identity.sub == 1 || identity.role == 'ROLE_ADMIN')" type="button" class="btn btn-admin-action" id="my-delete-button" data-bs-toggle="modal" [attr.data-bs-target]="'#deleteVideo' + contentVideo.id" style="padding: 3px 6px;">
                                                             <i class= "ti-trash"></i>
                                                         </button>
                                                     </div>
@@ -84,35 +55,63 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Mensaje cuando no hay videos -->
+        <div *ngIf="course && (!videos || videos.length === 0)" class="no-content-message">
+            <p>No videos available for this course.</p>
+        </div>
+    </div>
 
-        <!-- Delete Modal -->
-        <ng-container *ngFor="let video of videos">
-            <div class="modal fade" [id]="'delete' + video.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal_title fs-5" id="exampleModalLabel">
-                                Are you sure you want to delete this video?
-                            </h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            You are going to delete the video: {{ video.title }}.
-                            <br>
-                            This action cannot be undone.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
-                                Close
-                            </button>
-                            <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteVideo(video.id)">
-                                <i class= "ti-trash"></i>
-                            </button>
+    <!-- Comments Area -->
+    <div class="comments">
+        <div class="comments-buttons" style="display: flex; justify-content: center;">
+            <a class="btn btn-button" data-bs-toggle="collapse" data-bs-target="#multiCollapseDescription" role="button" aria-expanded="false" (click)="show_des()">
+                Description
+            </a>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="course">
+            <div class="col">
+                <div class="collapse" id="multiCollapseDescription">
+                    <div class="card card-body">
+                        <div class="card-comment" style="padding: 10px;">
+                            <p>
+                                {{ course.detail }}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
-        </ng-container>
-        
+        </div>
     </div>
+
+    <!-- Delete Modal -->
+    <ng-container *ngFor="let video of videos">
+        <div class="modal fade" [id]="'deleteVideo' + video.id" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal_title fs-5" id="exampleModalLabel">
+                            Are you sure you want to delete this video?
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        You are going to delete the video: {{ video.title }}.
+                        <br>
+                        This action cannot be undone.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-admin-action" data-bs-dismiss="modal" style="color: black;">
+                            Close
+                        </button>
+                        <button type="button" class="btn btn-admin-action" style="color: black;" (click)="deleteVideo(video.id)">
+                            <i class= "ti-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
 </div>
