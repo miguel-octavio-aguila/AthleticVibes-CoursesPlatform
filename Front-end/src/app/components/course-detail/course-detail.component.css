@@ -119,67 +119,73 @@ iframe {
 }
 
 .accordion {
+    --border-color: #223;
+    border: 1px solid var(--border-color);
+    border-radius: .25rem;
+    overflow: hidden;
     width: 100%;
+}
+
+.accordion-entries {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    width: 100%;
+}
+
+details {
+    border: none;
+    width: 100%;
+}
+
+.accordion-item {
     background: transparent;
-    border-radius: 6px;
-    margin-top: 0.5rem;
-    padding: 0.5rem;
+    border-bottom: 1px solid black;
+    border-radius: 0%;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
-.accordion-buttons {
+.accordion-header {
+    cursor: pointer;
+    font-weight: 700;
+    padding: 5px 0;
+    font-size: 1rem; /* Reducido para el sidebar */
+    color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
 }
 
-.accordion-buttons a {
+.toggle-icon {
+    opacity: 1;
+    transition: opacity .3s;
+    fill: black;
+    flex-shrink: 0;
+}
+
+[open] .toggle-icon {
+    opacity: 0;
+}
+
+.accordion-header::-webkit-details-marker {
+    display: none;
+}
+
+[open] .accordion-header {
+    color: black;
+}
+
+.accordion-content {
+    padding: 0 0 1rem;
     width: 100%;
-    text-decoration: none;
-    color: inherit;
-    outline: none;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #f8f9fa;
 }
-
-.accordion-buttons a:hover {
-    background: #e9ecef;
-}
-
 .entry {
     display: flex;
     width: 100%;
     border-radius: 10px;
     flex-direction: column;
-}
-
-.entry h4 {
-    margin: 0.5rem 0;
-    display: flex;
-    cursor: pointer;
-}
-
-.entry h4 span {
-    display: inline-block;
-    margin-left: 0.5rem;
-}
-
-.entry .toggle {
-    margin-left: auto;
-    margin-right: 1rem;
-}
-
-.entry input[type="checkbox"] {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* Acordion checked */
-.entry input[type="checkbox"]:checked ~ .content-inner {
-    max-height: 200vh;
-    padding: 1rem;
 }
 
 /* Acordion not checked */
