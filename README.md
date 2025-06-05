@@ -13,13 +13,6 @@
 3. [Tech Stack](#tech-stack)  
 4. [Architecture](#architecture)  
 5. [Quick Start](#quick-start)  
-6. [Backend Setup](#backend-setup)  
-7. [Frontend Setup](#frontend-setup)  
-8. [API Reference & Postman](#api-reference--postman)  
-9. [Deployment Guide](#deployment-guide)  
-10. [Roadmap](#roadmap)  
-11. [Contributing](#contributing)  
-12. [License](#license)  
 
 ---
 
