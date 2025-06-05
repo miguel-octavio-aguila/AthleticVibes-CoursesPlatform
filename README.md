@@ -13,6 +13,9 @@
 3. [Tech Stack](#tech-stack)  
 4. [Architecture](#architecture)  
 5. [Quick Start](#quick-start)  
+6. [API Reference & Postman](#api-reference--postman)  
+7. [Deployment Guide](#deployment-guide)  
+8. [Contributing](#contributing)  
 
 ---
 
@@ -46,9 +49,33 @@ Sports lessons are seeded by default, but the codebase is **domain-agnostic**—
 
 | Layer | Main Tools & Libraries |
 |-------|-----------------------|
-| **Backend** | PHP 8.3 • **Laravel 11** • MySQL/MariaDB • Firebase `php-jwt` • Laravel Sanctum (optional) • Pest PHP |
-| **Frontend** | **Angular 19** • RxJS • Angular Router • ng2-charts + Chart.js • Bootstrap 5 • Themify Icons • iziToast • AOS • Froala Editor |
-| **Dev / Ops** | Docker / Docker Compose • GitHub Actions • Postman • ESLint + Prettier • Vite (Angular 19 default) |
+### Backend (Laravel 11)
+- **Framework**: Laravel 11
+- **Authentication**: JWT (JSON Web Tokens)
+- **Database**: MySQL (Eloquent ORM)
+- **API Design**: RESTful principles
+- **Validation**: Laravel Validator
+- **File Storage**: Local storage with upload endpoints
+- **Testing**: Postman for API endpoint verification
+
+### Frontend (Angular 19)
+- **Framework**: Angular 19 (Component-based architecture)
+- **State Management**: BehaviorSubject for progress tracking
+- **UI Components**: 
+  - Froala WYSIWYG editor
+  - NgxDropzone for file uploads
+  - Chart.js integration (Doughnut charts)
+- **Routing**: Angular Router with route guards
+- **Forms**: Reactive forms with validation
+- **HTTP Client**: Angular HttpClient with interceptors
+- **Build Tool**: Angular CLI with AOT compilation
+
+### Cross-Stack Features
+- Environment configuration (production/development)
+- Security headers and CORS configuration
+- Error handling (iziToast notifications)
+- Responsive grid layout system
+- YouTube embed API integration
 
 ---
 
@@ -77,3 +104,57 @@ Sports lessons are seeded by default, but the codebase is **domain-agnostic**—
 | npm / pnpm | latest |
 | MySQL / MariaDB | ≥ 10.6 |
 </details>
+
+## 🧪 API Endpoints
+
+### Authentication
+- `POST /api/login` - User login
+- `POST /api/register` - User registration
+- `POST /api/logout` - Token invalidation
+
+### User Management
+- `GET /api/user/detail/{id}` - User profile retrieval
+- `POST /api/upload` - Avatar upload
+- `GET /api/user/avatar/{filename}` - Avatar retrieval
+
+### Course System
+- `GET /api/courses` - Course listing
+- `GET /courses/getByCategory/{id}` - Category filtering
+- `GET /courses/getByText/{text}` - Search functionality
+- `POST /api/courses` - Course creation
+
+### Sales & Cart
+- `GET /api/sales` - Sales history
+- `GET /sales/getByCategory/{id}` - Category filtering
+- `GET /sales/getByText/{text}` - Search functionality
+- `POST /api/sales` - Purchase processing
+
+### Interactive Features
+- `POST /api/comments` - Question submission
+- `GET /api/comments/image/{filename}` - Image retrieval
+- `POST /api/responses` - Answer submission
+- `POST /api/checkboxes` - Progress tracking
+
+---
+
+## 📈 Scalability & Deployment
+
+The application is designed with cloud deployment in mind:
+- API-first architecture for easy mobile/web integration
+- State management ready for Redis caching
+- File storage system compatible with S3/Cloudinary
+- Environment-based configuration for different stages
+- Docker-ready structure for containerization
+
+---
+
+## 🤝 Contribution Guidelines
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/new-feature`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature/new-feature`)
+5. Create a new Pull Request
+
+---
